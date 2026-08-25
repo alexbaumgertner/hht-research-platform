@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: payload
+          POSTGRES_PASSWORD: payload
+          POSTGRES_DB: payload
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U payload"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgres://payload:payload@localhost:5432/payload
+      PAYLOAD_SECRET: ci-secret-not-for-production
+      PAYLOAD_API_KEY: ci-worker-key
+      PUBLIC_SITE_URL: http://localhost:3000
+      AI_GATEWAY_API_KEY: ''
+      RESEND_API_KEY: ''
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Format check
+        run: pnpm format:check
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Build shared + worker
+        run: pnpm --filter @hht/shared build && pnpm --filter @hht/worker build
+
+      - name: Build web
+        run: pnpm --filter @hht/web build
+
+      - name: Jest
+        run: pnpm test
+
+      - name: Install Playwright browsers
+        run: pnpm --filter @hht/web exec playwright install --with-deps chromium
+
+      - name: Playwright
+        run: pnpm test:e2e
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:3000
+        continue-on-error: false

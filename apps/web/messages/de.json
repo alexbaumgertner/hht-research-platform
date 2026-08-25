@@ -1,0 +1,34 @@
+{
+  "Home": {
+    "title": "Forschungs-Digests",
+    "subtitle": "Öffentliche Monitoring-Digests für konfigurierte Forschungsprojekte.",
+    "empty": "Noch keine veröffentlichten Projekte.",
+    "latestDigest": "Neuester Digest"
+  },
+  "Project": {
+    "feedTitle": "Digest-Feed",
+    "empty": "Für dieses Projekt wurden noch keine Digests veröffentlicht.",
+    "filterLabel": "Wichtigkeit",
+    "filterAll": "Alle",
+    "importance": {
+      "critical": "Kritisch",
+      "high": "Hoch",
+      "medium": "Mittel",
+      "low": "Niedrig"
+    },
+    "backHome": "Alle Projekte"
+  },
+  "Publication": {
+    "objective": "Ziel",
+    "methods": "Methoden",
+    "results": "Ergebnisse",
+    "limitations": "Limitationen",
+    "whyItMatters": "Warum es wichtig ist",
+    "originalLink": "Originalquelle ansehen",
+    "backToFeed": "Zurück zum Feed",
+    "translationFallback": "Maschinenübersetzung öffnen"
+  },
+  "LocaleSwitcher": {
+    "label": "Sprache"
+  }
+}

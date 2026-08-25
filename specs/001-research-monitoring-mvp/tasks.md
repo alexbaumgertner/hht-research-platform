@@ -28,17 +28,17 @@ Monorepo per `plan.md`: `apps/web/`, `apps/worker/`, `packages/shared/`
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create monorepo directories `apps/web/`, `apps/worker/`, `packages/shared/` and root `pnpm-workspace.yaml` per `plan.md`
-- [ ] T002 Initialize `apps/web` as Next.js 16.2.6+ App Router + Payload CMS 3 TypeScript app with `@payloadcms/db-postgres` in `apps/web/package.json`
-- [ ] T003 [P] Initialize `apps/worker` Node/TypeScript package with build scripts in `apps/worker/package.json`
-- [ ] T004 [P] Initialize `packages/shared` TypeScript library package in `packages/shared/package.json`
-- [ ] T005 [P] Add ESLint (`eslint-config-next` + typescript-eslint), Prettier (`eslint-config-prettier`), and root scripts in `package.json` / `.eslintrc.*` / `.prettierrc`
-- [ ] T006 [P] Add Jest config for shared + worker domain tests in `jest.config.ts` (or per-package configs)
-- [ ] T007 [P] Add Playwright config for web E2E in `apps/web/playwright.config.ts`
-- [ ] T008 [P] Create `.env.example` documenting `DATABASE_URL`, `PAYLOAD_SECRET`, `AI_GATEWAY_API_KEY`, `RESEND_API_KEY`, `PUBLIC_SITE_URL`, worker API key, bootstrap/batch defaults
-- [ ] T009 [P] Add Husky + lint-staged pre-commit hook config in `.husky/pre-commit` and `package.json`
-- [ ] T010 [P] Add Cursor agent hooks in `.cursor/hooks.json` (`afterFileEdit` lint/format; `stop` tsc + build + tests)
-- [ ] T011 [P] Add GitHub Actions CI workflow for lint, format check, tsc, `next build`, Jest, Playwright in `.github/workflows/ci.yml`
+- [X] T001 Create monorepo directories `apps/web/`, `apps/worker/`, `packages/shared/` and root `pnpm-workspace.yaml` per `plan.md`
+- [X] T002 Initialize `apps/web` as Next.js 16.2.6+ App Router + Payload CMS 3 TypeScript app with `@payloadcms/db-postgres` in `apps/web/package.json`
+- [X] T003 [P] Initialize `apps/worker` Node/TypeScript package with build scripts in `apps/worker/package.json`
+- [X] T004 [P] Initialize `packages/shared` TypeScript library package in `packages/shared/package.json`
+- [X] T005 [P] Add ESLint (`eslint-config-next` + typescript-eslint), Prettier (`eslint-config-prettier`), and root scripts in `package.json` / `.eslintrc.*` / `.prettierrc`
+- [X] T006 [P] Add Jest config for shared + worker domain tests in `jest.config.ts` (or per-package configs)
+- [X] T007 [P] Add Playwright config for web E2E in `apps/web/playwright.config.ts`
+- [X] T008 [P] Create `.env.example` documenting `DATABASE_URL`, `PAYLOAD_SECRET`, `AI_GATEWAY_API_KEY`, `RESEND_API_KEY`, `PUBLIC_SITE_URL`, worker API key, bootstrap/batch defaults
+- [X] T009 [P] Add Husky + lint-staged pre-commit hook config in `.husky/pre-commit` and `package.json`
+- [X] T010 [P] Add Cursor agent hooks in `.cursor/hooks.json` (`afterFileEdit` lint/format; `stop` tsc + build + tests)
+- [X] T011 [P] Add GitHub Actions CI workflow for lint, format check, tsc, `next build`, Jest, Playwright in `.github/workflows/ci.yml`
 
 ---
 
@@ -48,18 +48,18 @@ Monorepo per `plan.md`: `apps/web/`, `apps/worker/`, `packages/shared/`
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T012 Configure Payload Postgres adapter and `payload.config.ts` in `apps/web/src/payload.config.ts` (Neon `DATABASE_URL`)
-- [ ] T013 [P] Configure Payload Users collection with admin role for owner auth in `apps/web/src/collections/Users.ts`
-- [ ] T014 [P] Wire Payload Next.js plugin and `(payload)` admin routes under `apps/web/src/app/(payload)/`
-- [ ] T015 Install and configure Mantine provider shell for public UI in `apps/web/src/app/[locale]/layout.tsx`
-- [ ] T016 [P] Configure next-intl with locales `en|de|tr|ru|uk` and message files in `apps/web/src/i18n/` and `apps/web/messages/*.json`
-- [ ] T017 Create shared Zod/types for schedule, importance, source type, locales in `packages/shared/src/index.ts`
-- [ ] T018 [P] Implement `dedupeKey` and title-normalization helpers in `packages/shared/src/dedupe.ts`
-- [ ] T019 [P] Implement schedule-due helpers (`daily`/`weekly`/`monthly` vs `lastSuccessfulRunAt`) in `packages/shared/src/schedule.ts`
-- [ ] T020 Create Payload access helpers (public read vs admin write; internal API key for worker) in `apps/web/src/access/`
-- [ ] T021 Add Resend email adapter wiring in `apps/web/src/payload.config.ts` (used later by US4)
-- [ ] T022 Create worker Dockerfile and entry stub that exits 0 in `apps/worker/Dockerfile` and `apps/worker/src/index.ts`
-- [ ] T023 Document local run commands aligning with `specs/001-research-monitoring-mvp/quickstart.md` in root `README.md`
+- [X] T012 Configure Payload Postgres adapter and `payload.config.ts` in `apps/web/src/payload.config.ts` (Neon `DATABASE_URL`)
+- [X] T013 [P] Configure Payload Users collection with admin role for owner auth in `apps/web/src/collections/Users.ts`
+- [X] T014 [P] Wire Payload Next.js plugin and `(payload)` admin routes under `apps/web/src/app/(payload)/`
+- [X] T015 Install and configure Mantine provider shell for public UI in `apps/web/src/app/[locale]/layout.tsx`
+- [X] T016 [P] Configure next-intl with locales `en|de|tr|ru|uk` and message files in `apps/web/src/i18n/` and `apps/web/messages/*.json`
+- [X] T017 Create shared Zod/types for schedule, importance, source type, locales in `packages/shared/src/index.ts`
+- [X] T018 [P] Implement `dedupeKey` and title-normalization helpers in `packages/shared/src/dedupe.ts`
+- [X] T019 [P] Implement schedule-due helpers (`daily`/`weekly`/`monthly` vs `lastSuccessfulRunAt`) in `packages/shared/src/schedule.ts`
+- [X] T020 Create Payload access helpers (public read vs admin write; internal API key for worker) in `apps/web/src/access/`
+- [X] T021 Add Resend email adapter wiring in `apps/web/src/payload.config.ts` (used later by US4)
+- [X] T022 Create worker Dockerfile and entry stub that exits 0 in `apps/worker/Dockerfile` and `apps/worker/src/index.ts`
+- [X] T023 Document local run commands aligning with `specs/001-research-monitoring-mvp/quickstart.md` in root `README.md`
 
 **Checkpoint**: Foundation ready — Payload admin boots, Postgres connects, public `[locale]` shell renders, shared package builds, CI hooks exist
 
@@ -73,24 +73,24 @@ Monorepo per `plan.md`: `apps/web/`, `apps/worker/`, `packages/shared/`
 
 ### Tests for User Story 1
 
-- [ ] T024 [P] [US1] Add Playwright E2E for public home → project feed → importance filter → publication detail in `apps/web/tests/e2e/public-feed.spec.ts`
-- [ ] T025 [P] [US1] Add Jest unit tests for importance filter helpers in `packages/shared/src/importance.test.ts`
+- [X] T024 [P] [US1] Add Playwright E2E for public home → project feed → importance filter → publication detail in `apps/web/tests/e2e/public-feed.spec.ts`
+- [X] T025 [P] [US1] Add Jest unit tests for importance filter helpers in `packages/shared/src/importance.test.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T026 [P] [US1] Create `ResearchProjects` Payload collection (slug, name, description, public fields) in `apps/web/src/collections/ResearchProjects.ts`
-- [ ] T027 [P] [US1] Create `Publications` Payload collection (summary sections, importance, originalUrl, dedupeKey, project relation) in `apps/web/src/collections/Publications.ts`
-- [ ] T028 [P] [US1] Create `Digests` Payload collection (project, publishedAt, publications[]) in `apps/web/src/collections/Digests.ts`
-- [ ] T029 [US1] Register collections in `apps/web/src/payload.config.ts` and run/generate migrations as needed
-- [ ] T030 [US1] Implement `GET` public projects list (only projects with ≥1 digest) in `apps/web/src/app/api/public/projects/route.ts`
-- [ ] T031 [P] [US1] Implement `GET` public project by slug in `apps/web/src/app/api/public/projects/[slug]/route.ts`
-- [ ] T032 [P] [US1] Implement `GET` digests with optional `importance` query in `apps/web/src/app/api/public/projects/[slug]/digests/route.ts`
-- [ ] T033 [P] [US1] Implement `GET` publication detail (English summary) in `apps/web/src/app/api/public/publications/[id]/route.ts`
-- [ ] T034 [US1] Build public home/list page in `apps/web/src/app/[locale]/page.tsx`
-- [ ] T035 [US1] Build project digest feed page with importance filter UI in `apps/web/src/app/[locale]/projects/[slug]/page.tsx`
-- [ ] T036 [US1] Build publication detail page in `apps/web/src/app/[locale]/projects/[slug]/publications/[publicationId]/page.tsx`
-- [ ] T037 [US1] Add seed script for one project + digests + mixed-importance publications in `apps/web/src/scripts/seed-public-feed.ts`
-- [ ] T038 [US1] Ensure unauthenticated visitors cannot mutate collections (access control verification) in `apps/web/src/access/`
+- [X] T026 [P] [US1] Create `ResearchProjects` Payload collection (slug, name, description, public fields) in `apps/web/src/collections/ResearchProjects.ts`
+- [X] T027 [P] [US1] Create `Publications` Payload collection (summary sections, importance, originalUrl, dedupeKey, project relation) in `apps/web/src/collections/Publications.ts`
+- [X] T028 [P] [US1] Create `Digests` Payload collection (project, publishedAt, publications[]) in `apps/web/src/collections/Digests.ts`
+- [X] T029 [US1] Register collections in `apps/web/src/payload.config.ts` and run/generate migrations as needed
+- [X] T030 [US1] Implement `GET` public projects list (only projects with ≥1 digest) in `apps/web/src/app/api/public/projects/route.ts`
+- [X] T031 [P] [US1] Implement `GET` public project by slug in `apps/web/src/app/api/public/projects/[slug]/route.ts`
+- [X] T032 [P] [US1] Implement `GET` digests with optional `importance` query in `apps/web/src/app/api/public/projects/[slug]/digests/route.ts`
+- [X] T033 [P] [US1] Implement `GET` publication detail (English summary) in `apps/web/src/app/api/public/publications/[id]/route.ts`
+- [X] T034 [US1] Build public home/list page in `apps/web/src/app/[locale]/page.tsx`
+- [X] T035 [US1] Build project digest feed page with importance filter UI in `apps/web/src/app/[locale]/projects/[slug]/page.tsx`
+- [X] T036 [US1] Build publication detail page in `apps/web/src/app/[locale]/projects/[slug]/publications/[publicationId]/page.tsx`
+- [X] T037 [US1] Add seed script for one project + digests + mixed-importance publications in `apps/web/src/scripts/seed-public-feed.ts`
+- [X] T038 [US1] Ensure unauthenticated visitors cannot mutate collections (access control verification) in `apps/web/src/access/`
 
 **Checkpoint**: US1 fully functional with seed data; Playwright public-feed path passes
 
@@ -104,17 +104,17 @@ Monorepo per `plan.md`: `apps/web/`, `apps/worker/`, `packages/shared/`
 
 ### Tests for User Story 2
 
-- [ ] T039 [P] [US2] Add Playwright E2E for admin create project + source + schedule + pause/resume in `apps/web/tests/e2e/admin-project-config.spec.ts`
-- [ ] T040 [P] [US2] Add Jest tests for keyword non-empty / RSS URL validation helpers in `packages/shared/src/project-validation.test.ts`
+- [X] T039 [P] [US2] Add Playwright E2E for admin create project + source + schedule + pause/resume in `apps/web/tests/e2e/admin-project-config.spec.ts`
+- [X] T040 [P] [US2] Add Jest tests for keyword non-empty / RSS URL validation helpers in `packages/shared/src/project-validation.test.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T041 [P] [US2] Extend `ResearchProjects` with keywords[], schedule, monitoringStatus, bootstrapLookbackDays, emailNotificationEnabled, lastSuccessfulRunAt, owner in `apps/web/src/collections/ResearchProjects.ts`
-- [ ] T042 [P] [US2] Create `MonitoredSources` collection (type, rssUrl, enabled, project) with validation in `apps/web/src/collections/MonitoredSources.ts`
-- [ ] T043 [US2] Add Payload hooks preventing `monitoringStatus=active` with empty keywords in `apps/web/src/collections/ResearchProjects.ts`
-- [ ] T044 [US2] Add RSS URL field validation (reject non-URL) in `apps/web/src/collections/MonitoredSources.ts`
-- [ ] T045 [US2] Configure Admin UI labels/groups for project + sources management in collection `admin` configs under `apps/web/src/collections/`
-- [ ] T046 [US2] Document owner setup steps (SC-001) linking to quickstart in `README.md`
+- [X] T041 [P] [US2] Extend `ResearchProjects` with keywords[], schedule, monitoringStatus, bootstrapLookbackDays, emailNotificationEnabled, lastSuccessfulRunAt, owner in `apps/web/src/collections/ResearchProjects.ts`
+- [X] T042 [P] [US2] Create `MonitoredSources` collection (type, rssUrl, enabled, project) with validation in `apps/web/src/collections/MonitoredSources.ts`
+- [X] T043 [US2] Add Payload hooks preventing `monitoringStatus=active` with empty keywords in `apps/web/src/collections/ResearchProjects.ts`
+- [X] T044 [US2] Add RSS URL field validation (reject non-URL) in `apps/web/src/collections/MonitoredSources.ts`
+- [X] T045 [US2] Configure Admin UI labels/groups for project + sources management in collection `admin` configs under `apps/web/src/collections/`
+- [X] T046 [US2] Document owner setup steps (SC-001) linking to quickstart in `README.md`
 
 **Checkpoint**: Owner can fully configure a project in `/admin`; pause freezes intent for later worker skip
 
@@ -128,24 +128,24 @@ Monorepo per `plan.md`: `apps/web/`, `apps/worker/`, `packages/shared/`
 
 ### Tests for User Story 3
 
-- [ ] T047 [P] [US3] Add Jest tests for dedupe key generation in `packages/shared/src/dedupe.test.ts`
-- [ ] T048 [P] [US3] Add Jest tests for schedule-due and pause skip logic in `packages/shared/src/schedule.test.ts`
-- [ ] T049 [P] [US3] Add Jest tests for pipeline batching / empty-digest rules in `apps/worker/src/pipeline/publish.test.ts`
-- [ ] T050 [US3] Add Playwright (or API) verification that a run produces a visible digest on public feed in `apps/web/tests/e2e/monitoring-digest.spec.ts`
+- [X] T047 [P] [US3] Add Jest tests for dedupe key generation in `packages/shared/src/dedupe.test.ts`
+- [X] T048 [P] [US3] Add Jest tests for schedule-due and pause skip logic in `packages/shared/src/schedule.test.ts`
+- [X] T049 [P] [US3] Add Jest tests for pipeline batching / empty-digest rules in `apps/worker/src/pipeline/publish.test.ts`
+- [X] T050 [US3] Add Playwright (or API) verification that a run produces a visible digest on public feed in `apps/web/tests/e2e/monitoring-digest.spec.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T051 [P] [US3] Create `MonitoringRuns` collection (status, sourceResults, stats, triggeredBy, digest relation) in `apps/web/src/collections/MonitoringRuns.ts`
-- [ ] T052 [US3] Expose worker-authenticated write access for runs/publications/digests/project watermark in `apps/web/src/access/` and env `PAYLOAD_API_KEY` usage
-- [ ] T053 [P] [US3] Implement PubMed E-utilities adapter in `apps/worker/src/adapters/pubmed.ts`
-- [ ] T054 [P] [US3] Implement ClinicalTrials.gov API v2 adapter in `apps/worker/src/adapters/clinicaltrials.ts`
-- [ ] T055 [P] [US3] Implement RSS adapter with non-feed failure in `apps/worker/src/adapters/rss.ts`
-- [ ] T056 [US3] Implement CMS client (list due projects, upsert publication, create run/digest, patch watermark) in `apps/worker/src/cms/client.ts`
-- [ ] T057 [US3] Implement classify + summarize + importance via Vercel AI SDK / AI Gateway in `apps/worker/src/pipeline/ai.ts`
-- [ ] T058 [US3] Implement per-project pipeline (fetch → batch ≤50 → dedupe → classify → summarize → digest) in `apps/worker/src/pipeline/runProject.ts`
-- [ ] T059 [US3] Implement due-project selection + partial-failure status handling in `apps/worker/src/index.ts`
-- [ ] T060 [US3] Add optional manual run trigger for owner (admin custom endpoint or collection action) in `apps/web/src/endpoints/manualRun.ts`
-- [ ] T061 [US3] Add Cloud Scheduler + Cloud Run Job deploy notes (single hourly scheduler) in `apps/worker/README.md`
+- [X] T051 [P] [US3] Create `MonitoringRuns` collection (status, sourceResults, stats, triggeredBy, digest relation) in `apps/web/src/collections/MonitoringRuns.ts`
+- [X] T052 [US3] Expose worker-authenticated write access for runs/publications/digests/project watermark in `apps/web/src/access/` and env `PAYLOAD_API_KEY` usage
+- [X] T053 [P] [US3] Implement PubMed E-utilities adapter in `apps/worker/src/adapters/pubmed.ts`
+- [X] T054 [P] [US3] Implement ClinicalTrials.gov API v2 adapter in `apps/worker/src/adapters/clinicaltrials.ts`
+- [X] T055 [P] [US3] Implement RSS adapter with non-feed failure in `apps/worker/src/adapters/rss.ts`
+- [X] T056 [US3] Implement CMS client (list due projects, upsert publication, create run/digest, patch watermark) in `apps/worker/src/cms/client.ts`
+- [X] T057 [US3] Implement classify + summarize + importance via Vercel AI SDK / AI Gateway in `apps/worker/src/pipeline/ai.ts`
+- [X] T058 [US3] Implement per-project pipeline (fetch → batch ≤50 → dedupe → classify → summarize → digest) in `apps/worker/src/pipeline/runProject.ts`
+- [X] T059 [US3] Implement due-project selection + partial-failure status handling in `apps/worker/src/index.ts`
+- [X] T060 [US3] Add optional manual run trigger for owner (admin custom endpoint or collection action) in `apps/web/src/endpoints/manualRun.ts`
+- [X] T061 [US3] Add Cloud Scheduler + Cloud Run Job deploy notes (single hourly scheduler) in `apps/worker/README.md`
 
 **Checkpoint**: Worker produces digests per contracts/monitoring-worker.md; SC-002/SC-005 satisfied
 
@@ -159,13 +159,13 @@ Monorepo per `plan.md`: `apps/web/`, `apps/worker/`, `packages/shared/`
 
 ### Tests for User Story 4
 
-- [ ] T062 [P] [US4] Add Jest test that notification payload excludes digest body and includes feed URL in `apps/worker/src/notify/digestEmail.test.ts`
+- [X] T062 [P] [US4] Add Jest test that notification payload excludes digest body and includes feed URL in `apps/worker/src/notify/digestEmail.test.ts`
 
 ### Implementation for User Story 4
 
-- [ ] T063 [US4] Implement Resend digest notification sender in `apps/worker/src/notify/digestEmail.ts`
-- [ ] T064 [US4] Call notifier from publish path only when `emailNotificationEnabled` in `apps/worker/src/pipeline/runProject.ts`
-- [ ] T065 [US4] Ensure Admin toggle for `emailNotificationEnabled` is visible on Research Project in `apps/web/src/collections/ResearchProjects.ts`
+- [X] T063 [US4] Implement Resend digest notification sender in `apps/worker/src/notify/digestEmail.ts`
+- [X] T064 [US4] Call notifier from publish path only when `emailNotificationEnabled` in `apps/worker/src/pipeline/runProject.ts`
+- [X] T065 [US4] Ensure Admin toggle for `emailNotificationEnabled` is visible on Research Project in `apps/web/src/collections/ResearchProjects.ts`
 
 **Checkpoint**: SC-006 satisfied
 
@@ -179,16 +179,16 @@ Monorepo per `plan.md`: `apps/web/`, `apps/worker/`, `packages/shared/`
 
 ### Tests for User Story 5
 
-- [ ] T066 [P] [US5] Add Playwright E2E for locale switcher across five locales in `apps/web/tests/e2e/i18n-locales.spec.ts`
-- [ ] T067 [P] [US5] Add Jest test for translation cache hit/miss helper in `apps/web/src/lib/translations.test.ts`
+- [X] T066 [P] [US5] Add Playwright E2E for locale switcher across five locales in `apps/web/tests/e2e/i18n-locales.spec.ts`
+- [X] T067 [P] [US5] Add Jest test for translation cache hit/miss helper in `apps/web/src/lib/translations.test.ts`
 
 ### Implementation for User Story 5
 
-- [ ] T068 [P] [US5] Create `ContentTranslations` collection (publication, locale, fields) with unique (publication, locale) in `apps/web/src/collections/ContentTranslations.ts`
-- [ ] T069 [US5] Extend publication public API to accept `locale`, generate+cache translation via AI Gateway in `apps/web/src/app/api/public/publications/[id]/route.ts`
-- [ ] T070 [US5] Add locale switcher component in `apps/web/src/components/LocaleSwitcher.tsx`
-- [ ] T071 [US5] Complete message catalogs for UI chrome in `apps/web/messages/{en,de,tr,ru,uk}.json`
-- [ ] T072 [US5] Add machine-translation fallback link field when AI translation fails in `apps/web/src/lib/translationFallback.ts`
+- [X] T068 [P] [US5] Create `ContentTranslations` collection (publication, locale, fields) with unique (publication, locale) in `apps/web/src/collections/ContentTranslations.ts`
+- [X] T069 [US5] Extend publication public API to accept `locale`, generate+cache translation via AI Gateway in `apps/web/src/app/api/public/publications/[id]/route.ts`
+- [X] T070 [US5] Add locale switcher component in `apps/web/src/components/LocaleSwitcher.tsx`
+- [X] T071 [US5] Complete message catalogs for UI chrome in `apps/web/messages/{en,de,tr,ru,uk}.json`
+- [X] T072 [US5] Add machine-translation fallback link field when AI translation fails in `apps/web/src/lib/translationFallback.ts`
 
 **Checkpoint**: SC-004 satisfied; FR-016/FR-017 met
 
@@ -198,12 +198,12 @@ Monorepo per `plan.md`: `apps/web/`, `apps/worker/`, `packages/shared/`
 
 **Purpose**: Hardening, docs, and full quickstart validation
 
-- [ ] T073 [P] Align public empty-state vs home-list omission (FR-021) in `apps/web/src/app/[locale]/` and public projects route
-- [ ] T074 [P] Add MIT `LICENSE` at repo root if missing
-- [ ] T075 Verify all quickstart scenarios V1–V6 in `specs/001-research-monitoring-mvp/quickstart.md` against a running stack
-- [ ] T076 Confirm CI required checks green on a PR: lint, format, tsc, build, Jest, Playwright via `.github/workflows/ci.yml`
-- [ ] T077 [P] Final pass: topic-agnostic naming (no HHT hardcoding in domain code) across `apps/` and `packages/shared/`
-- [ ] T078 Docker Compose optional local Postgres for offline dev in `docker-compose.yml`
+- [X] T073 [P] Align public empty-state vs home-list omission (FR-021) in `apps/web/src/app/[locale]/` and public projects route
+- [X] T074 [P] Add MIT `LICENSE` at repo root if missing
+- [X] T075 Verify all quickstart scenarios V1–V6 in `specs/001-research-monitoring-mvp/quickstart.md` against a running stack
+- [X] T076 Confirm CI required checks green on a PR: lint, format, tsc, build, Jest, Playwright via `.github/workflows/ci.yml`
+- [X] T077 [P] Final pass: topic-agnostic naming (no HHT hardcoding in domain code) across `apps/` and `packages/shared/`
+- [X] T078 Docker Compose optional local Postgres for offline dev in `docker-compose.yml`
 
 ---
 

@@ -1,0 +1,15 @@
+node_modules/
+dist/
+build/
+.next/
+out/
+coverage/
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+playwright-report/
+test-results/
+media/
+*.md
+**/next-env.d.ts
+**/payload-types.ts

@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Builds
+dist/
+build/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+
+# Logs & temp
+*.log
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Test artifacts
+playwright-report/
+test-results/
+blob-report/
+
+# Payload / media
+media/
+**/payload-types.ts
+
+# Docker
+*.log*
+
+# Misc
+.turbo/
+.vercel/

@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "hooks": {
+    "afterFileEdit": [
+      {
+        "command": "npx prettier --write \"$CURSOR_FILE\" 2>/dev/null || true"
+      }
+    ],
+    "stop": [
+      {
+        "command": "pnpm typecheck && pnpm --filter @hht/web build && pnpm test"
+      }
+    ]
+  }
+}

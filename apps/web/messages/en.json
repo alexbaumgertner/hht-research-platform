@@ -1,0 +1,34 @@
+{
+  "Home": {
+    "title": "Research digests",
+    "subtitle": "Public monitoring digests for configured research projects.",
+    "empty": "No published projects yet.",
+    "latestDigest": "Latest digest"
+  },
+  "Project": {
+    "feedTitle": "Digest feed",
+    "empty": "No digests published for this project yet.",
+    "filterLabel": "Importance",
+    "filterAll": "All",
+    "importance": {
+      "critical": "Critical",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "backHome": "All projects"
+  },
+  "Publication": {
+    "objective": "Objective",
+    "methods": "Methods",
+    "results": "Results",
+    "limitations": "Limitations",
+    "whyItMatters": "Why it matters",
+    "originalLink": "View original source",
+    "backToFeed": "Back to feed",
+    "translationFallback": "Open machine translation"
+  },
+  "LocaleSwitcher": {
+    "label": "Language"
+  }
+}

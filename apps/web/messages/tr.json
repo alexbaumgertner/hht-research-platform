@@ -1,0 +1,34 @@
+{
+  "Home": {
+    "title": "Araştırma özetleri",
+    "subtitle": "Yapılandırılmış araştırma projeleri için herkese açık izleme özetleri.",
+    "empty": "Henüz yayımlanmış proje yok.",
+    "latestDigest": "Son özet"
+  },
+  "Project": {
+    "feedTitle": "Özet akışı",
+    "empty": "Bu proje için henüz özet yayımlanmadı.",
+    "filterLabel": "Önem",
+    "filterAll": "Tümü",
+    "importance": {
+      "critical": "Kritik",
+      "high": "Yüksek",
+      "medium": "Orta",
+      "low": "Düşük"
+    },
+    "backHome": "Tüm projeler"
+  },
+  "Publication": {
+    "objective": "Amaç",
+    "methods": "Yöntemler",
+    "results": "Sonuçlar",
+    "limitations": "Sınırlamalar",
+    "whyItMatters": "Neden önemli",
+    "originalLink": "Orijinal kaynağı görüntüle",
+    "backToFeed": "Akışa dön",
+    "translationFallback": "Makine çevirisini aç"
+  },
+  "LocaleSwitcher": {
+    "label": "Dil"
+  }
+}
