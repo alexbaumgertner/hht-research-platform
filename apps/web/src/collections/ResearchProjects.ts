@@ -1,5 +1,5 @@
 import type { CollectionConfig } from 'payload';
-import { hasNonEmptyKeywords } from '@hht/shared';
+import { hasNonEmptyKeywords, type KeywordInput } from '@hht/shared';
 
 import { isAuthenticated, publicRead } from '../access';
 
@@ -21,7 +21,7 @@ export const ResearchProjects: CollectionConfig = {
       ({ data, operation }) => {
         if (!data) return data;
         const status = data.monitoringStatus;
-        const keywords = data.keywords as string[] | undefined;
+        const keywords = data.keywords as KeywordInput[] | undefined;
         if (status === 'active' && !hasNonEmptyKeywords(keywords)) {
           throw new Error('Cannot activate monitoring with empty keywords');
         }

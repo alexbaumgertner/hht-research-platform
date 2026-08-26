@@ -22,6 +22,12 @@ describe('hasNonEmptyKeywords', () => {
     expect(hasNonEmptyKeywords(['', '  '])).toBe(false);
     expect(hasNonEmptyKeywords(['HHT'])).toBe(true);
   });
+
+  it('accepts Payload array rows shaped as { value }', () => {
+    expect(hasNonEmptyKeywords([{ value: '' }, { value: '  ' }])).toBe(false);
+    expect(hasNonEmptyKeywords([{ value: 'HHT' }])).toBe(true);
+    expect(hasNonEmptyKeywords([{ value: 'HHT' }, 'telangiectasia'])).toBe(true);
+  });
 });
 
 describe('isValidHttpUrl', () => {

@@ -50,8 +50,19 @@ export function filterByImportance<T extends { importance?: Importance | null }>
   return items.filter((item) => item.importance === importance);
 }
 
-export function hasNonEmptyKeywords(keywords: string[] | null | undefined): boolean {
-  return Boolean(keywords?.some((k) => k.trim().length > 0));
+/** Payload array rows are `{ value }`; APIs/tests may also pass plain strings. */
+export type KeywordInput = string | { value?: string | null } | null | undefined;
+
+export function keywordText(keyword: KeywordInput): string {
+  if (typeof keyword === 'string') return keyword.trim();
+  if (keyword && typeof keyword === 'object' && typeof keyword.value === 'string') {
+    return keyword.value.trim();
+  }
+  return '';
+}
+
+export function hasNonEmptyKeywords(keywords: KeywordInput[] | null | undefined): boolean {
+  return Boolean(keywords?.some((k) => keywordText(k).length > 0));
 }
 
 export function isValidHttpUrl(value: string): boolean {
