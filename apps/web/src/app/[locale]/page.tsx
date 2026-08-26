@@ -1,6 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Anchor, Card, Stack, Text, Title } from '@mantine/core';
 import { Link } from '@/i18n/routing';
+import { getPublicSiteUrl } from '@/lib/siteUrl';
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -25,8 +26,7 @@ export default async function HomePage({ params }: Props) {
   setRequestLocale(locale);
   const t = await getTranslations('Home');
 
-  const baseUrl = process.env.PUBLIC_SITE_URL || 'http://localhost:3000';
-  const { docs } = await fetchProjects(baseUrl);
+  const { docs } = await fetchProjects(getPublicSiteUrl());
 
   return (
     <Stack gap="md">

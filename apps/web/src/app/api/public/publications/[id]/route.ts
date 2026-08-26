@@ -67,7 +67,7 @@ export async function GET(req: Request, { params }: Params) {
         await payload.create({
           collection: 'content-translations',
           data: {
-            publication: id,
+            publication: publication.id,
             locale: target,
             fields: translated,
           },

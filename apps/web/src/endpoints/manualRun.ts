@@ -33,7 +33,7 @@ export const manualRunEndpoint: Endpoint = {
     const run = await req.payload.create({
       collection: 'monitoring-runs',
       data: {
-        project: projectId,
+        project: project.id,
         status: 'running',
         triggeredBy: 'manual',
         startedAt: new Date().toISOString(),

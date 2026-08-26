@@ -14,6 +14,7 @@ import { Publications } from './collections/Publications';
 import { Digests } from './collections/Digests';
 import { ContentTranslations } from './collections/ContentTranslations';
 import { manualRunEndpoint } from './endpoints/manualRun';
+import { getPublicSiteUrl } from './lib/siteUrl';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -51,5 +52,5 @@ export default buildConfig({
     apiKey: process.env.RESEND_API_KEY || '',
   }),
   sharp,
-  serverURL: process.env.PUBLIC_SITE_URL || 'http://localhost:3000',
+  serverURL: getPublicSiteUrl(),
 });

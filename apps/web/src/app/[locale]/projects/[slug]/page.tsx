@@ -3,6 +3,7 @@ import { Anchor, Badge, Group, Stack, Text, Title } from '@mantine/core';
 import { Suspense } from 'react';
 import { Link } from '@/i18n/routing';
 import { ImportanceFilter } from '@/components/ImportanceFilter';
+import { getPublicSiteUrl } from '@/lib/siteUrl';
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>;
@@ -42,7 +43,7 @@ export default async function ProjectFeedPage({ params, searchParams }: Props) {
   const { importance } = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations('Project');
-  const baseUrl = process.env.PUBLIC_SITE_URL || 'http://localhost:3000';
+  const baseUrl = getPublicSiteUrl();
 
   const project = await fetchProject(baseUrl, slug);
   if (!project) {
