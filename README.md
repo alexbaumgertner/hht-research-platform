@@ -27,6 +27,8 @@ Topic-agnostic research monitoring: configure sources in Payload Admin, run a Do
 - `apps/worker` — Cloud Run Job monitoring pipeline
 - `packages/shared` — Zod types, dedupe, schedule helpers
 
+Deploy the worker to GCP and connect it to production web: [`docs/deploy-worker.md`](docs/deploy-worker.md).
+
 See `specs/001-research-monitoring-mvp/` for the full Spec Kit plan, data model, and contracts.
 
 ## Setup
