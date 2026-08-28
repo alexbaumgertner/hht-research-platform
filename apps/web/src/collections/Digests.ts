@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload';
 
 import { isAuthenticated, isWorkerOrAdmin, publicRead } from '../access';
+import { capCreateDepth, resolveRelationshipId } from './digestHooks';
 
 export const Digests: CollectionConfig = {
   slug: 'digests',
@@ -26,23 +27,23 @@ export const Digests: CollectionConfig = {
         return data;
       },
     ],
+    beforeOperation: [({ args, operation }) => capCreateDepth(args, operation)],
     afterChange: [
       async ({ doc, req, operation }) => {
         if (operation !== 'create') return;
-        const projectId =
-          typeof doc.project === 'object' && doc.project !== null
-            ? (doc.project as { id: string | number }).id
-            : doc.project;
+        const projectId = resolveRelationshipId(doc.project);
         if (!projectId) return;
-        // Email is sent by the worker, not this hook. Keep this denormalized
-        // flag update cheap so POST /api/digests stays within serverless limits.
-        await req.payload.update({
+        // Email is sent by the worker (`sendDigestPublishedEmail`), not this hook.
+        // Nested `payload.update()` *without* `req` starts a second postgres
+        // transaction while create still holds the first — that stalls the pool
+        // until Vercel FUNCTION_INVOCATION_TIMEOUT (504). Share `req` so this
+        // is one SET on the same connection. Jobs queue is not configured.
+        await req.payload.db.updateOne({
           collection: 'research-projects',
           id: projectId,
           data: { hasPublishedDigest: true },
-          overrideAccess: true,
-          depth: 0,
-          select: { id: true },
+          req,
+          returning: false,
         });
       },
     ],
@@ -54,12 +55,15 @@ export const Digests: CollectionConfig = {
       relationTo: 'research-projects',
       required: true,
       index: true,
+      maxDepth: 1,
     },
     {
       name: 'run',
       type: 'relationship',
       relationTo: 'monitoring-runs',
       required: true,
+      // Break circular populate: run.digest → digest.run → …
+      maxDepth: 1,
     },
     {
       name: 'publishedAt',
