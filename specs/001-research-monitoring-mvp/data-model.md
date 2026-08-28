@@ -34,6 +34,7 @@ Named research topic area owned by a single admin user for MVP.
 **Relationships**: has many `MonitoredSource`, `MonitoringRun`, `Digest`, `Publication`.
 
 **Validation**:
+
 - Cannot set `monitoringStatus=active` with empty `keywords`.
 - Pause does not delete digests or sources; does not advance `lastSuccessfulRunAt`.
 
@@ -54,6 +55,7 @@ Configured input attached to one project.
 | `createdAt` / `updatedAt` | datetime | System |
 
 **Validation**:
+
 - RSS URL rejected at save or marked failed at run if non-feed content.
 - PubMed / ClinicalTrials need no extra credentials for public APIs.
 
@@ -85,6 +87,7 @@ One execution of the fetch → dedupe → classify → summarize → publish pip
 ```
 
 **Rules**:
+
 - Empty qualifying set → no Digest; may still be `completed` / `completed_partial_failure`.
 - On `completed` or `completed_partial_failure`, set project `lastSuccessfulRunAt = finishedAt` (FR-020).
 - While project `monitoringStatus=paused`, scheduler MUST NOT start runs.
@@ -113,6 +116,7 @@ Distinct research item known to a project (after dedupe).
 | `createdAt` / `updatedAt` | datetime | System |
 
 **Dedupe key** (FR-006 / assumptions):
+
 1. DOI (normalized) if present  
 2. else PMID / NCT ID / RSS GUID  
 3. else `normalize(title) + sourceType` (or project-scoped title hash)
@@ -135,6 +139,7 @@ Published bundle of qualifying publications from one monitoring run.
 | `createdAt` / `updatedAt` | datetime | System |
 
 **Rules**:
+
 - Exactly one Digest per run when ≥1 qualifying publication (FR-009).
 - Public project list requires ≥1 Digest for the project (FR-021).
 

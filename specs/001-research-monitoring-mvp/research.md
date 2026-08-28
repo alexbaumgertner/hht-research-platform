@@ -13,6 +13,7 @@ All Technical Context unknowns from `plan.md` are resolved below.
 **Rationale**: Spec deferred the exact duration to planning. HHT (and similar rare-disease topics) produce sparse hits; 30 days seeds a useful first digest without flooding AI summarization. Overflow beyond the per-run batch limit is deferred to later runs (FR assumptions).
 
 **Alternatives considered**:
+
 - 7 days — too sparse for rare topics; empty first digest likely.
 - 90 days — higher AI/cost and batch overflow on first run.
 - Schedule-tied window forever — rejected by clarification (watermark-based “what’s new”).
@@ -26,6 +27,7 @@ All Technical Context unknowns from `plan.md` are resolved below.
 **Rationale**: Keeps Cloud Run Job duration and AI spend predictable on free tiers; matches “bounded batch” assumption in the spec.
 
 **Alternatives considered**:
+
 - 20 — safer but may starve weekly/monthly projects after a pause gap.
 - Unbounded — violates free-tier cost and job-timeout risk.
 
@@ -38,6 +40,7 @@ All Technical Context unknowns from `plan.md` are resolved below.
 **Rationale**: Aligns with free-tier-first (Principle III), Next.js/Vercel hosting, and “no multi-model choice.” Worker and web both call the Gateway with a shared API key / env config so prompts and schemas stay consistent.
 
 **Alternatives considered**:
+
 - Direct Google Gemini / OpenAI SDKs only — more lock-in and duplicate config across apps.
 - Local/open models on Cloud Run — higher ops burden for MVP.
 - Dedicated translation API (DeepL, etc.) — explicitly out of scope (FR-019).
@@ -51,6 +54,7 @@ All Technical Context unknowns from `plan.md` are resolved below.
 **Rationale**: Free, Payload-friendly, sufficient volume for a solo owner and few projects.
 
 **Alternatives considered**:
+
 - SMTP / Ethereal only — fine for local, not production deliverability.
 - SendGrid / SES — more setup; unnecessary at MVP volume.
 
@@ -63,6 +67,7 @@ All Technical Context unknowns from `plan.md` are resolved below.
 **Rationale**: Cloud Scheduler free tier is only **3 jobs/month**; one Scheduler + due-project polling stays free-tier viable and portable. Matches constitution: worker is a separate deployable; long runs stay off Vercel request path.
 
 **Alternatives considered**:
+
 - One Scheduler per project — blows free tier immediately.
 - In-process cron on Vercel — couples monitoring to request hosting; violates Principle VII.
 - Always-on VM — not free-tier-first.
@@ -72,6 +77,7 @@ All Technical Context unknowns from `plan.md` are resolved below.
 ## R6. Source adapters
 
 **Decision**:
+
 - **PubMed**: NCBI E-utilities (`esearch` + `efetch`); keyword OR query; date filter via `mindate`/`maxdate` + `datetype=edat` from watermark (or 30-day bootstrap); dedupe key PMID then DOI then normalized title.
 - **ClinicalTrials.gov**: API v2 `GET /api/v2/studies` with `query.term` (OR keywords) and `filter.advanced` `AREA[LastUpdatePostDate]RANGE[since,MAX]`; dedupe key NCT ID.
 - **RSS**: Fetch feed URL; parse with a maintained RSS/Atom library; filter items by keyword OR against title/description and by `pubDate`/`updated` ≥ watermark; reject non-feed responses at config validate and/or run failure; dedupe by GUID/link then normalized title.
@@ -79,6 +85,7 @@ All Technical Context unknowns from `plan.md` are resolved below.
 **Rationale**: All three are free public APIs/feeds, well documented, and match FR-002 source types.
 
 **Alternatives considered**:
+
 - Third-party literature aggregators — extra cost/dependency.
 - Scraping HTML UIs — fragile and against maintainability (Principle V).
 
@@ -87,6 +94,7 @@ All Technical Context unknowns from `plan.md` are resolved below.
 ## R7. App / service layout
 
 **Decision**: Monorepo with:
+
 - `apps/web` — Next.js 16+ App Router + Payload CMS 3 (admin + public UI + REST)
 - `apps/worker` — containerized Node monitoring pipeline
 - `packages/shared` — shared types, Zod schemas, pipeline pure functions (dedupe keys, schedule-due logic) used by Jest
@@ -96,6 +104,7 @@ Shared **Neon Postgres**; worker reads/writes via Payload REST (and/or direct DB
 **Rationale**: Principle VII (service boundaries) + VIII (Docker worker) + single schema owned by Payload.
 
 **Alternatives considered**:
+
 - Single Next.js process for cron — rejected by constitution.
 - Separate databases — unnecessary complexity for MVP.
 

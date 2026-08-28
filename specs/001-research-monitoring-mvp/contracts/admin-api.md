@@ -29,6 +29,7 @@ Must be expressible in Admin without custom public auth:
 6. Optional: trigger **manual monitoring run** (not required for normal operation)
 
 Validation surfaced in Admin:
+
 - Keywords non-empty before activating monitoring
 - RSS URL required for RSS type; reject obvious non-URL values
 

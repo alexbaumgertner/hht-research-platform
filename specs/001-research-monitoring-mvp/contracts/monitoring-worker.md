@@ -16,6 +16,7 @@ node dist/index.js
 ```
 
 **Env (required)**:
+
 - `DATABASE_URL` or CMS base URL + `PAYLOAD_API_KEY` (preferred: talk to Payload REST)
 - `AI_GATEWAY_API_KEY` (or equivalent for Vercel AI Gateway)
 - `RESEND_API_KEY` (digest email)
