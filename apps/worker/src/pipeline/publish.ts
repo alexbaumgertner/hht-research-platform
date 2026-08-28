@@ -13,8 +13,23 @@ export function clampBatch<T>(items: T[], limit: number): T[] {
 
 export type SourceOutcome = 'success' | 'failure';
 
+export type TerminalRunStatus = 'completed' | 'completed_partial_failure' | 'failed';
+
+/**
+ * Digest create/email failed after sources were processed.
+ * Reuse `completed_partial_failure` (no separate `partial` status in monitoring-runs).
+ */
+export function statusAfterDigestStepFailure(status: TerminalRunStatus): TerminalRunStatus {
+  return status === 'failed' ? 'failed' : 'completed_partial_failure';
+}
+
+export function formatDigestStepError(err: unknown): string {
+  const message = err instanceof Error ? err.message : String(err);
+  return `Digest publish step failed: ${message}`;
+}
+
 export function resolveRunStatus(outcomes: SourceOutcome[]): {
-  status: 'completed' | 'completed_partial_failure' | 'failed';
+  status: TerminalRunStatus;
   advanceWatermark: boolean;
 } {
   if (outcomes.length === 0) {

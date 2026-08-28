@@ -1,4 +1,10 @@
-import { clampBatch, resolveRunStatus, shouldPublishDigest } from './publish.js';
+import {
+  clampBatch,
+  formatDigestStepError,
+  resolveRunStatus,
+  shouldPublishDigest,
+  statusAfterDigestStepFailure,
+} from './publish.js';
 
 describe('shouldPublishDigest', () => {
   it('publishes only when qualifying items exist', () => {
@@ -33,5 +39,26 @@ describe('resolveRunStatus', () => {
       status: 'failed',
       advanceWatermark: false,
     });
+  });
+});
+
+describe('statusAfterDigestStepFailure', () => {
+  it('maps completed source runs to completed_partial_failure', () => {
+    expect(statusAfterDigestStepFailure('completed')).toBe('completed_partial_failure');
+    expect(statusAfterDigestStepFailure('completed_partial_failure')).toBe(
+      'completed_partial_failure',
+    );
+  });
+
+  it('keeps failed when no sources succeeded', () => {
+    expect(statusAfterDigestStepFailure('failed')).toBe('failed');
+  });
+});
+
+describe('formatDigestStepError', () => {
+  it('prefixes Error messages', () => {
+    expect(formatDigestStepError(new Error('CMS POST /api/digests failed: 504'))).toBe(
+      'Digest publish step failed: CMS POST /api/digests failed: 504',
+    );
   });
 });

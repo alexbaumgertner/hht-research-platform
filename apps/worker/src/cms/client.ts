@@ -179,7 +179,9 @@ export class CmsClient {
   }
 
   async createDigest(data: Json) {
-    return this.request<{ doc: { id: string | number } }>(`/api/digests`, {
+    // depth=0 skips populating hasMany publications (and nested relations) on the
+    // create response — default depth=2 was exceeding Vercel's function timeout.
+    return this.request<{ doc: { id: string | number } }>(`/api/digests?depth=0`, {
       method: 'POST',
       body: JSON.stringify(data),
     });

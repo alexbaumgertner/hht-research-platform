@@ -4,6 +4,14 @@ import { isAuthenticated, isWorkerOrAdmin, publicRead } from '../access';
 
 export const Publications: CollectionConfig = {
   slug: 'publications',
+  // When populated from Digests (and other relations), skip heavy fields like
+  // abstractOrBody so REST create/list does not serialize full paper text.
+  defaultPopulate: {
+    title: true,
+    importance: true,
+    originalUrl: true,
+    summary: true,
+  },
   admin: {
     useAsTitle: 'title',
     group: 'Research',

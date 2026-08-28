@@ -34,11 +34,15 @@ export const Digests: CollectionConfig = {
             ? (doc.project as { id: string | number }).id
             : doc.project;
         if (!projectId) return;
+        // Email is sent by the worker, not this hook. Keep this denormalized
+        // flag update cheap so POST /api/digests stays within serverless limits.
         await req.payload.update({
           collection: 'research-projects',
           id: projectId,
           data: { hasPublishedDigest: true },
           overrideAccess: true,
+          depth: 0,
+          select: { id: true },
         });
       },
     ],
@@ -70,6 +74,9 @@ export const Digests: CollectionConfig = {
       hasMany: true,
       required: true,
       minRows: 1,
+      // Cap nested populate (project / firstSeenRun) so a default-depth REST
+      // create does not N+1 through every related publication.
+      maxDepth: 1,
     },
   ],
 };

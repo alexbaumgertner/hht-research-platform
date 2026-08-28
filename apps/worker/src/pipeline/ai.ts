@@ -1,4 +1,4 @@
-import { generateObject } from 'ai';
+import { generateText, Output } from 'ai';
 import { createGateway } from '@ai-sdk/gateway';
 import { z } from 'zod';
 import type { Importance, Summary } from '@hht/shared';
@@ -32,15 +32,15 @@ export async function classifyRelevance(input: {
   abstractOrBody?: string;
   keywords: string[];
 }): Promise<boolean> {
-  const { object } = await generateObject({
+  const { output } = await generateText({
     model: getModel(),
-    schema: ClassificationSchema,
+    output: Output.object({ schema: ClassificationSchema }),
     prompt: `Decide if this research item is relevant to a project with keywords: ${input.keywords.join(', ')}.
 Title: ${input.title}
 Abstract: ${input.abstractOrBody || '(none)'}
 Return relevant=true only if it clearly relates to the topic.`,
   });
-  return object.relevant;
+  return output.relevant;
 }
 
 export async function summarizeAndRank(input: {
@@ -48,14 +48,14 @@ export async function summarizeAndRank(input: {
   abstractOrBody?: string;
   keywords: string[];
 }): Promise<{ importance: Importance; summary: Summary }> {
-  const { object } = await generateObject({
+  const { output } = await generateText({
     model: getModel(),
-    schema: SummaryImportanceSchema,
+    output: Output.object({ schema: SummaryImportanceSchema }),
     prompt: `Summarize this research item in English for a specialist audience monitoring: ${input.keywords.join(', ')}.
 Title: ${input.title}
 Abstract: ${input.abstractOrBody || '(none)'}
 Fill objective, methods, results, limitations, whyItMatters.
 Assign importance: critical|high|medium|low based on clinical/scientific impact for the topic.`,
   });
-  return object;
+  return output;
 }

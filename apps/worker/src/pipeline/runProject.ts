@@ -5,7 +5,13 @@ import { clinicalTrialsAdapter } from '../adapters/clinicaltrials.js';
 import { rssAdapter } from '../adapters/rss.js';
 import type { SourceAdapter } from '../adapters/types.js';
 import { classifyRelevance, summarizeAndRank } from './ai.js';
-import { clampBatch, resolveRunStatus, shouldPublishDigest } from './publish.js';
+import {
+  clampBatch,
+  formatDigestStepError,
+  resolveRunStatus,
+  shouldPublishDigest,
+  statusAfterDigestStepFailure,
+} from './publish.js';
 import { sendDigestPublishedEmail } from '../notify/digestEmail.js';
 
 const adapters: Record<'pubmed' | 'clinicaltrials' | 'rss', SourceAdapter> = {
@@ -146,27 +152,37 @@ export async function runProject(
   }
 
   const outcomes = sourceResults.map((r) => r.status);
-  const { status, advanceWatermark } = resolveRunStatus(outcomes);
+  const resolved = resolveRunStatus(outcomes);
+  let status = resolved.status;
+  const { advanceWatermark } = resolved;
   const finishedAt = new Date().toISOString();
   let digestId: string | number | undefined;
+  let errorSummary: string | undefined =
+    status === 'failed' ? 'No sources processed successfully' : undefined;
 
   if (shouldPublishDigest({ qualifyingCount: qualifyingIds.length })) {
-    const digest = await cms.createDigest({
-      project: project.id,
-      run: runId,
-      publishedAt: finishedAt,
-      publications: qualifyingIds,
-    });
-    digestId = digest.doc.id;
-    stats.published = qualifyingIds.length;
-
-    if (project.emailNotificationEnabled && project.ownerEmail) {
-      await sendDigestPublishedEmail({
-        to: project.ownerEmail,
-        projectName: project.name,
-        projectSlug: project.slug,
-        projectId: project.id,
+    try {
+      const digest = await cms.createDigest({
+        project: project.id,
+        run: runId,
+        publishedAt: finishedAt,
+        publications: qualifyingIds,
       });
+      digestId = digest.doc.id;
+      stats.published = qualifyingIds.length;
+
+      if (project.emailNotificationEnabled && project.ownerEmail) {
+        await sendDigestPublishedEmail({
+          to: project.ownerEmail,
+          projectName: project.name,
+          projectSlug: project.slug,
+          projectId: project.id,
+        });
+      }
+    } catch (err) {
+      console.error('[worker] digest publish step failed', err);
+      errorSummary = formatDigestStepError(err);
+      status = statusAfterDigestStepFailure(status);
     }
   }
 
@@ -176,7 +192,7 @@ export async function runProject(
     sourceResults,
     stats,
     digest: digestId,
-    errorSummary: status === 'failed' ? 'No sources processed successfully' : undefined,
+    errorSummary,
   });
 
   if (advanceWatermark) {

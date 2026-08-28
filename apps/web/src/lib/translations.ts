@@ -1,5 +1,5 @@
 import type { ContentTranslationLocale, Summary } from '@hht/shared';
-import { generateObject } from 'ai';
+import { generateText, Output } from 'ai';
 import { createGateway } from '@ai-sdk/gateway';
 import { z } from 'zod';
 
@@ -43,11 +43,11 @@ export async function translateSummary(
   const gateway = createGateway({ apiKey });
   const modelId = process.env.AI_GATEWAY_MODEL || 'openai/gpt-4o-mini';
 
-  const { object } = await generateObject({
+  const { output } = await generateText({
     model: gateway(modelId),
-    schema: SummaryZod,
+    output: Output.object({ schema: SummaryZod }),
     prompt: `Translate the following research summary sections from English to locale "${locale}". Preserve scientific meaning. Return the same five fields.\n\n${JSON.stringify(summary, null, 2)}`,
   });
 
-  return object;
+  return output;
 }
