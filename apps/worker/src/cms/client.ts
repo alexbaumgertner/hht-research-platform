@@ -123,7 +123,7 @@ export class CmsClient {
             : undefined;
 
         return {
-          id: String(project.id),
+          id: project.id as string,
           name: project.name,
           slug: project.slug,
           keywords,
@@ -139,7 +139,7 @@ export class CmsClient {
       .filter((p): p is NonNullable<typeof p> => Boolean(p));
   }
 
-  async createRun(projectId: string, triggeredBy: 'schedule' | 'manual') {
+  async createRun(projectId: string | number, triggeredBy: 'schedule' | 'manual') {
     return this.request<{ doc: { id: string | number } }>(`/api/monitoring-runs`, {
       method: 'POST',
       body: JSON.stringify({
