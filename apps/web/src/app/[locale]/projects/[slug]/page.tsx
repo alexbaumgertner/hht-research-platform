@@ -1,8 +1,8 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { Anchor, Badge, Group, Stack, Text, Title } from '@mantine/core';
+import { Badge, Group, Stack, Text, Title } from '@mantine/core';
 import { Suspense } from 'react';
-import { Link } from '@/i18n/routing';
 import { ImportanceFilter } from '@/components/ImportanceFilter';
+import { TextLink } from '@/components/TextLink';
 import { getPublicSiteUrl } from '@/lib/siteUrl';
 
 type Props = {
@@ -55,9 +55,9 @@ export default async function ProjectFeedPage({ params, searchParams }: Props) {
   return (
     <Stack gap="lg">
       <div>
-        <Anchor component={Link} href="/" size="sm">
+        <TextLink href="/" size="sm">
           {t('backHome')}
-        </Anchor>
+        </TextLink>
         <Title order={1} mt="xs">
           {project.name}
         </Title>
@@ -83,13 +83,9 @@ export default async function ProjectFeedPage({ params, searchParams }: Props) {
               {digest.publications.map((pub) => (
                 <Group key={pub.id} justify="space-between" align="flex-start" wrap="nowrap">
                   <Stack gap={4}>
-                    <Anchor
-                      component={Link}
-                      href={`/projects/${slug}/publications/${pub.id}`}
-                      fw={600}
-                    >
+                    <TextLink href={`/projects/${slug}/publications/${pub.id}`} fw={600}>
                       {pub.title}
-                    </Anchor>
+                    </TextLink>
                     {pub.summaryPreview ? (
                       <Text size="sm" lineClamp={2}>
                         {pub.summaryPreview}

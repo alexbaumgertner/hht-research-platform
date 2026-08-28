@@ -1,6 +1,6 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Anchor, Stack, Text, Title } from '@mantine/core';
-import { Link } from '@/i18n/routing';
+import { TextLink } from '@/components/TextLink';
 import { getPublicSiteUrl } from '@/lib/siteUrl';
 
 type Props = {
@@ -53,9 +53,9 @@ export default async function PublicationPage({ params }: Props) {
 
   return (
     <Stack gap="lg">
-      <Anchor component={Link} href={`/projects/${slug}`} size="sm">
+      <TextLink href={`/projects/${slug}`} size="sm">
         {t('backToFeed')}
-      </Anchor>
+      </TextLink>
       <Title order={1}>{pub.title}</Title>
       <Anchor href={pub.originalUrl} target="_blank" rel="noopener noreferrer">
         {t('originalLink')}

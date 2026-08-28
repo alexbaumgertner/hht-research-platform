@@ -1,6 +1,6 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { Anchor, Card, Stack, Text, Title } from '@mantine/core';
-import { Link } from '@/i18n/routing';
+import { Card, Stack, Text, Title } from '@mantine/core';
+import { TextLink } from '@/components/TextLink';
 import { getPublicSiteUrl } from '@/lib/siteUrl';
 
 type Props = { params: Promise<{ locale: string }> };
@@ -42,9 +42,9 @@ export default async function HomePage({ params }: Props) {
           {docs.map((project) => (
             <Card key={project.id} padding="md" radius="md" withBorder>
               <Stack gap={4}>
-                <Anchor component={Link} href={`/projects/${project.slug}`} fw={600} size="lg">
+                <TextLink href={`/projects/${project.slug}`} fw={600} size="lg">
                   {project.name}
-                </Anchor>
+                </TextLink>
                 {project.description ? <Text size="sm">{project.description}</Text> : null}
                 {project.latestDigestPublishedAt ? (
                   <Text size="xs" c="dimmed">
