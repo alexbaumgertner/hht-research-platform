@@ -1,7 +1,12 @@
 import type { CollectionConfig } from 'payload';
 import { hasNonEmptyKeywords, type KeywordInput } from '@hht/shared';
 
-import { isAuthenticated, publicRead } from '../access';
+import {
+  canUpdateResearchProject,
+  isAuthenticated,
+  isWorkerOrAdminFieldLevel,
+  publicRead,
+} from '../access';
 
 export const ResearchProjects: CollectionConfig = {
   slug: 'research-projects',
@@ -13,7 +18,7 @@ export const ResearchProjects: CollectionConfig = {
   access: {
     read: publicRead,
     create: isAuthenticated,
-    update: isAuthenticated,
+    update: canUpdateResearchProject,
     delete: isAuthenticated,
   },
   hooks: {
@@ -97,17 +102,7 @@ export const ResearchProjects: CollectionConfig = {
         description: 'Watermark advanced by worker on successful/partial runs',
       },
       access: {
-        update: ({ req }) => {
-          // Allow worker / admin to patch watermark
-          if (!req.user) {
-            const headerKey =
-              req.headers.get('x-payload-api-key') || req.headers.get('X-Payload-API-Key');
-            return Boolean(
-              process.env.PAYLOAD_API_KEY && headerKey === process.env.PAYLOAD_API_KEY,
-            );
-          }
-          return true;
-        },
+        update: isWorkerOrAdminFieldLevel,
       },
     },
     {

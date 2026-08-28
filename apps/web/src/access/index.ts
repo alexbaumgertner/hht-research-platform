@@ -18,23 +18,41 @@ export const isAuthenticated: Access = ({ req: { user } }) => Boolean(user);
 /** Public read for published research content. */
 export const publicRead: Access = () => true;
 
+function userHasWorkerOrAdminRole(user: unknown): boolean {
+  const roles = (user as { roles?: string[] } | null)?.roles;
+  return Boolean(roles?.includes('admin') || roles?.includes('worker'));
+}
+
+function isWorkerOrAdminRequest(req: {
+  user?: unknown;
+  headers: { get(name: string): string | null };
+}): boolean {
+  if (userHasWorkerOrAdminRole(req.user)) return true;
+
+  const headerKey = req.headers.get('x-payload-api-key') || req.headers.get('X-Payload-API-Key');
+  const expected = process.env.PAYLOAD_API_KEY;
+  return Boolean(expected && headerKey && headerKey === expected);
+}
+
 /**
  * Worker authenticates via Payload API key on a Users account,
  * or via X-Payload-API-Key header matching PAYLOAD_API_KEY.
  */
-export const isWorkerOrAdmin: Access = ({ req }) => {
-  if (req.user) {
-    const roles = (req.user as { roles?: string[] }).roles;
-    if (roles?.includes('admin') || roles?.includes('worker')) return true;
-  }
+export const isWorkerOrAdmin: Access = ({ req }) => isWorkerOrAdminRequest(req);
 
-  const headerKey = req.headers.get('x-payload-api-key') || req.headers.get('X-Payload-API-Key');
-  const expected = process.env.PAYLOAD_API_KEY;
-  if (expected && headerKey && headerKey === expected) {
-    return true;
-  }
+export const isWorkerOrAdminFieldLevel: FieldAccess = ({ req }) => isWorkerOrAdminRequest(req);
 
-  return false;
+/**
+ * Research-projects update: admin/worker sessions (and native API-key users with
+ * those roles) may edit the document. Header-only X-Payload-API-Key may patch
+ * lastSuccessfulRunAt only — not name, keywords, owner, etc.
+ */
+export const canUpdateResearchProject: Access = ({ req, data }) => {
+  if (userHasWorkerOrAdminRole(req.user)) return true;
+  if (!isWorkerOrAdmin({ req })) return false;
+
+  const keys = Object.keys((data ?? {}) as Record<string, unknown>);
+  return keys.every((key) => key === 'lastSuccessfulRunAt');
 };
 
 /** Deny all writes for anonymous visitors (explicit). */
