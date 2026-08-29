@@ -5,15 +5,15 @@
 
 Collections (see `data-model.md` for fields):
 
-| Collection | Access |
-| --- | --- |
-| `users` | Payload auth |
-| `research-projects` | Create/update/delete: authenticated admin only; read: public fields via public API |
-| `monitored-sources` | Admin only write; scoped to project |
-| `monitoring-runs` | Create by worker (API key / internal); read admin |
-| `publications` | Worker write; public read via public API |
-| `digests` | Worker write on publish; public read via public API |
-| `content-translations` | Created on demand by web; public read via publication endpoint |
+| Collection             | Access                                                                             |
+| ---------------------- | ---------------------------------------------------------------------------------- |
+| `users`                | Payload auth                                                                       |
+| `research-projects`    | Create/update/delete: authenticated admin only; read: public fields via public API |
+| `monitored-sources`    | Admin only write; scoped to project                                                |
+| `monitoring-runs`      | Create by worker (API key / internal); read admin                                  |
+| `publications`         | Worker write; public read via public API                                           |
+| `digests`              | Worker write on publish; public read via public API                                |
+| `content-translations` | Created on demand by web; public read via publication endpoint                     |
 
 ---
 
@@ -65,6 +65,6 @@ Update `lastSuccessfulRunAt` when run completes successfully or with partial fai
 
 When a digest is published and `emailNotificationEnabled === true`:
 
-- **To**: owner user email  
-- **Subject**: short, e.g. `New digest: {project.name}`  
+- **To**: owner user email
+- **Subject**: short, e.g. `New digest: {project.name}`
 - **Body**: short text/HTML with **link to public project feed only** — no full digest body (FR-015)

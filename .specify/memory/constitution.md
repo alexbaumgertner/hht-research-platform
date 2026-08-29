@@ -132,21 +132,21 @@ inspection of code alone.
 
 The following stack choices MUST NOT be revisited without a new ADR:
 
-| Concern | Choice |
-| --- | --- |
-| Backend / CMS | Payload CMS on Next.js (App Router) |
-| Public + admin hosting | Vercel (Hobby tier) |
-| Background monitoring worker | Containerized Node.js on GCP Cloud Run Jobs, triggered by GCP Cloud Scheduler |
-| Database | Postgres via Neon (free tier) |
-| UI library | Mantine (explicitly not Tailwind CSS) |
-| i18n | next-intl with locale-prefixed routing (`[locale]` segment) |
-| Lint / format | ESLint (`eslint-config-next` + typescript-eslint); Prettier as formatting source of truth (`eslint-config-prettier`) |
-| Unit tests | Jest |
-| End-to-end tests | Playwright, including interactive verification via Playwright MCP during development |
-| Agent enforcement | Cursor agent hooks in `.cursor/hooks.json` (`afterFileEdit` lint/format; `stop` build + full test suite) |
-| Local enforcement | Husky + lint-staged pre-commit hook |
-| CI enforcement | GitHub Actions required status check on every PR (lint, format, type-check, build, unit, E2E) |
-| License | MIT |
+| Concern                      | Choice                                                                                                               |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Backend / CMS                | Payload CMS on Next.js (App Router)                                                                                  |
+| Public + admin hosting       | Vercel (Hobby tier)                                                                                                  |
+| Background monitoring worker | Containerized Node.js on GCP Cloud Run Jobs, triggered by GCP Cloud Scheduler                                        |
+| Database                     | Postgres via Neon (free tier)                                                                                        |
+| UI library                   | Mantine (explicitly not Tailwind CSS)                                                                                |
+| i18n                         | next-intl with locale-prefixed routing (`[locale]` segment)                                                          |
+| Lint / format                | ESLint (`eslint-config-next` + typescript-eslint); Prettier as formatting source of truth (`eslint-config-prettier`) |
+| Unit tests                   | Jest                                                                                                                 |
+| End-to-end tests             | Playwright, including interactive verification via Playwright MCP during development                                 |
+| Agent enforcement            | Cursor agent hooks in `.cursor/hooks.json` (`afterFileEdit` lint/format; `stop` build + full test suite)             |
+| Local enforcement            | Husky + lint-staged pre-commit hook                                                                                  |
+| CI enforcement               | GitHub Actions required status check on every PR (lint, format, type-check, build, unit, E2E)                        |
+| License                      | MIT                                                                                                                  |
 
 ## Spec & Delivery Workflow
 

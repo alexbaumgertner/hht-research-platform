@@ -9,12 +9,12 @@ Locale segment: one of `en` | `de` | `tr` | `ru` | `uk` (next-intl).
 
 ## Pages (UI contract)
 
-| Route | Auth | Behavior |
-| --- | --- | --- |
-| `/{locale}` | Public | Home: list of projects that have ≥1 published digest; link to each project feed |
-| `/{locale}/projects/{slug}` | Public | Chronological digest feed; importance filter control; empty state if no digests |
-| `/{locale}/projects/{slug}/publications/{publicationId}` | Public | Full AI summary sections + original source link |
-| `/admin` (Payload) | Owner | CRUD projects, sources, schedule, pause/resume, email notification toggle |
+| Route                                                    | Auth   | Behavior                                                                        |
+| -------------------------------------------------------- | ------ | ------------------------------------------------------------------------------- |
+| `/{locale}`                                              | Public | Home: list of projects that have ≥1 published digest; link to each project feed |
+| `/{locale}/projects/{slug}`                              | Public | Chronological digest feed; importance filter control; empty state if no digests |
+| `/{locale}/projects/{slug}/publications/{publicationId}` | Public | Full AI summary sections + original source link                                 |
+| `/admin` (Payload)                                       | Owner  | CRUD projects, sources, schedule, pause/resume, email notification toggle       |
 
 Unsupported locales are not offered in the language switcher.
 
@@ -55,6 +55,7 @@ Project metadata for public page.
 ### `GET /api/public/projects/:slug/digests`
 
 **Query**:
+
 - `importance` (optional): `critical` | `high` | `medium` | `low` — when set, only digests that contain ≥1 publication at that level are returned **or** publications within digests are filtered to that level (implementation MUST match FR-012: filtered view shows only that importance; prefer filtering publications in the feed payload).
 
 **Response 200**:
@@ -82,6 +83,7 @@ Project metadata for public page.
 ### `GET /api/public/publications/:id`
 
 **Query**:
+
 - `locale` (optional): `en` | `de` | `tr` | `ru` | `uk` — default `en`. Non-`en` returns cached translation or generates+caches then returns (FR-017).
 
 **Response 200**:

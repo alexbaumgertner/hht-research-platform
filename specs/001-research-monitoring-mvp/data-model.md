@@ -15,21 +15,21 @@ Storage: **Postgres (Neon)** via Payload CMS collections (`@payloadcms/db-postgr
 
 Named research topic area owned by a single admin user for MVP.
 
-| Field | Type | Rules |
-| --- | --- | --- |
-| `id` | UUID / Payload id | System |
-| `slug` | string | Unique; used in public URL `/[locale]/projects/[slug]` |
-| `name` | string | Required |
-| `description` | rich text / textarea | Optional but recommended |
-| `keywords` | string[] | **Required, min 1** to activate monitoring (FR-001) |
-| `schedule` | enum: `daily` \| `weekly` \| `monthly` | Required when monitoring active |
-| `monitoringStatus` | enum: `active` \| `paused` | Default `active` after first activation; pause freezes watermark (FR-022) |
-| `lastSuccessfulRunAt` | datetime \| null | Watermark for “what’s new”; null → first run uses bootstrap lookback |
-| `bootstrapLookbackDays` | number | Default **30**; used only when `lastSuccessfulRunAt` is null |
-| `emailNotificationEnabled` | boolean | Default `false` (FR-015) |
-| `owner` | relationship → User | Payload admin user; email for notifications |
-| `hasPublishedDigest` | boolean (derived or denormalized) | Public home/list includes project only when ≥1 published digest (FR-021) |
-| `createdAt` / `updatedAt` | datetime | System |
+| Field                      | Type                                   | Rules                                                                     |
+| -------------------------- | -------------------------------------- | ------------------------------------------------------------------------- |
+| `id`                       | UUID / Payload id                      | System                                                                    |
+| `slug`                     | string                                 | Unique; used in public URL `/[locale]/projects/[slug]`                    |
+| `name`                     | string                                 | Required                                                                  |
+| `description`              | rich text / textarea                   | Optional but recommended                                                  |
+| `keywords`                 | string[]                               | **Required, min 1** to activate monitoring (FR-001)                       |
+| `schedule`                 | enum: `daily` \| `weekly` \| `monthly` | Required when monitoring active                                           |
+| `monitoringStatus`         | enum: `active` \| `paused`             | Default `active` after first activation; pause freezes watermark (FR-022) |
+| `lastSuccessfulRunAt`      | datetime \| null                       | Watermark for “what’s new”; null → first run uses bootstrap lookback      |
+| `bootstrapLookbackDays`    | number                                 | Default **30**; used only when `lastSuccessfulRunAt` is null              |
+| `emailNotificationEnabled` | boolean                                | Default `false` (FR-015)                                                  |
+| `owner`                    | relationship → User                    | Payload admin user; email for notifications                               |
+| `hasPublishedDigest`       | boolean (derived or denormalized)      | Public home/list includes project only when ≥1 published digest (FR-021)  |
+| `createdAt` / `updatedAt`  | datetime                               | System                                                                    |
 
 **Relationships**: has many `MonitoredSource`, `MonitoringRun`, `Digest`, `Publication`.
 
@@ -44,15 +44,15 @@ Named research topic area owned by a single admin user for MVP.
 
 Configured input attached to one project.
 
-| Field | Type | Rules |
-| --- | --- | --- |
-| `id` | id | System |
-| `project` | relationship → ResearchProject | Required |
-| `type` | enum: `pubmed` \| `clinicaltrials` \| `rss` | Only these three (FR-002) |
-| `label` | string | Optional display name |
-| `rssUrl` | string \| null | Required iff `type=rss`; validated as reachable feed when possible |
-| `enabled` | boolean | Default `true`; disabled sources skipped in runs |
-| `createdAt` / `updatedAt` | datetime | System |
+| Field                     | Type                                        | Rules                                                              |
+| ------------------------- | ------------------------------------------- | ------------------------------------------------------------------ |
+| `id`                      | id                                          | System                                                             |
+| `project`                 | relationship → ResearchProject              | Required                                                           |
+| `type`                    | enum: `pubmed` \| `clinicaltrials` \| `rss` | Only these three (FR-002)                                          |
+| `label`                   | string                                      | Optional display name                                              |
+| `rssUrl`                  | string \| null                              | Required iff `type=rss`; validated as reachable feed when possible |
+| `enabled`                 | boolean                                     | Default `true`; disabled sources skipped in runs                   |
+| `createdAt` / `updatedAt` | datetime                                    | System                                                             |
 
 **Validation**:
 
@@ -65,18 +65,18 @@ Configured input attached to one project.
 
 One execution of the fetch → dedupe → classify → summarize → publish pipeline for a project.
 
-| Field | Type | Rules |
-| --- | --- | --- |
-| `id` | id | System |
-| `project` | relationship → ResearchProject | Required |
-| `status` | enum: `running` \| `completed` \| `completed_partial_failure` \| `failed` | |
-| `triggeredBy` | enum: `schedule` \| `manual` | Manual optional for owner/test |
-| `startedAt` | datetime | Required |
-| `finishedAt` | datetime \| null | Set on terminal states |
-| `sourceResults` | array of objects | Per-source: `{ sourceId, status: success\|failure, error?, fetchedCount, acceptedCount }` |
-| `digest` | relationship → Digest \| null | Set when a non-empty digest was published |
-| `stats` | object | e.g. `{ candidates, deduped, irrelevant, summarized, published }` |
-| `errorSummary` | string \| null | Top-level failure message when `failed` |
+| Field           | Type                                                                      | Rules                                                                                     |
+| --------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `id`            | id                                                                        | System                                                                                    |
+| `project`       | relationship → ResearchProject                                            | Required                                                                                  |
+| `status`        | enum: `running` \| `completed` \| `completed_partial_failure` \| `failed` |                                                                                           |
+| `triggeredBy`   | enum: `schedule` \| `manual`                                              | Manual optional for owner/test                                                            |
+| `startedAt`     | datetime                                                                  | Required                                                                                  |
+| `finishedAt`    | datetime \| null                                                          | Set on terminal states                                                                    |
+| `sourceResults` | array of objects                                                          | Per-source: `{ sourceId, status: success\|failure, error?, fetchedCount, acceptedCount }` |
+| `digest`        | relationship → Digest \| null                                             | Set when a non-empty digest was published                                                 |
+| `stats`         | object                                                                    | e.g. `{ candidates, deduped, irrelevant, summarized, published }`                         |
+| `errorSummary`  | string \| null                                                            | Top-level failure message when `failed`                                                   |
 
 **State transitions**:
 
@@ -98,27 +98,27 @@ One execution of the fetch → dedupe → classify → summarize → publish pip
 
 Distinct research item known to a project (after dedupe).
 
-| Field | Type | Rules |
-| --- | --- | --- |
-| `id` | id | System |
-| `project` | relationship → ResearchProject | Required |
-| `externalIds` | object | `{ pmid?, doi?, nctId?, guid? }` — at least one preferred |
-| `dedupeKey` | string | Stable unique per project (see rules below) |
-| `title` | string | Required |
-| `abstractOrBody` | text \| null | May be empty; summarization notes limited text |
-| `sourceType` | enum: `pubmed` \| `clinicaltrials` \| `rss` | Origin of first accept |
-| `originalUrl` | string | Link to original source (FR-013) |
-| `publishedOrUpdatedAt` | datetime \| null | From source |
-| `relevance` | enum: `pending` \| `relevant` \| `irrelevant` | Binary gate (FR-007) |
-| `importance` | enum: `critical` \| `high` \| `medium` \| `low` \| null | Only when relevant (FR-008) |
-| `summary` | object \| null | `{ objective, methods, results, limitations, whyItMatters }` English canonical |
-| `firstSeenRun` | relationship → MonitoringRun | Run that first accepted it |
-| `createdAt` / `updatedAt` | datetime | System |
+| Field                     | Type                                                    | Rules                                                                          |
+| ------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `id`                      | id                                                      | System                                                                         |
+| `project`                 | relationship → ResearchProject                          | Required                                                                       |
+| `externalIds`             | object                                                  | `{ pmid?, doi?, nctId?, guid? }` — at least one preferred                      |
+| `dedupeKey`               | string                                                  | Stable unique per project (see rules below)                                    |
+| `title`                   | string                                                  | Required                                                                       |
+| `abstractOrBody`          | text \| null                                            | May be empty; summarization notes limited text                                 |
+| `sourceType`              | enum: `pubmed` \| `clinicaltrials` \| `rss`             | Origin of first accept                                                         |
+| `originalUrl`             | string                                                  | Link to original source (FR-013)                                               |
+| `publishedOrUpdatedAt`    | datetime \| null                                        | From source                                                                    |
+| `relevance`               | enum: `pending` \| `relevant` \| `irrelevant`           | Binary gate (FR-007)                                                           |
+| `importance`              | enum: `critical` \| `high` \| `medium` \| `low` \| null | Only when relevant (FR-008)                                                    |
+| `summary`                 | object \| null                                          | `{ objective, methods, results, limitations, whyItMatters }` English canonical |
+| `firstSeenRun`            | relationship → MonitoringRun                            | Run that first accepted it                                                     |
+| `createdAt` / `updatedAt` | datetime                                                | System                                                                         |
 
 **Dedupe key** (FR-006 / assumptions):
 
-1. DOI (normalized) if present  
-2. else PMID / NCT ID / RSS GUID  
+1. DOI (normalized) if present
+2. else PMID / NCT ID / RSS GUID
 3. else `normalize(title) + sourceType` (or project-scoped title hash)
 
 Unique constraint: `(project, dedupeKey)`.
@@ -129,14 +129,14 @@ Unique constraint: `(project, dedupeKey)`.
 
 Published bundle of qualifying publications from one monitoring run.
 
-| Field | Type | Rules |
-| --- | --- | --- |
-| `id` | id | System |
-| `project` | relationship → ResearchProject | Required |
-| `run` | relationship → MonitoringRun | Required, 1:1 for published digests |
-| `publishedAt` | datetime | Chronological feed order |
-| `publications` | relationship[] → Publication | Non-empty (FR-010: never publish empty) |
-| `createdAt` / `updatedAt` | datetime | System |
+| Field                     | Type                           | Rules                                   |
+| ------------------------- | ------------------------------ | --------------------------------------- |
+| `id`                      | id                             | System                                  |
+| `project`                 | relationship → ResearchProject | Required                                |
+| `run`                     | relationship → MonitoringRun   | Required, 1:1 for published digests     |
+| `publishedAt`             | datetime                       | Chronological feed order                |
+| `publications`            | relationship[] → Publication   | Non-empty (FR-010: never publish empty) |
+| `createdAt` / `updatedAt` | datetime                       | System                                  |
 
 **Rules**:
 
@@ -149,13 +149,13 @@ Published bundle of qualifying publications from one monitoring run.
 
 Cached non-English rendering of canonical English AI content.
 
-| Field | Type | Rules |
-| --- | --- | --- |
-| `id` | id | System |
-| `publication` | relationship → Publication | Required (MVP: translate publication summaries) |
-| `locale` | enum: `de` \| `tr` \| `ru` \| `uk` | Not `en` (canonical is English) |
-| `fields` | object | Mirrored summary sections in target locale |
-| `createdAt` / `updatedAt` | datetime | System |
+| Field                     | Type                               | Rules                                           |
+| ------------------------- | ---------------------------------- | ----------------------------------------------- |
+| `id`                      | id                                 | System                                          |
+| `publication`             | relationship → Publication         | Required (MVP: translate publication summaries) |
+| `locale`                  | enum: `de` \| `tr` \| `ru` \| `uk` | Not `en` (canonical is English)                 |
+| `fields`                  | object                             | Mirrored summary sections in target locale      |
+| `createdAt` / `updatedAt` | datetime                           | System                                          |
 
 Unique constraint: `(publication, locale)`. Created on first request; reused thereafter (FR-017).
 
@@ -165,11 +165,11 @@ Unique constraint: `(publication, locale)`. Created on first request; reused the
 
 Existing Payload auth collection; MVP owner is an admin user.
 
-| Field | Usage |
-| --- | --- |
-| `email` | Login + digest notification recipient |
-| `password` | Admin auth |
-| `roles` | Include admin/owner capability for write ops |
+| Field      | Usage                                        |
+| ---------- | -------------------------------------------- |
+| `email`    | Login + digest notification recipient        |
+| `password` | Admin auth                                   |
+| `roles`    | Include admin/owner capability for write ops |
 
 No public end-user registration (FR-014).
 
@@ -183,12 +183,12 @@ Project `keywords` are combined with **OR** when querying sources (FR-001). Clas
 
 ## Public visibility rules
 
-| Surface | Rule |
-| --- | --- |
-| Home / project list | Projects with ≥1 published Digest only |
-| Project feed URL | Readable without auth; empty state allowed if slug known |
-| Importance filter | Client/server filter on publication `importance` |
-| Write / pause / sources / schedule | Admin auth only |
+| Surface                            | Rule                                                     |
+| ---------------------------------- | -------------------------------------------------------- |
+| Home / project list                | Projects with ≥1 published Digest only                   |
+| Project feed URL                   | Readable without auth; empty state allowed if slug known |
+| Importance filter                  | Client/server filter on publication `importance`         |
+| Write / pause / sources / schedule | Admin auth only                                          |
 
 ---
 

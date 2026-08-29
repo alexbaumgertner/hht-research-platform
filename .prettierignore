@@ -10,6 +10,6 @@ yarn.lock
 playwright-report/
 test-results/
 media/
-*.md
+#*.md
 **/next-env.d.ts
 **/payload-types.ts

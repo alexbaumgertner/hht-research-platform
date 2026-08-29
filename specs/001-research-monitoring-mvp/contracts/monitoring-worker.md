@@ -77,7 +77,7 @@ type Candidate = {
   abstractOrBody?: string;
   originalUrl: string;
   publishedOrUpdatedAt?: Date;
-  sourceType: "pubmed" | "clinicaltrials" | "rss";
+  sourceType: 'pubmed' | 'clinicaltrials' | 'rss';
 };
 
 interface SourceAdapter {
@@ -98,7 +98,7 @@ Adapters MUST throw/return typed errors so the runner can mark that source faile
 
 ## Exit codes
 
-| Code | Meaning |
-| --- | --- |
-| `0` | Job finished; individual project/run failures recorded in DB |
+| Code     | Meaning                                                                    |
+| -------- | -------------------------------------------------------------------------- |
+| `0`      | Job finished; individual project/run failures recorded in DB               |
 | non-zero | Infrastructure failure (DB unreachable, missing env) — Scheduler may retry |

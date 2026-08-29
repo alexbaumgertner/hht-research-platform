@@ -17,12 +17,12 @@ flowchart LR
   Web --> Neon[(Neon Postgres)]
 ```
 
-| Piece | Role |
-| --- | --- |
-| **Vercel (`apps/web`)** | Payload CMS + public feed. Owns Neon Postgres via `DATABASE_URL`. |
+| Piece                             | Role                                                                                         |
+| --------------------------------- | -------------------------------------------------------------------------------------------- |
+| **Vercel (`apps/web`)**           | Payload CMS + public feed. Owns Neon Postgres via `DATABASE_URL`.                            |
 | **Cloud Run Job (`apps/worker`)** | One-shot pipeline: fetch → dedupe → classify → summarize → publish digests. Exits when done. |
-| **Cloud Scheduler** | Invokes the job hourly. **One** Scheduler job only. |
-| **Shared secret** | Same `PAYLOAD_API_KEY` on Vercel and on the job. Worker sends `X-Payload-API-Key`. |
+| **Cloud Scheduler**               | Invokes the job hourly. **One** Scheduler job only.                                          |
+| **Shared secret**                 | Same `PAYLOAD_API_KEY` on Vercel and on the job. Worker sends `X-Payload-API-Key`.           |
 
 Important:
 
@@ -69,20 +69,20 @@ gcloud services enable \
 
 ### Shared with Vercel (must match Production exactly)
 
-| Variable | Required | Notes |
-| --- | --- | --- |
-| `PUBLIC_SITE_URL` | Yes | Same as Vercel. Example: `https://your-app.vercel.app`. No trailing slash. |
-| `PAYLOAD_API_KEY` | Yes | Same secret as Vercel. Worker sends it as `X-Payload-API-Key`. |
+| Variable          | Required | Notes                                                                      |
+| ----------------- | -------- | -------------------------------------------------------------------------- |
+| `PUBLIC_SITE_URL` | Yes      | Same as Vercel. Example: `https://your-app.vercel.app`. No trailing slash. |
+| `PAYLOAD_API_KEY` | Yes      | Same secret as Vercel. Worker sends it as `X-Payload-API-Key`.             |
 
 ### Worker-only (set on the Cloud Run Job)
 
-| Variable | Required | Notes |
-| --- | --- | --- |
-| `AI_GATEWAY_API_KEY` | Yes | Vercel AI Gateway key. Classify/summarize fail without it. |
-| `AI_GATEWAY_MODEL` | No | Default `openai/gpt-4o-mini`. |
-| `RESEND_API_KEY` | No | If unset, digest email is skipped. |
-| `RESEND_FROM_EMAIL` | No | Default `onboarding@resend.dev`. |
-| `BATCH_SIZE_PER_SOURCE` | No | Default `50`. |
+| Variable                | Required | Notes                                                      |
+| ----------------------- | -------- | ---------------------------------------------------------- |
+| `AI_GATEWAY_API_KEY`    | Yes      | Vercel AI Gateway key. Classify/summarize fail without it. |
+| `AI_GATEWAY_MODEL`      | No       | Default `openai/gpt-4o-mini`.                              |
+| `RESEND_API_KEY`        | No       | If unset, digest email is skipped.                         |
+| `RESEND_FROM_EMAIL`     | No       | Default `onboarding@resend.dev`.                           |
+| `BATCH_SIZE_PER_SOURCE` | No       | Default `50`.                                              |
 
 `BOOTSTRAP_LOOKBACK_DAYS` in `.env.example` is **not** read by the worker process; lookback comes from each project's `bootstrapLookbackDays` field (default 30).
 
@@ -258,21 +258,21 @@ gcloud run jobs execute "$JOB_NAME" --region="$REGION" --wait
 
 ### Common failures
 
-| Symptom | Likely cause |
-| --- | --- |
-| Job exits non-zero immediately | Missing `PUBLIC_SITE_URL` or `PAYLOAD_API_KEY` |
-| HTTP 401 / access denied from Payload | API key mismatch between Vercel and the job |
-| Fetch works but classify/summarize errors | Missing or invalid `AI_GATEWAY_API_KEY` |
-| Wrong host / redirects / empty responses | Trailing slash on `PUBLIC_SITE_URL`, or pointing at Preview instead of Production |
-| Scheduler succeeds but job never runs | Invoker SA missing `roles/run.invoker` on the job, or OIDC used instead of OAuth |
-| No email | `RESEND_API_KEY` unset, or project notification disabled in Admin |
+| Symptom                                   | Likely cause                                                                      |
+| ----------------------------------------- | --------------------------------------------------------------------------------- |
+| Job exits non-zero immediately            | Missing `PUBLIC_SITE_URL` or `PAYLOAD_API_KEY`                                    |
+| HTTP 401 / access denied from Payload     | API key mismatch between Vercel and the job                                       |
+| Fetch works but classify/summarize errors | Missing or invalid `AI_GATEWAY_API_KEY`                                           |
+| Wrong host / redirects / empty responses  | Trailing slash on `PUBLIC_SITE_URL`, or pointing at Preview instead of Production |
+| Scheduler succeeds but job never runs     | Invoker SA missing `roles/run.invoker` on the job, or OIDC used instead of OAuth  |
+| No email                                  | `RESEND_API_KEY` unset, or project notification disabled in Admin                 |
 
 ### Exit codes
 
-| Code | Meaning |
-| --- | --- |
-| `0` | Job finished. Per-project failures are recorded in CMS; Scheduler should not treat this as infra failure. |
-| Non-zero | Infrastructure / missing env. Scheduler may retry. |
+| Code     | Meaning                                                                                                   |
+| -------- | --------------------------------------------------------------------------------------------------------- |
+| `0`      | Job finished. Per-project failures are recorded in CMS; Scheduler should not treat this as infra failure. |
+| Non-zero | Infrastructure / missing env. Scheduler may retry.                                                        |
 
 Re-runs are idempotent on publication `dedupeKey`. Pausing a project in Admin skips it without advancing `lastSuccessfulRunAt`.
 

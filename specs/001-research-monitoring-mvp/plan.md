@@ -30,19 +30,19 @@ Build the first end-to-end research monitoring platform: owner configures a topi
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+_GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 
-| Principle | Status | Notes |
-| --- | --- | --- |
-| I. Spec-First, Event-Driven | PASS | Spec + plan + contracts before implementation; stack choices already in constitution baseline — new product ADRs only if we diverge |
-| II. Ruthless Scope Discipline | PASS | FR-019 exclusions honored; ≤3 sources; no RAG/MCP/multi-model/collab |
-| III. Free-Tier-First | PASS | Neon, Vercel Hobby, Cloud Run free tier, one Scheduler job, Resend free, AI Gateway free credits; on-demand translation |
-| IV. Public by Default | PASS | Public read APIs/pages; write via Payload admin only |
-| V. Maintainability / topic-agnostic | PASS | Domain entities have no HHT hardcoding |
-| VI. i18n first-class | PASS | en/de/tr/ru/uk via next-intl; on-demand content translation |
-| VII. Domain service boundaries | PASS | `apps/web` (project mgmt + public UI) vs `apps/worker` (monitoring run); shared Postgres + REST |
-| VIII. Portable by Design | PASS | Worker is Docker; Payload/Postgres portable off Vercel/GCP |
-| IX. Quality gates | PASS | Jest + Playwright + ESLint/Prettier/tsc/build in hooks, Husky, CI |
+| Principle                           | Status | Notes                                                                                                                               |
+| ----------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| I. Spec-First, Event-Driven         | PASS   | Spec + plan + contracts before implementation; stack choices already in constitution baseline — new product ADRs only if we diverge |
+| II. Ruthless Scope Discipline       | PASS   | FR-019 exclusions honored; ≤3 sources; no RAG/MCP/multi-model/collab                                                                |
+| III. Free-Tier-First                | PASS   | Neon, Vercel Hobby, Cloud Run free tier, one Scheduler job, Resend free, AI Gateway free credits; on-demand translation             |
+| IV. Public by Default               | PASS   | Public read APIs/pages; write via Payload admin only                                                                                |
+| V. Maintainability / topic-agnostic | PASS   | Domain entities have no HHT hardcoding                                                                                              |
+| VI. i18n first-class                | PASS   | en/de/tr/ru/uk via next-intl; on-demand content translation                                                                         |
+| VII. Domain service boundaries      | PASS   | `apps/web` (project mgmt + public UI) vs `apps/worker` (monitoring run); shared Postgres + REST                                     |
+| VIII. Portable by Design            | PASS   | Worker is Docker; Payload/Postgres portable off Vercel/GCP                                                                          |
+| IX. Quality gates                   | PASS   | Jest + Playwright + ESLint/Prettier/tsc/build in hooks, Husky, CI                                                                   |
 
 **Post–Phase 1 re-check**: Design artifacts (`research.md`, `data-model.md`, `contracts/*`, `quickstart.md`) stay within the gates above. No unjustified violations. Complexity Tracking left empty.
 

@@ -18,7 +18,7 @@
 - Q: How should anonymous visitors discover a research project’s public digest URL in the MVP? → A: Shareable project URL plus a simple public list/home of projects that have public digests
 - Q: Can the project owner pause monitoring for a project without deleting the project or its published digests? → A: Owner can pause and resume monitoring; public digests stay visible; watermark frozen while paused
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
 ### User Story 1 - Read a public project digest feed (Priority: P1)
 
@@ -121,7 +121,7 @@ The public UI is available in English, German, Turkish, Russian, and Ukrainian. 
 - A prior run failed or was skipped: the next successful run still uses “since last successful run,” so the gap is included once (subject to batch limits), not permanently lost to a short fixed window.
 - Owner pauses monitoring: no new scheduled runs; existing digests stay on the public feed and list; resume continues from the frozen watermark.
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
@@ -157,7 +157,7 @@ The public UI is available in English, German, Turkish, Russian, and Ukrainian. 
 - **Digest**: The published bundle of qualifying publications from one monitoring run for a project, ordered in the public chronological feed.
 - **Content Translation**: A derived, cached rendering of canonical English AI content in a supported non-English locale, created on first request.
 
-## Success Criteria *(mandatory)*
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 

@@ -9,12 +9,15 @@ HHT Research Platform is an open-source tool that automatically monitors PubMed,
 HHT Research Platform ist ein Open-Source-Tool, das automatisch PubMed-, ClinicalTrials.gov- und RSS-Quellen zu einem von Ihnen festgelegten Forschungsthema überwacht und neue Erkenntnisse per KI zusammenfasst und in einem öffentlichen Digest-Feed einordnet — ganz ohne Registrierung. Die Plattform selbst ist themenunabhängig; das erste Projekt begleitet die Hereditäre Hämorrhagische Teleangiektasie (HHT) für die Cure-HHT-Community, mit einer Oberfläche auf Englisch, Deutsch, Türkisch, Russisch und Ukrainisch.
 
 ## TR
+
 HHT Research Platform, sizin belirlediğiniz bir araştırma konusu için PubMed, ClinicalTrials.gov ve RSS kaynaklarını otomatik olarak izleyen; yeni bulguları yapay zekâyla özetleyip önem derecesine göre sıralayarak herkese açık bir bültende yayınlayan açık kaynaklı bir araçtır — kayıt gerektirmez. Platformun kendisi konudan bağımsızdır; ilk proje, Cure HHT topluluğu için Herediter Hemorajik Telenjiektazi'yi (HHT) izlemektedir ve arayüz İngilizce, Almanca, Türkçe, Rusça ve Ukraynaca olarak sunulmaktadır.
 
 ## RU
+
 HHT Research Platform — open-source инструмент, который автоматически отслеживает источники PubMed, ClinicalTrials.gov и RSS по заданной вами теме, суммаризирует новые находки через AI и ранжирует их по важности в открытой ленте дайджестов — без регистрации. Сама платформа не привязана к конкретной теме; первый проект на ней — мониторинг наследственной геморрагической телеангиэктазии (HHT) для сообщества Cure HHT, с интерфейсом на английском, немецком, турецком, русском и украинском языках.
 
 ## UK
+
 HHT Research Platform — це інструмент із відкритим кодом, який автоматично відстежує джерела PubMed, ClinicalTrials.gov та RSS за темою, яку ви визначаєте, узагальнює нові знахідки за допомогою AI і ранжує їх за важливістю у відкритій стрічці дайджестів — без реєстрації. Сама платформа не прив'язана до конкретної теми; перший проєкт на ній — моніторинг спадкової геморагічної телеангіектазії (HHT) для спільноти Cure HHT, з інтерфейсом англійською, німецькою, турецькою, російською та українською мовами.
 
 ## Short
