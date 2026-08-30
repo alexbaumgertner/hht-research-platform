@@ -11,6 +11,10 @@ const dirname = path.dirname(__filename);
 
 const nextConfig: NextConfig = {
   transpilePackages: ['@hht/shared'],
+  // Required on Next.js < 16.3 so next-intl can read [locale] via next/root-params
+  experimental: {
+    rootParams: true,
+  },
   images: {
     localPatterns: [
       {

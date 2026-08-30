@@ -1,4 +1,4 @@
-import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 import { Stack, Text, Title } from '@mantine/core';
 import { Suspense } from 'react';
 
@@ -29,7 +29,6 @@ async function fetchMaterials(baseUrl: string, slug: string, locale: string) {
 
 export default async function ProjectFeedPage({ params }: Props) {
   const { locale, slug } = await params;
-  setRequestLocale(locale);
   const t = await getTranslations('Project');
   const baseUrl = getPublicSiteUrl();
 

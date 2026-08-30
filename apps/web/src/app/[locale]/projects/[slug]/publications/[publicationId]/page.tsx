@@ -1,4 +1,4 @@
-import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 import { Anchor, Stack, Text, Title } from '@mantine/core';
 import { sanitizeHttpUrl } from '@hht/shared';
 import { TextLink } from '@/components/TextLink';
@@ -35,7 +35,6 @@ async function fetchPublication(baseUrl: string, id: string, locale: string) {
 
 export default async function PublicationPage({ params }: Props) {
   const { locale, slug, publicationId } = await params;
-  setRequestLocale(locale);
   const t = await getTranslations('Publication');
   const baseUrl = getPublicSiteUrl();
   const pub = await fetchPublication(baseUrl, publicationId, locale);

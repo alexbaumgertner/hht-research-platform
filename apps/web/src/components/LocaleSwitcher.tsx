@@ -2,7 +2,7 @@
 
 import { Select } from '@mantine/core';
 import { useLocale, useTranslations } from 'next-intl';
-import { usePathname, useRouter } from '@/i18n/routing';
+import { usePathname, useRouter } from '@/i18n/navigation';
 import { PUBLIC_LOCALES } from '@hht/shared';
 
 const LABELS: Record<string, string> = {

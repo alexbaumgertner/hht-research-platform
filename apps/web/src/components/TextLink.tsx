@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { Anchor, type AnchorProps } from '@mantine/core';
-import { Link } from '@/i18n/routing';
+import { Link } from '@/i18n/navigation';
 
 type TextLinkProps = Omit<AnchorProps, 'component' | 'href'> & {
   href: string;

@@ -1,13 +1,12 @@
 import { NextIntlClientProvider } from 'next-intl';
-import { getMessages, setRequestLocale } from 'next-intl/server';
-import { notFound } from 'next/navigation';
+import { getLocale, getMessages } from 'next-intl/server';
 import Script from 'next/script';
 import { Container, Group, Stack, Title, mantineHtmlProps } from '@mantine/core';
 import { IBM_Plex_Sans } from 'next/font/google';
-import { PUBLIC_LOCALES, type Locale } from '@hht/shared';
 
 import { Providers } from '../providers';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher';
+import { routing } from '@/i18n/routing';
 
 const ibmPlexSans = IBM_Plex_Sans({
   subsets: ['latin', 'cyrillic'],
@@ -25,20 +24,15 @@ const MANTINE_COLOR_SCHEME_SCRIPT = `try {
 
 type Props = {
   children: React.ReactNode;
-  params: Promise<{ locale: string }>;
 };
 
 export function generateStaticParams() {
-  return PUBLIC_LOCALES.map((locale) => ({ locale }));
+  return routing.locales.map((locale) => ({ locale }));
 }
 
-export default async function LocaleLayout({ children, params }: Props) {
-  const { locale } = await params;
-  if (!PUBLIC_LOCALES.includes(locale as Locale)) {
-    notFound();
-  }
-
-  setRequestLocale(locale);
+export default async function LocaleLayout({ children }: Props) {
+  // Locale comes from next/root-params via i18n/request.ts (no setRequestLocale).
+  const locale = await getLocale();
   const messages = await getMessages();
 
   return (
