@@ -32,8 +32,11 @@ async function backfill() {
       const publishedAt = digest.publishedAt;
       if (!publishedAt) continue;
 
-      const pubIds = (digest.publications || [])
-        .map((p) => (typeof p === 'object' && p && 'id' in p ? p.id : p))
+      // `ensure-schema` deletes the generated payload-types before `next build`,
+      // so `digest.publications` is loosely typed there — annotate explicitly.
+      const rawPubs = (digest.publications ?? []) as Array<number | { id?: number }>;
+      const pubIds = rawPubs
+        .map((p) => (typeof p === 'object' && p !== null ? p.id : p))
         .filter((id): id is number => typeof id === 'number');
 
       for (const pubId of pubIds) {
