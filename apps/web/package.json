@@ -27,6 +27,7 @@
     "@payloadcms/next": "^3.49.0",
     "@payloadcms/richtext-lexical": "^3.49.0",
     "@payloadcms/ui": "^3.49.0",
+    "@tabler/icons-react": "^3.46.0",
     "ai": "^7.0.79",
     "cross-env": "^7.0.3",
     "graphql": "^16.10.0",

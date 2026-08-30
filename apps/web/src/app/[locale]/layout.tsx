@@ -1,7 +1,7 @@
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import { Container, Group, Stack, Title } from '@mantine/core';
+import { ColorSchemeScript, Container, Group, Stack, Title } from '@mantine/core';
 import { IBM_Plex_Sans } from 'next/font/google';
 import { PUBLIC_LOCALES, type Locale } from '@hht/shared';
 
@@ -34,12 +34,15 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   return (
     <html lang={locale} className={ibmPlexSans.className}>
-      <body style={{ margin: 0, minHeight: '100vh', background: '#f6f8f7' }}>
+      <head>
+        <ColorSchemeScript defaultColorScheme="auto" />
+      </head>
+      <body style={{ margin: 0, minHeight: '100vh', background: 'var(--mantine-color-body)' }}>
         <Providers>
           <NextIntlClientProvider messages={messages}>
             <Container size="md" py="xl">
               <Stack gap="lg">
-                <Group justify="space-between" align="flex-end">
+                <Group justify="space-between" align="flex-end" wrap="wrap">
                   <Title order={3}>Research Monitoring</Title>
                   <LocaleSwitcher />
                 </Group>

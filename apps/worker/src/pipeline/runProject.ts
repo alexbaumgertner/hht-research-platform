@@ -29,17 +29,18 @@ function shouldTranslateOnPublish(): boolean {
 
 async function pregenerateTranslations(
   cms: CmsClient,
-  publications: Array<{ id: string | number; summary: Summary }>,
+  publications: Array<{ id: string | number; title: string; summary: Summary }>,
 ): Promise<void> {
   if (!shouldTranslateOnPublish()) return;
 
   for (const pub of publications) {
     for (const locale of CONTENT_TRANSLATION_LOCALES) {
       try {
-        const fields = await translateSummary(pub.summary, locale);
+        const { title, ...fields } = await translateSummary(pub.title, pub.summary, locale);
         await cms.createContentTranslation({
           publication: pub.id,
           locale,
+          title,
           fields,
         });
       } catch (err) {
@@ -93,7 +94,7 @@ export async function runProject(
     published: 0,
   };
 
-  const qualifying: Array<{ id: string | number; summary: Summary }> = [];
+  const qualifying: Array<{ id: string | number; title: string; summary: Summary }> = [];
   const since = project.lastSuccessfulRunAt ? new Date(project.lastSuccessfulRunAt) : null;
 
   for (const source of project.sources.filter((s) => s.enabled)) {
@@ -137,6 +138,7 @@ export async function runProject(
             publishedOrUpdatedAt: candidate.publishedOrUpdatedAt?.toISOString(),
             relevance: 'irrelevant',
             firstSeenRun: runId,
+            monitoredSource: source.id,
           });
           continue;
         }
@@ -161,8 +163,9 @@ export async function runProject(
           importance,
           summary,
           firstSeenRun: runId,
+          monitoredSource: source.id,
         });
-        qualifying.push({ id: createdPub.doc.id, summary });
+        qualifying.push({ id: createdPub.doc.id, title: candidate.title, summary });
         accepted += 1;
       }
 

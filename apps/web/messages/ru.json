@@ -6,17 +6,33 @@
     "latestDigest": "Последний дайджест"
   },
   "Project": {
-    "feedTitle": "Лента дайджестов",
-    "empty": "Для этого проекта ещё нет опубликованных дайджестов.",
-    "filterLabel": "Важность",
-    "filterAll": "Все",
-    "importance": {
-      "critical": "Критическая",
-      "high": "Высокая",
-      "medium": "Средняя",
-      "low": "Низкая"
-    },
+    "feedTitle": "Материалы",
+    "empty": "Для этого проекта ещё ничего не опубликовано.",
     "backHome": "Все проекты"
+  },
+  "Materials": {
+    "badge": {
+      "pubmed": "PubMed",
+      "trials": "Клинические исследования",
+      "news": "Новости",
+      "guideline": "Рекомендации",
+      "social": "Соцсети",
+      "unknown": "Другое"
+    },
+    "highImportance": "Высокая важность",
+    "emptyProject": "Для этого проекта ещё ничего не опубликовано.",
+    "noMatches": "Нет материалов, подходящих под фильтры.",
+    "clearFilters": "Сбросить фильтры",
+    "loadError": "Не удалось загрузить материалы. Попробуйте ещё раз.",
+    "retry": "Повторить",
+    "search": "Поиск материалов",
+    "searchPlaceholder": "Поиск по заголовку или резюме",
+    "sourceFilter": "Источники",
+    "importanceToggle": "Только высокая важность",
+    "visibleCount": "{count, plural, =0 {Нет материалов} one {# материал} few {# материала} many {# материалов} other {# материала}}",
+    "fallbackNote": "Показано на английском",
+    "untitledPlaceholder": "Материал без названия",
+    "opensInNewTab": "(открывается в новой вкладке)"
   },
   "Publication": {
     "objective": "Цель",

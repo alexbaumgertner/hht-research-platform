@@ -28,9 +28,9 @@ Monorepo: `apps/web/` (UI, Payload, public API), `apps/worker/` (pipeline), `pac
 
 **Purpose**: New dependency and shared presentation types/copy so later phases share one vocabulary
 
-- [ ] T001 Add `@tabler/icons-react` as a dependency in `apps/web/package.json` and install from the repo root (`pnpm install`)
-- [ ] T002 [P] Define `MaterialSource` (`pubmed` | `trials` | `news` | `guideline` | `social`), `DisplayImportance` (`normal` | `high`), `DisplayCategory` (`news` | `guideline` | `social`), and the `Material` view-model type plus the R3 resolution table constants in `apps/web/src/lib/materials.ts`
-- [ ] T003 [P] Add a `Materials` message namespace (badge labels, high-importance label, empty-project, no-matches, load-error, search, source-filter, importance-toggle, visible-count, fallback-note, untitled-placeholder) using the reader-facing word "material" — never "publication" — in `apps/web/messages/en.json`, `apps/web/messages/de.json`, `apps/web/messages/tr.json`, `apps/web/messages/ru.json`, and `apps/web/messages/uk.json`
+- [x] T001 Add `@tabler/icons-react` as a dependency in `apps/web/package.json` and install from the repo root (`pnpm install`)
+- [x] T002 [P] Define `MaterialSource` (`pubmed` | `trials` | `news` | `guideline` | `social`), `DisplayImportance` (`normal` | `high`), `DisplayCategory` (`news` | `guideline` | `social`), and the `Material` view-model type plus the R3 resolution table constants in `apps/web/src/lib/materials.ts`
+- [x] T003 [P] Add a `Materials` message namespace (badge labels, high-importance label, empty-project, no-matches, load-error, search, source-filter, importance-toggle, visible-count, fallback-note, untitled-placeholder) using the reader-facing word "material" — never "publication" — in `apps/web/messages/en.json`, `apps/web/messages/de.json`, `apps/web/messages/tr.json`, `apps/web/messages/ru.json`, and `apps/web/messages/uk.json`
 
 ---
 
@@ -40,20 +40,20 @@ Monorepo: `apps/web/` (UI, Payload, public API), `apps/worker/` (pipeline), `pac
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 [P] Add optional `displayCategory` select (`news` | `guideline` | `social`) to `apps/web/src/collections/MonitoredSources.ts`, shown in admin only when `type === 'rss'`
-- [ ] T005 [P] Add optional `monitoredSource` relationship (→ `monitored-sources`) and system-managed, admin-read-only `feedPublishedAt` date to `apps/web/src/collections/Publications.ts`
-- [ ] T006 [P] Add optional sibling `title` text field to `apps/web/src/collections/ContentTranslations.ts` (alongside the existing `fields` group)
-- [ ] T007 Generate Payload types after T004–T006 via `pnpm --filter @hht/web generate:types` (updates `apps/web/src/payload-types.ts`)
-- [ ] T008 Add `stampFeedPublishedAt(doc, req)` in `apps/web/src/collections/digestHooks.ts` and call it from the existing `afterChange` create hook in `apps/web/src/collections/Digests.ts`, sharing `req` the same way `hasPublishedDigest` already does so Vercel Hobby does not 504
-- [ ] T009 [P] Add unit tests for `stampFeedPublishedAt` id extraction and no-op-when-unset behavior in `apps/web/src/collections/digestHooks.test.ts`
-- [ ] T010 Write an idempotent backfill that sets `feedPublishedAt = digest.publishedAt` only when unset, for every publication already listed on a digest, in `apps/web/src/scripts/backfill-feed-published-at.ts` (one log line per project)
-- [ ] T011 [P] Add `<ColorSchemeScript defaultColorScheme="auto" />` to the document head in `apps/web/src/app/[locale]/layout.tsx`, set `MantineProvider defaultColorScheme="auto"` in `apps/web/src/app/providers.tsx`, and replace the hardcoded `body` background `#f6f8f7` with a Mantine theme token
-- [ ] T012 Implement `resolveSource`, `collapseImportance`, `resolveLocalizedContent`, `placeholderTitle`, and `toMaterial` in `apps/web/src/lib/materials.ts` per `data-model.md` and `research.md` R3/R4/R5/R11 (unrecognised `sourceType` → neutral fallback; empty RSS category → `news`; missing date → `null`; empty title → source+date placeholder)
-- [ ] T013 [P] Add Jest coverage for the R3 badge table (five outcomes + unrecognised fallback), importance collapse (`critical`/`high` → `high`; `medium`/`low`/`null` → `normal`), locale/title/summary fallback (hit, miss, partial miss), and untitled placeholder in `apps/web/src/lib/materials.test.ts`
-- [ ] T014 Implement `GET` in `apps/web/src/app/api/public/projects/[slug]/materials/route.ts` per `contracts/materials-api.md`: public, `locale` query default `en`, only rows with `feedPublishedAt` set, `toMaterial` mapping, sort `date` descending with `null` last, `404` for unknown slug; throw/non-OK on fetch failure (do not swallow to `[]`)
-- [ ] T015 Delete the unused public route `apps/web/src/app/api/public/projects/[slug]/digests/route.ts` (Payload `POST /api/digests` is a different route and must stay)
-- [ ] T016 Retarget `apps/web/tests/e2e/monitoring-digest.spec.ts` from `GET /api/public/projects/:slug/digests` to `GET /api/public/projects/:slug/materials` and assert a `docs` array
-- [ ] T017 Thread `monitoredSource: source.id` into both `cms.createPublication(...)` calls in `apps/worker/src/pipeline/runProject.ts`
+- [x] T004 [P] Add optional `displayCategory` select (`news` | `guideline` | `social`) to `apps/web/src/collections/MonitoredSources.ts`, shown in admin only when `type === 'rss'`
+- [x] T005 [P] Add optional `monitoredSource` relationship (→ `monitored-sources`) and system-managed, admin-read-only `feedPublishedAt` date to `apps/web/src/collections/Publications.ts`
+- [x] T006 [P] Add optional sibling `title` text field to `apps/web/src/collections/ContentTranslations.ts` (alongside the existing `fields` group)
+- [x] T007 Generate Payload types after T004–T006 via `pnpm --filter @hht/web generate:types` (updates `apps/web/src/payload-types.ts`)
+- [x] T008 Add `stampFeedPublishedAt(doc, req)` in `apps/web/src/collections/digestHooks.ts` and call it from the existing `afterChange` create hook in `apps/web/src/collections/Digests.ts`, sharing `req` the same way `hasPublishedDigest` already does so Vercel Hobby does not 504
+- [x] T009 [P] Add unit tests for `stampFeedPublishedAt` id extraction and no-op-when-unset behavior in `apps/web/src/collections/digestHooks.test.ts`
+- [x] T010 Write an idempotent backfill that sets `feedPublishedAt = digest.publishedAt` only when unset, for every publication already listed on a digest, in `apps/web/src/scripts/backfill-feed-published-at.ts` (one log line per project)
+- [x] T011 [P] Add `<ColorSchemeScript defaultColorScheme="auto" />` to the document head in `apps/web/src/app/[locale]/layout.tsx`, set `MantineProvider defaultColorScheme="auto"` in `apps/web/src/app/providers.tsx`, and replace the hardcoded `body` background `#f6f8f7` with a Mantine theme token
+- [x] T012 Implement `resolveSource`, `collapseImportance`, `resolveLocalizedContent`, `placeholderTitle`, and `toMaterial` in `apps/web/src/lib/materials.ts` per `data-model.md` and `research.md` R3/R4/R5/R11 (unrecognised `sourceType` → neutral fallback; empty RSS category → `news`; missing date → `null`; empty title → source+date placeholder)
+- [x] T013 [P] Add Jest coverage for the R3 badge table (five outcomes + unrecognised fallback), importance collapse (`critical`/`high` → `high`; `medium`/`low`/`null` → `normal`), locale/title/summary fallback (hit, miss, partial miss), and untitled placeholder in `apps/web/src/lib/materials.test.ts`
+- [x] T014 Implement `GET` in `apps/web/src/app/api/public/projects/[slug]/materials/route.ts` per `contracts/materials-api.md`: public, `locale` query default `en`, only rows with `feedPublishedAt` set, `toMaterial` mapping, sort `date` descending with `null` last, `404` for unknown slug; throw/non-OK on fetch failure (do not swallow to `[]`)
+- [x] T015 Delete the unused public route `apps/web/src/app/api/public/projects/[slug]/digests/route.ts` (Payload `POST /api/digests` is a different route and must stay)
+- [x] T016 Retarget `apps/web/tests/e2e/monitoring-digest.spec.ts` from `GET /api/public/projects/:slug/digests` to `GET /api/public/projects/:slug/materials` and assert a `docs` array
+- [x] T017 Thread `monitoredSource: source.id` into both `cms.createPublication(...)` calls in `apps/worker/src/pipeline/runProject.ts`
 
 **Checkpoint**: Schema, gate, mapping, materials endpoint, and source-link are in place — user story UI can begin
 
@@ -69,17 +69,17 @@ Monorepo: `apps/web/` (UI, Payload, public API), `apps/worker/` (pipeline), `pac
 
 > Write these first; they MUST fail against the current digest-grouped page
 
-- [ ] T018 [P] [US1] Extend `apps/web/src/scripts/seed-public-feed.ts` so `hht-research` has at least one published material per source (`pubmed`, `trials`, `news`, `guideline`, `social`) — including RSS sources tagged `guideline` and `social` — plus one `high` and one `normal` importance, one with no summary, and one with `publishedOrUpdatedAt` unset
-- [ ] T019 [P] [US1] Rewrite `apps/web/tests/e2e/public-feed.spec.ts` to assert a flat feed (no digest headings), newest-first order, five badge labels, high-importance treatment, title `target="_blank"` to the external URL (not `/publications/[id]`), and zero add/edit/delete controls
+- [x] T018 [P] [US1] Extend `apps/web/src/scripts/seed-public-feed.ts` so `hht-research` has at least one published material per source (`pubmed`, `trials`, `news`, `guideline`, `social`) — including RSS sources tagged `guideline` and `social` — plus one `high` and one `normal` importance, one with no summary, and one with `publishedOrUpdatedAt` unset
+- [x] T019 [P] [US1] Rewrite `apps/web/tests/e2e/public-feed.spec.ts` to assert a flat feed (no digest headings), newest-first order, five badge labels, high-importance treatment, title `target="_blank"` to the external URL (not `/publications/[id]`), and zero add/edit/delete controls
 
 ### Implementation for User Story 1
 
-- [ ] T020 [P] [US1] Implement `apps/web/src/components/SourceBadge.tsx` using `@tabler/icons-react` plus Mantine `Badge`/`ThemeIcon` tokens: same icon, label, and color per category under light and dark; unrecognised source → neutral fallback badge
-- [ ] T021 [P] [US1] Implement `apps/web/src/components/MaterialCard.tsx`: source badge, title as sanitized outbound link (`rel="noopener noreferrer"`, new-tab discoverable to AT), date or none, summary when present, high-importance soft edge + faint tint + muted text label (FR-020/FR-021); no other interactive regions
-- [ ] T022 [US1] Rewrite `apps/web/src/app/[locale]/projects/[slug]/page.tsx` to server-fetch `GET /api/public/projects/{slug}/materials?locale=` (throw on non-OK, matching `fetchProject`), render a single centred column of `MaterialCard`s newest-first, and show the empty-project message when `docs` is empty — no loading placeholder
-- [ ] T023 [P] [US1] Add `apps/web/src/app/[locale]/projects/[slug]/error.tsx` that shows a distinctly worded inline error with `reset()` retry and does not replace `[locale]/layout.tsx` chrome
-- [ ] T024 [US1] Delete `apps/web/src/components/ImportanceFilter.tsx` and remove every import/usage (including `Suspense` around it in the old page)
-- [ ] T025 [US1] Replace digest-era `Project.feedTitle` / `Project.empty` / `Project.filter*` copy with Materials-feed strings in `apps/web/messages/{en,de,tr,ru,uk}.json` so all five locales have complete US1 chrome
+- [x] T020 [P] [US1] Implement `apps/web/src/components/SourceBadge.tsx` using `@tabler/icons-react` plus Mantine `Badge`/`ThemeIcon` tokens: same icon, label, and color per category under light and dark; unrecognised source → neutral fallback badge
+- [x] T021 [P] [US1] Implement `apps/web/src/components/MaterialCard.tsx`: source badge, title as sanitized outbound link (`rel="noopener noreferrer"`, new-tab discoverable to AT), date or none, summary when present, high-importance soft edge + faint tint + muted text label (FR-020/FR-021); no other interactive regions
+- [x] T022 [US1] Rewrite `apps/web/src/app/[locale]/projects/[slug]/page.tsx` to server-fetch `GET /api/public/projects/{slug}/materials?locale=` (throw on non-OK, matching `fetchProject`), render a single centred column of `MaterialCard`s newest-first, and show the empty-project message when `docs` is empty — no loading placeholder
+- [x] T023 [P] [US1] Add `apps/web/src/app/[locale]/projects/[slug]/error.tsx` that shows a distinctly worded inline error with `reset()` retry and does not replace `[locale]/layout.tsx` chrome
+- [x] T024 [US1] Delete `apps/web/src/components/ImportanceFilter.tsx` and remove every import/usage (including `Suspense` around it in the old page)
+- [x] T025 [US1] Replace digest-era `Project.feedTitle` / `Project.empty` / `Project.filter*` copy with Materials-feed strings in `apps/web/messages/{en,de,tr,ru,uk}.json` so all five locales have complete US1 chrome
 
 **Checkpoint**: User Story 1 is a usable MVP — open the page, scan the list, follow a title out
 
@@ -93,17 +93,17 @@ Monorepo: `apps/web/` (UI, Payload, public API), `apps/worker/` (pipeline), `pac
 
 ### Tests for User Story 2
 
-- [ ] T026 [P] [US2] Add `filterMaterials` (search ∧ sources ∧ importance; empty source list = all; case-insensitive match on displayed title/summary) and empty-state selection (`empty-project` vs `no-matches`) plus Jest cases in `apps/web/src/lib/materials.ts` and `apps/web/src/lib/materials.test.ts`
-- [ ] T027 [P] [US2] Extend `apps/web/tests/e2e/public-feed.spec.ts` with search, source chips (including deselect-all ⇒ all), high-importance switch, combined filters, visible count, no-matches + clear, and empty-project (no clear prompt)
+- [x] T026 [P] [US2] Add `filterMaterials` (search ∧ sources ∧ importance; empty source list = all; case-insensitive match on displayed title/summary) and empty-state selection (`empty-project` vs `no-matches`) plus Jest cases in `apps/web/src/lib/materials.ts` and `apps/web/src/lib/materials.test.ts`
+- [x] T027 [P] [US2] Extend `apps/web/tests/e2e/public-feed.spec.ts` with search, source chips (including deselect-all ⇒ all), high-importance switch, combined filters, visible count, no-matches + clear, and empty-project (no clear prompt)
 
 ### Implementation for User Story 2
 
-- [ ] T028 [P] [US2] Implement `apps/web/src/components/MaterialSearchInput.tsx` (leading Tabler search icon, accessible label, keyboard-operable)
-- [ ] T029 [P] [US2] Implement `apps/web/src/components/SourceCategoryFilter.tsx` as a Mantine `Chip.Group` of the five categories; empty selection means all
-- [ ] T030 [P] [US2] Implement `apps/web/src/components/HighImportanceSwitch.tsx` as a single labelled switch
-- [ ] T031 [US2] Implement `apps/web/src/components/MaterialsFeed.tsx` as the client owner of `{ q, sources, important }` in the URL (`?q=&sources=&important=`), filtering the already-fetched `Material[]` in memory, stating the visible count in a live region (FR-051), and rendering no-matches + clear-filters
-- [ ] T032 [US2] Mount `MaterialsFeed` from `apps/web/src/app/[locale]/projects/[slug]/page.tsx`; when `docs.length === 0` hide or inert the controls and show only the empty-project message
-- [ ] T033 [US2] Complete search / chip / switch / count / no-matches / clear-filters strings in `apps/web/messages/{en,de,tr,ru,uk}.json`
+- [x] T028 [P] [US2] Implement `apps/web/src/components/MaterialSearchInput.tsx` (leading Tabler search icon, accessible label, keyboard-operable)
+- [x] T029 [P] [US2] Implement `apps/web/src/components/SourceCategoryFilter.tsx` as a Mantine `Chip.Group` of the five categories; empty selection means all
+- [x] T030 [P] [US2] Implement `apps/web/src/components/HighImportanceSwitch.tsx` as a single labelled switch
+- [x] T031 [US2] Implement `apps/web/src/components/MaterialsFeed.tsx` as the client owner of `{ q, sources, important }` in the URL (`?q=&sources=&important=`), filtering the already-fetched `Material[]` in memory, stating the visible count in a live region (FR-051), and rendering no-matches + clear-filters
+- [x] T032 [US2] Mount `MaterialsFeed` from `apps/web/src/app/[locale]/projects/[slug]/page.tsx`; when `docs.length === 0` hide or inert the controls and show only the empty-project message
+- [x] T033 [US2] Complete search / chip / switch / count / no-matches / clear-filters strings in `apps/web/messages/{en,de,tr,ru,uk}.json`
 
 **Checkpoint**: User Stories 1 and 2 both work — a reader can scan and then narrow
 
@@ -117,16 +117,16 @@ Monorepo: `apps/web/` (UI, Payload, public API), `apps/worker/` (pipeline), `pac
 
 ### Tests for User Story 3
 
-- [ ] T034 [P] [US3] Add Jest cases for fallback-note flags (`isFallback`, `displayedLocale`) and for search matching the displayed (not stored-English-only) title/summary in `apps/web/src/lib/materials.test.ts`
-- [ ] T035 [P] [US3] Extend `apps/web/tests/e2e/public-feed.spec.ts` so a locale switch keeps `q` / `sources` / `important` and shows a fallback note on an untranslated material; confirm `apps/web/tests/e2e/i18n-locales.spec.ts` still passes
+- [x] T034 [P] [US3] Add Jest cases for fallback-note flags (`isFallback`, `displayedLocale`) and for search matching the displayed (not stored-English-only) title/summary in `apps/web/src/lib/materials.test.ts`
+- [x] T035 [P] [US3] Extend `apps/web/tests/e2e/public-feed.spec.ts` so a locale switch keeps `q` / `sources` / `important` and shows a fallback note on an untranslated material; confirm `apps/web/tests/e2e/i18n-locales.spec.ts` still passes
 
 ### Implementation for User Story 3
 
-- [ ] T036 [P] [US3] Extend `apps/web/src/components/LocaleSwitcher.tsx` to append the current URL query string when navigating to the new locale (no-op on pages with no query)
-- [ ] T037 [P] [US3] Extend `translateSummary` in `apps/worker/src/pipeline/translate.ts` to return `{ title, ...summary }` from the same AI Gateway call, and persist `title` on `content-translations` from `apps/worker/src/pipeline/runProject.ts`
-- [ ] T038 [US3] Render the unobtrusive fallback-language note on `apps/web/src/components/MaterialCard.tsx` when `isFallback` is true
-- [ ] T039 [US3] Seed one material with a non-English cached title+summary and one left untranslated in `apps/web/src/scripts/seed-public-feed.ts`
-- [ ] T040 [US3] Finish every `Materials` key in all five locale files and retire leftover digest-grouped `Project.importance.*` / `Project.filter*` keys that no public surface still reads
+- [x] T036 [P] [US3] Extend `apps/web/src/components/LocaleSwitcher.tsx` to append the current URL query string when navigating to the new locale (no-op on pages with no query)
+- [x] T037 [P] [US3] Extend `translateSummary` in `apps/worker/src/pipeline/translate.ts` to return `{ title, ...summary }` from the same AI Gateway call, and persist `title` on `content-translations` from `apps/worker/src/pipeline/runProject.ts`
+- [x] T038 [US3] Render the unobtrusive fallback-language note on `apps/web/src/components/MaterialCard.tsx` when `isFallback` is true
+- [x] T039 [US3] Seed one material with a non-English cached title+summary and one left untranslated in `apps/web/src/scripts/seed-public-feed.ts`
+- [x] T040 [US3] Finish every `Materials` key in all five locale files and retire leftover digest-grouped `Project.importance.*` / `Project.filter*` keys that no public surface still reads
 
 **Checkpoint**: All three stories are independently functional — scan, filter, and read in any of the five locales
 
@@ -136,11 +136,11 @@ Monorepo: `apps/web/` (UI, Payload, public API), `apps/worker/` (pipeline), `pac
 
 **Purpose**: Accessibility, responsive layout, leftover surfaces, and quickstart sign-off
 
-- [ ] T041 [P] Verify keyboard tab order and visible focus rings on search, chips, importance switch, and `LocaleSwitcher` (FR-046, FR-047) in `apps/web/src/components/MaterialsFeed.tsx`, `apps/web/src/components/MaterialSearchInput.tsx`, `apps/web/src/components/SourceCategoryFilter.tsx`, `apps/web/src/components/HighImportanceSwitch.tsx`, and `apps/web/src/components/LocaleSwitcher.tsx`
-- [ ] T042 [P] Stack header and controls at 320px with no horizontal scroll or clipped labels in `apps/web/src/app/[locale]/projects/[slug]/page.tsx` and `apps/web/src/components/MaterialsFeed.tsx` (FR-044, FR-043 — stay single-column at every width)
-- [ ] T043 Confirm title links expose "opens in a new tab" to assistive technology in `apps/web/src/components/MaterialCard.tsx` (FR-050) and that source/importance meaning is in text, not colour alone (FR-048, FR-049)
-- [ ] T044 [P] Smoke-check `apps/web/tests/e2e/admin-project-config.spec.ts` and `apps/web/tests/e2e/i18n-locales.spec.ts` still pass after the removed digests route and message-key churn
-- [ ] T045 Run the full [quickstart.md](./quickstart.md) gate: backfill script, `seed:public-feed`, manual verification table in all five locales (including OS dark scheme), `pnpm test`, `pnpm test:e2e`, `pnpm lint`, `pnpm typecheck`, `pnpm build`
+- [x] T041 [P] Verify keyboard tab order and visible focus rings on search, chips, importance switch, and `LocaleSwitcher` (FR-046, FR-047) in `apps/web/src/components/MaterialsFeed.tsx`, `apps/web/src/components/MaterialSearchInput.tsx`, `apps/web/src/components/SourceCategoryFilter.tsx`, `apps/web/src/components/HighImportanceSwitch.tsx`, and `apps/web/src/components/LocaleSwitcher.tsx`
+- [x] T042 [P] Stack header and controls at 320px with no horizontal scroll or clipped labels in `apps/web/src/app/[locale]/projects/[slug]/page.tsx` and `apps/web/src/components/MaterialsFeed.tsx` (FR-044, FR-043 — stay single-column at every width)
+- [x] T043 Confirm title links expose "opens in a new tab" to assistive technology in `apps/web/src/components/MaterialCard.tsx` (FR-050) and that source/importance meaning is in text, not colour alone (FR-048, FR-049)
+- [x] T044 [P] Smoke-check `apps/web/tests/e2e/admin-project-config.spec.ts` and `apps/web/tests/e2e/i18n-locales.spec.ts` still pass after the removed digests route and message-key churn
+- [x] T045 Run the full [quickstart.md](./quickstart.md) gate: backfill script, `seed:public-feed`, manual verification table in all five locales (including OS dark scheme), `pnpm test`, `pnpm test:e2e`, `pnpm lint`, `pnpm typecheck`, `pnpm build`
 
 ---
 

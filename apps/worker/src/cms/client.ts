@@ -190,6 +190,7 @@ export class CmsClient {
   async createContentTranslation(data: {
     publication: string | number;
     locale: string;
+    title?: string;
     fields: Json;
   }) {
     return this.request<{ doc: { id: string | number } }>(`/api/content-translations`, {

@@ -7,7 +7,10 @@ test.describe('i18n locales', () => {
     test(`renders home chrome for ${locale}`, async ({ page }) => {
       await page.goto(`/${locale}`);
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-      await expect(page.getByLabel(/Language|Sprache|Dil|Язык|Мова/i)).toBeVisible();
+      // Mantine Select exposes the control as a textbox with accessible name from label/aria-label
+      await expect(
+        page.getByRole('textbox', { name: /Language|Sprache|Dil|Язык|Мова/i }),
+      ).toBeVisible();
     });
   }
 });

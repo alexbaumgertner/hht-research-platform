@@ -1,6 +1,8 @@
 import type { Config } from '@playwright/test';
 import { defineConfig, devices } from '@playwright/test';
 
+const baseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000';
+
 const config: Config = defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
@@ -9,7 +11,7 @@ const config: Config = defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'list',
   use: {
-    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000',
+    baseURL,
     trace: 'on-first-retry',
   },
   projects: [
@@ -22,9 +24,13 @@ const config: Config = defineConfig({
     ? undefined
     : {
         command: 'pnpm dev',
-        url: 'http://localhost:3000',
+        // Playwright only treats 2xx/3xx as ready — `/` returns 404 (locale
+        // segment required), so probe a real locale route instead.
+        url: `${baseURL}/en`,
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,
+        stdout: 'pipe',
+        stderr: 'pipe',
       },
 });
 

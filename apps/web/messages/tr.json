@@ -6,17 +6,33 @@
     "latestDigest": "Son özet"
   },
   "Project": {
-    "feedTitle": "Özet akışı",
-    "empty": "Bu proje için henüz özet yayımlanmadı.",
-    "filterLabel": "Önem",
-    "filterAll": "Tümü",
-    "importance": {
-      "critical": "Kritik",
-      "high": "Yüksek",
-      "medium": "Orta",
-      "low": "Düşük"
-    },
+    "feedTitle": "Materyaller",
+    "empty": "Bu proje için henüz yayımlanmış materyal yok.",
     "backHome": "Tüm projeler"
+  },
+  "Materials": {
+    "badge": {
+      "pubmed": "PubMed",
+      "trials": "Klinik çalışmalar",
+      "news": "Haber",
+      "guideline": "Kılavuz",
+      "social": "Sosyal",
+      "unknown": "Diğer"
+    },
+    "highImportance": "Yüksek önem",
+    "emptyProject": "Bu proje için henüz yayımlanmış materyal yok.",
+    "noMatches": "Filtrelerinize uyan materyal yok.",
+    "clearFilters": "Filtreleri temizle",
+    "loadError": "Materyaller yüklenemedi. Lütfen yeniden deneyin.",
+    "retry": "Yeniden dene",
+    "search": "Materyal ara",
+    "searchPlaceholder": "Başlığa veya özete göre ara",
+    "sourceFilter": "Kaynaklar",
+    "importanceToggle": "Yalnızca yüksek önem",
+    "visibleCount": "{count, plural, =0 {Materyal yok} one {# materyal} other {# materyal}}",
+    "fallbackNote": "İngilizce gösteriliyor",
+    "untitledPlaceholder": "Başlıksız materyal",
+    "opensInNewTab": "(yeni sekmede açılır)"
   },
   "Publication": {
     "objective": "Amaç",

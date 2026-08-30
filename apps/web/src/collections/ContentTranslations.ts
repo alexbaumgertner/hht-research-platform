@@ -36,6 +36,13 @@ export const ContentTranslations: CollectionConfig = {
       index: true,
     },
     {
+      name: 'title',
+      type: 'text',
+      admin: {
+        description: 'Localized title; populated by the worker alongside summary fields.',
+      },
+    },
+    {
       name: 'fields',
       type: 'group',
       fields: [

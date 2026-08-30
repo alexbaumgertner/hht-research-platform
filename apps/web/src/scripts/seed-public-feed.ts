@@ -1,5 +1,7 @@
 /**
- * Seed one research project with digests + mixed-importance publications.
+ * Seed hht-research with materials across all five source categories,
+ * both importance levels, missing summary/date, and partial translations.
+ *
  * Usage: DATABASE_URL=... PAYLOAD_SECRET=... pnpm --filter @hht/web seed:public-feed
  */
 import { getPayload } from 'payload';
@@ -43,7 +45,7 @@ async function seed() {
       data: {
         name: 'HHT Research',
         slug,
-        description: 'Monitoring publications related to Hereditary Hemorrhagic Telangiectasia.',
+        description: 'Monitoring materials related to Hereditary Hemorrhagic Telangiectasia.',
         keywords: [{ value: 'HHT' }, { value: 'hereditary hemorrhagic telangiectasia' }],
         schedule: 'daily',
         monitoringStatus: 'active',
@@ -56,6 +58,61 @@ async function seed() {
     projectId = project.id;
   }
 
+  async function ensureSource(input: {
+    type: 'pubmed' | 'clinicaltrials' | 'rss';
+    label: string;
+    displayCategory?: 'news' | 'guideline' | 'social';
+    rssUrl?: string;
+  }) {
+    const found = await payload.find({
+      collection: 'monitored-sources',
+      where: {
+        and: [{ project: { equals: projectId } }, { label: { equals: input.label } }],
+      },
+      limit: 1,
+      overrideAccess: true,
+    });
+    if (found.docs[0]) return found.docs[0].id as number;
+
+    const created = await payload.create({
+      collection: 'monitored-sources',
+      data: {
+        project: projectId!,
+        type: input.type,
+        label: input.label,
+        enabled: true,
+        ...(input.displayCategory ? { displayCategory: input.displayCategory } : {}),
+        ...(input.rssUrl ? { rssUrl: input.rssUrl } : {}),
+      },
+      overrideAccess: true,
+    });
+    return created.id as number;
+  }
+
+  const pubmedSource = await ensureSource({ type: 'pubmed', label: 'PubMed HHT' });
+  const trialsSource = await ensureSource({
+    type: 'clinicaltrials',
+    label: 'ClinicalTrials HHT',
+  });
+  const newsSource = await ensureSource({
+    type: 'rss',
+    label: 'HHT News RSS',
+    displayCategory: 'news',
+    rssUrl: 'https://example.com/hht-news.rss',
+  });
+  const guidelineSource = await ensureSource({
+    type: 'rss',
+    label: 'HHT Guidelines RSS',
+    displayCategory: 'guideline',
+    rssUrl: 'https://example.com/hht-guidelines.rss',
+  });
+  const socialSource = await ensureSource({
+    type: 'rss',
+    label: 'HHT Social RSS',
+    displayCategory: 'social',
+    rssUrl: 'https://example.com/hht-social.rss',
+  });
+
   const run = await payload.create({
     collection: 'monitoring-runs',
     data: {
@@ -65,65 +122,180 @@ async function seed() {
       startedAt: new Date().toISOString(),
       finishedAt: new Date().toISOString(),
       stats: {
-        candidates: 4,
+        candidates: 7,
         deduped: 0,
         irrelevant: 0,
-        summarized: 4,
-        published: 4,
+        summarized: 7,
+        published: 7,
       },
     },
     overrideAccess: true,
   });
 
-  const samples = [
+  const samples: Array<{
+    key: string;
+    title: string;
+    importance: 'critical' | 'high' | 'medium' | 'low';
+    sourceType: 'pubmed' | 'clinicaltrials' | 'rss';
+    monitoredSource: number;
+    objective?: string;
+    publishedOrUpdatedAt?: string | null;
+    url: string;
+    translateDe?: boolean;
+  }> = [
     {
+      key: 'pubmed-high',
       title: 'Bevacizumab for severe HHT-related epistaxis',
-      importance: 'critical' as const,
+      importance: 'critical',
+      sourceType: 'pubmed',
+      monitoredSource: pubmedSource,
       objective: 'Evaluate systemic bevacizumab for refractory epistaxis in HHT.',
+      publishedOrUpdatedAt: '2026-08-20T10:00:00.000Z',
+      url: 'https://pubmed.ncbi.nlm.nih.gov/seed-pubmed/',
+      translateDe: true,
     },
     {
-      title: 'Screening protocols for pulmonary AVMs in HHT',
-      importance: 'high' as const,
-      objective: 'Compare imaging strategies for detecting pulmonary AVMs.',
+      key: 'trials',
+      title: 'Phase II trial of anti-angiogenic therapy in HHT',
+      importance: 'high',
+      sourceType: 'clinicaltrials',
+      monitoredSource: trialsSource,
+      objective: 'Assess safety of anti-angiogenic therapy.',
+      publishedOrUpdatedAt: '2026-08-18T10:00:00.000Z',
+      url: 'https://clinicaltrials.gov/study/NCTSEED',
     },
     {
-      title: 'Quality of life after nasal closure procedures',
-      importance: 'medium' as const,
-      objective: 'Assess patient-reported outcomes after surgical interventions.',
+      key: 'news',
+      title: 'New screening clinic opens for HHT families',
+      importance: 'medium',
+      sourceType: 'rss',
+      monitoredSource: newsSource,
+      objective: 'Clinic opening announcement covering pulmonary AVM screening.',
+      publishedOrUpdatedAt: '2026-08-15T10:00:00.000Z',
+      url: 'https://example.com/news/hht-clinic',
     },
     {
-      title: 'Case report: atypical hepatic involvement',
-      importance: 'low' as const,
-      objective: 'Describe an uncommon hepatic presentation of HHT.',
+      key: 'guideline',
+      title: 'Updated international guidelines for HHT management',
+      importance: 'high',
+      sourceType: 'rss',
+      monitoredSource: guidelineSource,
+      objective: 'Consensus recommendations for diagnosis and treatment.',
+      publishedOrUpdatedAt: '2026-08-12T10:00:00.000Z',
+      url: 'https://example.com/guidelines/hht-2026',
+    },
+    {
+      key: 'social',
+      title: 'Patient community thread on epistaxis care',
+      importance: 'low',
+      sourceType: 'rss',
+      monitoredSource: socialSource,
+      objective: 'Community discussion of home care strategies.',
+      publishedOrUpdatedAt: '2026-08-10T10:00:00.000Z',
+      url: 'https://example.com/social/hht-thread',
+    },
+    {
+      key: 'no-summary',
+      title: 'Brief note without structured summary',
+      importance: 'medium',
+      sourceType: 'pubmed',
+      monitoredSource: pubmedSource,
+      publishedOrUpdatedAt: '2026-08-08T10:00:00.000Z',
+      url: 'https://pubmed.ncbi.nlm.nih.gov/seed-nosummary/',
+    },
+    {
+      key: 'no-date',
+      title: 'Undated registry entry for hepatic AVM',
+      importance: 'low',
+      sourceType: 'clinicaltrials',
+      monitoredSource: trialsSource,
+      objective: 'Registry entry missing a source publish date.',
+      publishedOrUpdatedAt: null,
+      url: 'https://clinicaltrials.gov/study/NCTSEEDNODATE',
     },
   ];
 
   const publicationIds: Array<string | number> = [];
-  for (const [index, sample] of samples.entries()) {
-    const pub = await payload.create({
+
+  for (const sample of samples) {
+    const existingPub = await payload.find({
       collection: 'publications',
-      data: {
-        project: projectId,
-        dedupeKey: `seed:${slug}:${index}`,
-        title: sample.title,
-        abstractOrBody: sample.objective,
-        sourceType: 'pubmed',
-        originalUrl: `https://pubmed.ncbi.nlm.nih.gov/seed${index}/`,
-        relevance: 'relevant',
-        importance: sample.importance,
-        summary: {
-          objective: sample.objective,
-          methods: 'Narrative methods for seed data.',
-          results: 'Illustrative results for public feed testing.',
-          limitations: 'Seed data is not a real study.',
-          whyItMatters: 'Provides mixed importance levels for UI filters.',
-        },
-        firstSeenRun: run.id,
-        externalIds: { pmid: `SEED${index}` },
+      where: {
+        and: [
+          { project: { equals: projectId } },
+          { dedupeKey: { equals: `seed:${slug}:${sample.key}` } },
+        ],
       },
+      limit: 1,
       overrideAccess: true,
     });
-    publicationIds.push(pub.id);
+
+    let pubId = existingPub.docs[0]?.id;
+    if (!pubId) {
+      const pub = await payload.create({
+        collection: 'publications',
+        data: {
+          project: projectId,
+          dedupeKey: `seed:${slug}:${sample.key}`,
+          title: sample.title,
+          abstractOrBody: sample.objective || sample.title,
+          sourceType: sample.sourceType,
+          originalUrl: sample.url,
+          relevance: 'relevant',
+          importance: sample.importance,
+          ...(sample.objective
+            ? {
+                summary: {
+                  objective: sample.objective,
+                  methods: 'Narrative methods for seed data.',
+                  results: 'Illustrative results for public feed testing.',
+                  limitations: 'Seed data is not a real study.',
+                  whyItMatters: 'Provides mixed materials for UI verification.',
+                },
+              }
+            : {}),
+          ...(sample.publishedOrUpdatedAt
+            ? { publishedOrUpdatedAt: sample.publishedOrUpdatedAt }
+            : {}),
+          firstSeenRun: run.id,
+          monitoredSource: sample.monitoredSource,
+          externalIds: { pmid: `SEED-${sample.key}` },
+        },
+        overrideAccess: true,
+      });
+      pubId = pub.id;
+    }
+    publicationIds.push(pubId);
+
+    if (sample.translateDe) {
+      const existingTr = await payload.find({
+        collection: 'content-translations',
+        where: {
+          and: [{ publication: { equals: pubId } }, { locale: { equals: 'de' } }],
+        },
+        limit: 1,
+        overrideAccess: true,
+      });
+      if (!existingTr.docs[0]) {
+        await payload.create({
+          collection: 'content-translations',
+          data: {
+            publication: pubId,
+            locale: 'de',
+            title: 'Bevacizumab bei schwerer HHT-bedingter Epistaxis',
+            fields: {
+              objective:
+                'Bewertung von systemischem Bevacizumab bei therapierefraktärer Epistaxis bei HHT.',
+              methods: 'Narrative Methoden für Seed-Daten.',
+              results: 'Illustrative Ergebnisse für die öffentliche Feed-Prüfung.',
+              limitations: 'Seed-Daten sind keine echte Studie.',
+              whyItMatters: 'Stellt gemischte Materialien für die UI-Prüfung bereit.',
+            },
+          },
+          overrideAccess: true,
+        });
+      }
+    }
   }
 
   await payload.create({
@@ -137,7 +309,7 @@ async function seed() {
     overrideAccess: true,
   });
 
-  console.log(`Seeded project "${slug}" with ${publicationIds.length} publications.`);
+  console.log(`Seeded project "${slug}" with ${publicationIds.length} materials.`);
   process.exit(0);
 }
 

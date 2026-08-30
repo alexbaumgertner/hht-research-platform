@@ -27,7 +27,11 @@ export function LocaleSwitcher() {
       value={locale}
       onChange={(value) => {
         if (!value) return;
-        router.replace(pathname, { locale: value });
+        // Read query from the live URL so we do not need useSearchParams
+        // (which forces a Suspense boundary and can hide this control on first paint).
+        const qs = typeof window !== 'undefined' ? window.location.search.replace(/^\?/, '') : '';
+        const href = qs ? `${pathname}?${qs}` : pathname;
+        router.replace(href, { locale: value });
       }}
       allowDeselect={false}
       w={180}

@@ -15,7 +15,10 @@ import { Digests } from './collections/Digests';
 import { ContentTranslations } from './collections/ContentTranslations';
 import { manualRunEndpoint } from './endpoints/manualRun';
 import { requiredEnv } from './lib/env';
+import { loadLocalEnv } from './lib/loadLocalEnv';
 import { getPublicSiteUrl } from './lib/siteUrl';
+
+loadLocalEnv();
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);

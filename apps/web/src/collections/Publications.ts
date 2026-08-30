@@ -13,6 +13,10 @@ export const Publications: CollectionConfig = {
     importance: true,
     originalUrl: true,
     summary: true,
+    sourceType: true,
+    publishedOrUpdatedAt: true,
+    monitoredSource: true,
+    feedPublishedAt: true,
   },
   admin: {
     useAsTitle: 'title',
@@ -113,6 +117,25 @@ export const Publications: CollectionConfig = {
         { name: 'limitations', type: 'textarea' },
         { name: 'whyItMatters', type: 'textarea' },
       ],
+    },
+    {
+      name: 'monitoredSource',
+      type: 'relationship',
+      relationTo: 'monitored-sources',
+      admin: {
+        readOnly: true,
+        description: 'Set by the worker from the source that produced this publication.',
+      },
+    },
+    {
+      name: 'feedPublishedAt',
+      type: 'date',
+      index: true,
+      admin: {
+        readOnly: true,
+        description:
+          'System-managed. Set when a digest including this publication is published; gates public feed visibility.',
+      },
     },
     {
       name: 'firstSeenRun',

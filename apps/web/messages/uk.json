@@ -6,17 +6,33 @@
     "latestDigest": "Останній дайджест"
   },
   "Project": {
-    "feedTitle": "Стрічка дайджестів",
-    "empty": "Для цього проєкту ще немає опублікованих дайджестів.",
-    "filterLabel": "Важливість",
-    "filterAll": "Усі",
-    "importance": {
-      "critical": "Критична",
-      "high": "Висока",
-      "medium": "Середня",
-      "low": "Низька"
-    },
+    "feedTitle": "Матеріали",
+    "empty": "Для цього проєкту ще нічого не опубліковано.",
     "backHome": "Усі проєкти"
+  },
+  "Materials": {
+    "badge": {
+      "pubmed": "PubMed",
+      "trials": "Клінічні дослідження",
+      "news": "Новини",
+      "guideline": "Настанови",
+      "social": "Соцмережі",
+      "unknown": "Інше"
+    },
+    "highImportance": "Висока важливість",
+    "emptyProject": "Для цього проєкту ще нічого не опубліковано.",
+    "noMatches": "Немає матеріалів, що відповідають фільтрам.",
+    "clearFilters": "Скинути фільтри",
+    "loadError": "Не вдалося завантажити матеріали. Спробуйте ще раз.",
+    "retry": "Повторити",
+    "search": "Пошук матеріалів",
+    "searchPlaceholder": "Пошук за заголовком або резюме",
+    "sourceFilter": "Джерела",
+    "importanceToggle": "Лише висока важливість",
+    "visibleCount": "{count, plural, =0 {Немає матеріалів} one {# матеріал} few {# матеріали} many {# матеріалів} other {# матеріалу}}",
+    "fallbackNote": "Показано англійською",
+    "untitledPlaceholder": "Матеріал без назви",
+    "opensInNewTab": "(відкривається в новій вкладці)"
   },
   "Publication": {
     "objective": "Мета",

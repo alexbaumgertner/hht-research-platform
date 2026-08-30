@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload';
 
 import { isAuthenticated, isAuthenticatedOrWorker, isWorkerOrAdmin } from '../access';
-import { capCreateDepth, resolveRelationshipId } from './digestHooks';
+import { capCreateDepth, resolveRelationshipId, stampFeedPublishedAt } from './digestHooks';
 
 export const Digests: CollectionConfig = {
   slug: 'digests',
@@ -45,6 +45,7 @@ export const Digests: CollectionConfig = {
           req,
           returning: false,
         });
+        await stampFeedPublishedAt(doc, req);
       },
     ],
   },

@@ -6,17 +6,33 @@
     "latestDigest": "Neuester Digest"
   },
   "Project": {
-    "feedTitle": "Digest-Feed",
-    "empty": "Für dieses Projekt wurden noch keine Digests veröffentlicht.",
-    "filterLabel": "Wichtigkeit",
-    "filterAll": "Alle",
-    "importance": {
-      "critical": "Kritisch",
-      "high": "Hoch",
-      "medium": "Mittel",
-      "low": "Niedrig"
-    },
+    "feedTitle": "Materialien",
+    "empty": "Für dieses Projekt wurde noch nichts veröffentlicht.",
     "backHome": "Alle Projekte"
+  },
+  "Materials": {
+    "badge": {
+      "pubmed": "PubMed",
+      "trials": "Klinische Studien",
+      "news": "Nachrichten",
+      "guideline": "Leitlinie",
+      "social": "Social",
+      "unknown": "Sonstige"
+    },
+    "highImportance": "Hohe Wichtigkeit",
+    "emptyProject": "Für dieses Projekt wurde noch nichts veröffentlicht.",
+    "noMatches": "Keine Materialien entsprechen Ihren Filtern.",
+    "clearFilters": "Filter zurücksetzen",
+    "loadError": "Materialien konnten nicht geladen werden. Bitte erneut versuchen.",
+    "retry": "Erneut versuchen",
+    "search": "Materialien suchen",
+    "searchPlaceholder": "Nach Titel oder Zusammenfassung suchen",
+    "sourceFilter": "Quellen",
+    "importanceToggle": "Nur hohe Wichtigkeit",
+    "visibleCount": "{count, plural, =0 {Keine Materialien} one {# Material} other {# Materialien}}",
+    "fallbackNote": "Auf Englisch angezeigt",
+    "untitledPlaceholder": "Unbenanntes Material",
+    "opensInNewTab": "(öffnet in neuem Tab)"
   },
   "Publication": {
     "objective": "Ziel",

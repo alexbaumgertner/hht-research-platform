@@ -72,6 +72,19 @@ export const MonitoredSources: CollectionConfig = {
       },
     },
     {
+      name: 'displayCategory',
+      type: 'select',
+      options: [
+        { label: 'News', value: 'news' },
+        { label: 'Guideline', value: 'guideline' },
+        { label: 'Social', value: 'social' },
+      ],
+      admin: {
+        condition: (_, siblingData) => siblingData?.type === 'rss',
+        description: 'Reader-facing badge for RSS materials. Unset defaults to News at read time.',
+      },
+    },
+    {
       name: 'enabled',
       type: 'checkbox',
       defaultValue: true,
