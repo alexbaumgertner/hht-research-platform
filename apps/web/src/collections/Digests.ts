@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload';
 
-import { isAuthenticated, isWorkerOrAdmin, publicRead } from '../access';
+import { isAuthenticated, isAuthenticatedOrWorker, isWorkerOrAdmin } from '../access';
 import { capCreateDepth, resolveRelationshipId } from './digestHooks';
 
 export const Digests: CollectionConfig = {
@@ -11,7 +11,7 @@ export const Digests: CollectionConfig = {
     defaultColumns: ['publishedAt', 'project', 'updatedAt'],
   },
   access: {
-    read: publicRead,
+    read: isAuthenticatedOrWorker,
     create: isWorkerOrAdmin,
     update: isWorkerOrAdmin,
     delete: isAuthenticated,

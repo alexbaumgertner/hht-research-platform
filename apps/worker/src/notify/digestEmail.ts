@@ -39,6 +39,10 @@ export async function sendDigestPublishedEmail(input: {
     feedUrl,
   });
 
+  if (!assertLinkOnlyEmail(payload)) {
+    throw new Error('Digest email failed link-only check; refusing to send');
+  }
+
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
     console.warn('[notify] RESEND_API_KEY missing; skipping email');

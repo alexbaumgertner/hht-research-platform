@@ -1,6 +1,8 @@
 import Parser from 'rss-parser';
+import { sanitizeHttpUrl } from '@hht/shared';
 import type { Candidate, FetchCandidatesInput, SourceAdapter } from './types.js';
 import { resolveSinceDate } from './types.js';
+import { safeFetch } from '../net/safeFetch.js';
 
 const parser = new Parser();
 
@@ -15,7 +17,7 @@ export const rssAdapter: SourceAdapter = {
       throw new Error('RSS URL is required');
     }
 
-    const res = await fetch(input.rssUrl);
+    const res = await safeFetch(input.rssUrl);
     if (!res.ok) {
       throw new Error(`RSS fetch failed: ${res.status}`);
     }
@@ -46,7 +48,7 @@ export const rssAdapter: SourceAdapter = {
       const published = pubDate ? new Date(pubDate) : undefined;
       if (published && published < since) continue;
 
-      const link = item.link || input.rssUrl;
+      const link = sanitizeHttpUrl(item.link) ?? input.rssUrl;
       const guid = item.guid || item.id || link;
       items.push({
         externalIds: { guid: String(guid) },

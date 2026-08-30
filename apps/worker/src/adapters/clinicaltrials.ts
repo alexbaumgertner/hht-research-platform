@@ -1,5 +1,6 @@
 import type { Candidate, FetchCandidatesInput, SourceAdapter } from './types.js';
 import { formatYmd, resolveSinceDate } from './types.js';
+import { safeFetch } from '../net/safeFetch.js';
 
 function buildQuery(keywords: string[]): string {
   return keywords.join(' OR ');
@@ -29,7 +30,7 @@ export const clinicalTrialsAdapter: SourceAdapter = {
       format: 'json',
     });
 
-    const res = await fetch(`https://clinicaltrials.gov/api/v2/studies?${params.toString()}`);
+    const res = await safeFetch(`https://clinicaltrials.gov/api/v2/studies?${params.toString()}`);
     if (!res.ok) {
       throw new Error(`ClinicalTrials.gov failed: ${res.status}`);
     }

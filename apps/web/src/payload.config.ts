@@ -14,6 +14,7 @@ import { Publications } from './collections/Publications';
 import { Digests } from './collections/Digests';
 import { ContentTranslations } from './collections/ContentTranslations';
 import { manualRunEndpoint } from './endpoints/manualRun';
+import { requiredEnv } from './lib/env';
 import { getPublicSiteUrl } from './lib/siteUrl';
 
 const filename = fileURLToPath(import.meta.url);
@@ -37,13 +38,13 @@ export default buildConfig({
   ],
   endpoints: [manualRunEndpoint],
   editor: lexicalEditor(),
-  secret: process.env.PAYLOAD_SECRET || 'dev-secret-change-me',
+  secret: requiredEnv('PAYLOAD_SECRET', 'dev-secret-change-me'),
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
   db: postgresAdapter({
     pool: {
-      connectionString: process.env.DATABASE_URL || '',
+      connectionString: requiredEnv('DATABASE_URL'),
     },
   }),
   email: resendAdapter({
@@ -53,4 +54,7 @@ export default buildConfig({
   }),
   sharp,
   serverURL: getPublicSiteUrl(),
+  graphQL: {
+    disable: true,
+  },
 });

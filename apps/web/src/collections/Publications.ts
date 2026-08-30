@@ -1,6 +1,8 @@
 import type { CollectionConfig } from 'payload';
 
-import { isAuthenticated, isWorkerOrAdmin, publicRead } from '../access';
+import { isValidHttpUrl } from '@hht/shared';
+
+import { isAuthenticated, isAuthenticatedOrWorker, isWorkerOrAdmin } from '../access';
 
 export const Publications: CollectionConfig = {
   slug: 'publications',
@@ -18,7 +20,7 @@ export const Publications: CollectionConfig = {
     defaultColumns: ['title', 'importance', 'relevance', 'sourceType', 'project'],
   },
   access: {
-    read: publicRead,
+    read: isAuthenticatedOrWorker,
     create: isWorkerOrAdmin,
     update: isWorkerOrAdmin,
     delete: isAuthenticated,
@@ -70,6 +72,12 @@ export const Publications: CollectionConfig = {
       name: 'originalUrl',
       type: 'text',
       required: true,
+      validate: (value: string | null | undefined) => {
+        if (!value || !isValidHttpUrl(value)) {
+          return 'originalUrl must be a valid http(s) URL';
+        }
+        return true;
+      },
     },
     {
       name: 'publishedOrUpdatedAt',

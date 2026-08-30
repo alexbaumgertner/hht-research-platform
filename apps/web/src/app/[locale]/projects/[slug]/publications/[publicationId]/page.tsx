@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Anchor, Stack, Text, Title } from '@mantine/core';
+import { sanitizeHttpUrl } from '@hht/shared';
 import { TextLink } from '@/components/TextLink';
 import { getPublicSiteUrl } from '@/lib/siteUrl';
 
@@ -43,6 +44,9 @@ export default async function PublicationPage({ params }: Props) {
     return <Text>Not found</Text>;
   }
 
+  const originalUrl = sanitizeHttpUrl(pub.originalUrl);
+  const translationFallbackUrl = sanitizeHttpUrl(pub.translationFallbackUrl);
+
   const sections = [
     { key: 'objective' as const, label: t('objective') },
     { key: 'methods' as const, label: t('methods') },
@@ -57,11 +61,13 @@ export default async function PublicationPage({ params }: Props) {
         {t('backToFeed')}
       </TextLink>
       <Title order={1}>{pub.title}</Title>
-      <Anchor href={pub.originalUrl} target="_blank" rel="noopener noreferrer">
-        {t('originalLink')}
-      </Anchor>
-      {pub.translationFallbackUrl ? (
-        <Anchor href={pub.translationFallbackUrl} target="_blank" rel="noopener noreferrer">
+      {originalUrl ? (
+        <Anchor href={originalUrl} target="_blank" rel="noopener noreferrer">
+          {t('originalLink')}
+        </Anchor>
+      ) : null}
+      {translationFallbackUrl ? (
+        <Anchor href={translationFallbackUrl} target="_blank" rel="noopener noreferrer">
           {t('translationFallback')}
         </Anchor>
       ) : null}

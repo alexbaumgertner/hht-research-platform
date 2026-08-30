@@ -4,8 +4,8 @@ import { hasNonEmptyKeywords, type KeywordInput } from '@hht/shared';
 import {
   canUpdateResearchProject,
   isAuthenticated,
+  isAuthenticatedOrWorker,
   isWorkerOrAdminFieldLevel,
-  publicRead,
 } from '../access';
 
 export const ResearchProjects: CollectionConfig = {
@@ -16,7 +16,7 @@ export const ResearchProjects: CollectionConfig = {
     defaultColumns: ['name', 'slug', 'monitoringStatus', 'schedule', 'updatedAt'],
   },
   access: {
-    read: publicRead,
+    read: isAuthenticatedOrWorker,
     create: isAuthenticated,
     update: canUpdateResearchProject,
     delete: isAuthenticated,
@@ -139,7 +139,7 @@ export const ResearchProjects: CollectionConfig = {
         description: 'Denormalized: true when ≥1 digest exists (FR-021)',
       },
       access: {
-        update: () => true,
+        update: isWorkerOrAdminFieldLevel,
       },
     },
   ],

@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload';
 
-import { isAdmin, isAuthenticated } from '../access';
+import { isAdmin, usersReadAccess } from '../access';
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -12,7 +12,7 @@ export const Users: CollectionConfig = {
     useAPIKey: true,
   },
   access: {
-    read: isAuthenticated,
+    read: usersReadAccess,
     create: async ({ req }) => {
       const users = await req.payload.find({
         collection: 'users',

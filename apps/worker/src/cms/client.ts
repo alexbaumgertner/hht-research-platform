@@ -187,6 +187,17 @@ export class CmsClient {
     });
   }
 
+  async createContentTranslation(data: {
+    publication: string | number;
+    locale: string;
+    fields: Json;
+  }) {
+    return this.request<{ doc: { id: string | number } }>(`/api/content-translations`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
   async patchProjectWatermark(projectId: string, finishedAt: string) {
     return this.request(`/api/research-projects/${projectId}`, {
       method: 'PATCH',

@@ -1,4 +1,4 @@
-import { filterByImportance, hasNonEmptyKeywords, isValidHttpUrl } from './index';
+import { filterByImportance, hasNonEmptyKeywords, isValidHttpUrl, sanitizeHttpUrl } from './index';
 
 describe('filterByImportance', () => {
   const items = [
@@ -35,5 +35,22 @@ describe('isValidHttpUrl', () => {
     expect(isValidHttpUrl('https://example.com/feed.xml')).toBe(true);
     expect(isValidHttpUrl('ftp://example.com')).toBe(false);
     expect(isValidHttpUrl('not-a-url')).toBe(false);
+  });
+});
+
+describe('sanitizeHttpUrl', () => {
+  it('returns normalized http(s) href', () => {
+    expect(sanitizeHttpUrl('https://example.com/path')).toBe('https://example.com/path');
+  });
+
+  it('rejects javascript: and data: URIs', () => {
+    expect(sanitizeHttpUrl('javascript:alert(1)')).toBeNull();
+    expect(sanitizeHttpUrl('data:text/html,<script>')).toBeNull();
+  });
+
+  it('rejects empty and relative values', () => {
+    expect(sanitizeHttpUrl('')).toBeNull();
+    expect(sanitizeHttpUrl(null)).toBeNull();
+    expect(sanitizeHttpUrl('/relative')).toBeNull();
   });
 });

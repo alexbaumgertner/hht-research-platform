@@ -132,7 +132,7 @@ async function seed() {
       project: projectId,
       run: run.id,
       publishedAt: new Date().toISOString(),
-      publications: publicationIds,
+      publications: publicationIds as number[],
     },
     overrideAccess: true,
   });

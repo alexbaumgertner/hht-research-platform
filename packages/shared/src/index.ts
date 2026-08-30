@@ -74,5 +74,22 @@ export function isValidHttpUrl(value: string): boolean {
   }
 }
 
+/**
+ * Returns a normalized http(s) URL string, or null if the value is not a safe
+ * navigable URL (javascript:, data:, relative, etc.). Use before rendering href.
+ */
+export function sanitizeHttpUrl(value: string | null | undefined): string | null {
+  if (!value || typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  try {
+    const url = new URL(trimmed);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
+    return url.href;
+  } catch {
+    return null;
+  }
+}
+
 export * from './dedupe.js';
 export * from './schedule.js';

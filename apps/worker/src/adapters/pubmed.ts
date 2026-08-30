@@ -1,5 +1,6 @@
 import type { Candidate, FetchCandidatesInput, SourceAdapter } from './types.js';
 import { formatYmd, resolveSinceDate } from './types.js';
+import { safeFetch } from '../net/safeFetch.js';
 
 function buildQuery(keywords: string[]): string {
   return keywords.map((k) => `(${k})`).join(' OR ');
@@ -16,7 +17,7 @@ export const pubmedAdapter: SourceAdapter = {
       `&retmode=json&retmax=${input.limit}&term=${term}` +
       `&datetype=edat&mindate=${mindate}&maxdate=${maxdate}`;
 
-    const searchRes = await fetch(searchUrl);
+    const searchRes = await safeFetch(searchUrl);
     if (!searchRes.ok) {
       throw new Error(`PubMed esearch failed: ${searchRes.status}`);
     }
@@ -29,7 +30,7 @@ export const pubmedAdapter: SourceAdapter = {
     const fetchUrl =
       `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed` +
       `&retmode=xml&id=${ids.join(',')}`;
-    const fetchRes = await fetch(fetchUrl);
+    const fetchRes = await safeFetch(fetchUrl);
     if (!fetchRes.ok) {
       throw new Error(`PubMed efetch failed: ${fetchRes.status}`);
     }

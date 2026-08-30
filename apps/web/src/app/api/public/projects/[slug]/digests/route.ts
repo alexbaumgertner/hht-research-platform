@@ -1,6 +1,11 @@
 import { getPayload } from 'payload';
 import config from '@payload-config';
-import { ImportanceSchema, filterByImportance, type Importance } from '@hht/shared';
+import {
+  ImportanceSchema,
+  filterByImportance,
+  sanitizeHttpUrl,
+  type Importance,
+} from '@hht/shared';
 import { NextResponse } from 'next/server';
 
 type Params = { params: Promise<{ slug: string }> };
@@ -54,7 +59,7 @@ export async function GET(req: Request, { params }: Params) {
           id: String(p.id),
           title: p.title ?? '',
           importance: p.importance ?? null,
-          originalUrl: p.originalUrl ?? '',
+          originalUrl: sanitizeHttpUrl(p.originalUrl) ?? '',
           summaryPreview: p.summary?.objective ?? null,
         })),
         importance,

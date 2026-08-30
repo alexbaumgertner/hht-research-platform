@@ -153,6 +153,9 @@ importers:
       rss-parser:
         specifier: ^3.13.0
         version: 3.13.0
+      undici:
+        specifier: ^7.29.0
+        version: 7.29.0
       zod:
         specifier: ^3.24.2
         version: 3.25.76

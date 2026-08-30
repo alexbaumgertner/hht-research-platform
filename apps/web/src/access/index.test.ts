@@ -1,11 +1,21 @@
-import { canUpdateResearchProject, isAuthenticated, isWorkerOrAdmin } from './index';
+import type { AccessArgs } from 'payload';
 
-function mockReq(opts: { user?: { roles?: string[] } | null; apiKey?: string | null }): {
-  req: { user: { roles?: string[] } | null; headers: Headers };
-} {
+import {
+  canUpdateResearchProject,
+  isAuthenticated,
+  isAuthenticatedOrWorker,
+  safeEqualString,
+  usersReadAccess,
+  isWorkerOrAdmin,
+} from './index';
+
+function mockReq(opts: {
+  user?: { id?: string; roles?: string[] } | null;
+  apiKey?: string | null;
+}): AccessArgs {
   const headers = new Headers();
   if (opts.apiKey) headers.set('X-Payload-API-Key', opts.apiKey);
-  return { req: { user: opts.user ?? null, headers } };
+  return { req: { user: opts.user ?? null, headers } } as AccessArgs;
 }
 
 describe('research-projects access.update', () => {
@@ -67,5 +77,58 @@ describe('research-projects access.update', () => {
         data: { lastSuccessfulRunAt: '2026-08-28T00:00:00.000Z' },
       }),
     ).toBe(false);
+  });
+
+  it('rejects wrong-length API keys without throwing', () => {
+    expect(isWorkerOrAdmin(mockReq({ apiKey: 'x' }))).toBe(false);
+    expect(isWorkerOrAdmin(mockReq({ apiKey: 'test-worker-key-extra' }))).toBe(false);
+  });
+});
+
+describe('isAuthenticatedOrWorker', () => {
+  const originalKey = process.env.PAYLOAD_API_KEY;
+
+  beforeEach(() => {
+    process.env.PAYLOAD_API_KEY = 'test-worker-key';
+  });
+
+  afterEach(() => {
+    process.env.PAYLOAD_API_KEY = originalKey;
+  });
+
+  it('denies anonymous callers', () => {
+    expect(isAuthenticatedOrWorker(mockReq({ user: null }))).toBe(false);
+  });
+
+  it('allows any logged-in user', () => {
+    expect(isAuthenticatedOrWorker(mockReq({ user: { roles: [] } }))).toBe(true);
+  });
+
+  it('allows valid worker API key', () => {
+    expect(isAuthenticatedOrWorker(mockReq({ apiKey: 'test-worker-key' }))).toBe(true);
+  });
+});
+
+describe('usersReadAccess', () => {
+  it('denies anonymous', () => {
+    expect(usersReadAccess(mockReq({ user: null }))).toBe(false);
+  });
+
+  it('allows admins full read', () => {
+    expect(usersReadAccess(mockReq({ user: { id: '1', roles: ['admin'] } }))).toBe(true);
+  });
+
+  it('scopes non-admin to self', () => {
+    expect(usersReadAccess(mockReq({ user: { id: '42', roles: ['worker'] } }))).toEqual({
+      id: { equals: '42' },
+    });
+  });
+});
+
+describe('safeEqualString', () => {
+  it('compares equal strings', () => {
+    expect(safeEqualString('abc', 'abc')).toBe(true);
+    expect(safeEqualString('abc', 'abd')).toBe(false);
+    expect(safeEqualString('abc', 'ab')).toBe(false);
   });
 });

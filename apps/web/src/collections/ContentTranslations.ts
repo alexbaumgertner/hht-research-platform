@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload';
 
-import { isWorkerOrAdmin, publicRead } from '../access';
+import { isAuthenticatedOrWorker, isWorkerOrAdmin } from '../access';
 
 export const ContentTranslations: CollectionConfig = {
   slug: 'content-translations',
@@ -10,7 +10,7 @@ export const ContentTranslations: CollectionConfig = {
     defaultColumns: ['locale', 'publication', 'updatedAt'],
   },
   access: {
-    read: publicRead,
+    read: isAuthenticatedOrWorker,
     create: isWorkerOrAdmin,
     update: isWorkerOrAdmin,
     delete: isWorkerOrAdmin,

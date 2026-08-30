@@ -3,6 +3,7 @@
  * Payload only auto-pushes schema when NODE_ENV !== 'production', so this
  * script forces a one-shot push using the deployment DATABASE_URL.
  */
+import { randomUUID } from 'node:crypto';
 import { unlink } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -14,7 +15,8 @@ if (!process.env.DATABASE_URL) {
   process.exit(1);
 }
 
-process.env.PAYLOAD_SECRET ||= 'build-time-schema-push';
+// Ephemeral secret for schema push only — never serves traffic.
+process.env.PAYLOAD_SECRET ||= randomUUID();
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const generatedTypes = path.resolve(dirname, '../src/payload-types.ts');

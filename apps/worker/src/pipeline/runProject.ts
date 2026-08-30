@@ -1,10 +1,11 @@
-import { dedupeKey } from '@hht/shared';
+import { CONTENT_TRANSLATION_LOCALES, dedupeKey, type Summary } from '@hht/shared';
 import type { CmsClient } from '../cms/client.js';
 import { pubmedAdapter } from '../adapters/pubmed.js';
 import { clinicalTrialsAdapter } from '../adapters/clinicaltrials.js';
 import { rssAdapter } from '../adapters/rss.js';
 import type { SourceAdapter } from '../adapters/types.js';
 import { classifyRelevance, summarizeAndRank } from './ai.js';
+import { translateSummary } from './translate.js';
 import {
   clampBatch,
   formatDigestStepError,
@@ -19,6 +20,37 @@ const adapters: Record<'pubmed' | 'clinicaltrials' | 'rss', SourceAdapter> = {
   clinicaltrials: clinicalTrialsAdapter,
   rss: rssAdapter,
 };
+
+function shouldTranslateOnPublish(): boolean {
+  const raw = process.env.TRANSLATE_ON_PUBLISH;
+  if (raw === undefined || raw === '') return true;
+  return raw !== '0' && raw.toLowerCase() !== 'false';
+}
+
+async function pregenerateTranslations(
+  cms: CmsClient,
+  publications: Array<{ id: string | number; summary: Summary }>,
+): Promise<void> {
+  if (!shouldTranslateOnPublish()) return;
+
+  for (const pub of publications) {
+    for (const locale of CONTENT_TRANSLATION_LOCALES) {
+      try {
+        const fields = await translateSummary(pub.summary, locale);
+        await cms.createContentTranslation({
+          publication: pub.id,
+          locale,
+          fields,
+        });
+      } catch (err) {
+        console.error(
+          `[worker] translation failed for publication ${pub.id} locale=${locale}`,
+          err,
+        );
+      }
+    }
+  }
+}
 
 export type ProjectForRun = {
   id: string;
@@ -61,7 +93,7 @@ export async function runProject(
     published: 0,
   };
 
-  const qualifyingIds: Array<string | number> = [];
+  const qualifying: Array<{ id: string | number; summary: Summary }> = [];
   const since = project.lastSuccessfulRunAt ? new Date(project.lastSuccessfulRunAt) : null;
 
   for (const source of project.sources.filter((s) => s.enabled)) {
@@ -130,7 +162,7 @@ export async function runProject(
           summary,
           firstSeenRun: runId,
         });
-        qualifyingIds.push(createdPub.doc.id);
+        qualifying.push({ id: createdPub.doc.id, summary });
         accepted += 1;
       }
 
@@ -160,16 +192,18 @@ export async function runProject(
   let errorSummary: string | undefined =
     status === 'failed' ? 'No sources processed successfully' : undefined;
 
-  if (shouldPublishDigest({ qualifyingCount: qualifyingIds.length })) {
+  if (shouldPublishDigest({ qualifyingCount: qualifying.length })) {
     try {
       const digest = await cms.createDigest({
         project: project.id,
         run: runId,
         publishedAt: finishedAt,
-        publications: qualifyingIds,
+        publications: qualifying.map((q) => q.id),
       });
       digestId = digest.doc.id;
-      stats.published = qualifyingIds.length;
+      stats.published = qualifying.length;
+
+      await pregenerateTranslations(cms, qualifying);
 
       if (project.emailNotificationEnabled && project.ownerEmail) {
         await sendDigestPublishedEmail({
