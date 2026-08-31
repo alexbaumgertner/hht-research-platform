@@ -1,5 +1,8 @@
 # HHT Research Platform
 
+[![CI](https://github.com/alexbaumgertner/hht-research-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/alexbaumgertner/hht-research-platform/actions/workflows/ci.yml)
+[![Deploy worker](https://github.com/alexbaumgertner/hht-research-platform/actions/workflows/deploy-worker.yml/badge.svg)](https://github.com/alexbaumgertner/hht-research-platform/actions/workflows/deploy-worker.yml)
+
 ## EN
 
 HHT Research Platform is an open-source tool that automatically monitors PubMed, ClinicalTrials.gov, and RSS sources for a research topic you define, using AI to summarize and rank new findings in a public digest feed — no registration needed. The platform itself is topic-agnostic; its first project tracks Hereditary Hemorrhagic Telangiectasia (HHT) for the Cure HHT community, with an interface in English, German, Turkish, Russian, and Ukrainian.
