@@ -8,6 +8,7 @@ on:
       - 'packages/shared/**'
       - 'pnpm-lock.yaml'
       - '.github/workflows/deploy-worker.yml'
+      - '.github/artifact-registry-cleanup-policy.json'
   workflow_dispatch:
     inputs:
       execute_job:
@@ -62,6 +63,17 @@ jobs:
             --project="${GCP_PROJECT_ID}" \
             --region="${GCP_REGION}" \
             --image="${IMAGE}:${GITHUB_SHA}"
+
+      # Keeps Artifact Registry under the ~0.5 GiB free tier: delete untagged
+      # and >14d tagged images, but always retain the 5 most recent versions.
+      # Idempotent; AR applies deletions on a daily background job.
+      - name: Ensure Artifact Registry cleanup policies
+        run: |
+          gcloud artifacts repositories set-cleanup-policies "${GCP_AR_REPO}" \
+            --project="${GCP_PROJECT_ID}" \
+            --location="${GCP_REGION}" \
+            --policy=.github/artifact-registry-cleanup-policy.json \
+            --no-dry-run
 
       - name: Execute Cloud Run Job
         if: github.event_name == 'workflow_dispatch' && inputs.execute_job

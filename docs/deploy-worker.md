@@ -300,14 +300,17 @@ Use only when you intend to mutate production CMS data.
 
 Workflow: [`.github/workflows/deploy-worker.yml`](../.github/workflows/deploy-worker.yml).
 
-On push to `main` / `master` that touches `apps/worker/**`, `packages/shared/**`, `pnpm-lock.yaml`, or the workflow itself, CI:
+On push to `main` / `master` that touches `apps/worker/**`, `packages/shared/**`, `pnpm-lock.yaml`, the workflow, or the Artifact Registry cleanup policy file, CI:
 
 1. Authenticates to GCP with **Workload Identity Federation** (OIDC)
 2. Builds the image with `--platform linux/amd64` (required — arm64 images fail silently on Cloud Run)
 3. Pushes `:sha` and `:latest` to Artifact Registry
 4. Updates the Cloud Run Job to the sha-tagged image
+5. Re-applies Artifact Registry **cleanup policies** (keep 5 newest versions; delete untagged after 1d and other tagged images after 14d) so storage stays near the **0.5 GiB free tier**
 
 It does **not** create Artifact Registry, the Job, Scheduler, or Secret Manager secrets. Manual `workflow_dispatch` can optionally run `gcloud run jobs execute … --wait`.
+
+Cleanup policy source of truth: [`.github/artifact-registry-cleanup-policy.json`](../.github/artifact-registry-cleanup-policy.json). Artifact Registry evaluates deletions about once per day.
 
 #### One-time: GitHub ↔ GCP Workload Identity
 
@@ -324,11 +327,11 @@ export GITHUB_REPO="OWNER/REPO"   # e.g. alexbaumgertner/hht-research-platform
 gcloud iam service-accounts create github-actions-worker \
   --display-name="GitHub Actions worker deploy"
 
-# Push images
+# Push images + manage cleanup policies (free-tier retention)
 gcloud artifacts repositories add-iam-policy-binding "$AR_REPO" \
   --location="$REGION" \
   --member="serviceAccount:${DEPLOY_SA}" \
-  --role="roles/artifactregistry.writer"
+  --role="roles/artifactregistry.repoAdmin"
 
 # Update Cloud Run Job image
 gcloud projects add-iam-policy-binding "$PROJECT_ID" \

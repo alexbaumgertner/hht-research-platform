@@ -1,0 +1,26 @@
+[
+  {
+    "name": "delete-untagged",
+    "action": { "type": "Delete" },
+    "condition": {
+      "tagState": "UNTAGGED",
+      "olderThan": "1d"
+    }
+  },
+  {
+    "name": "delete-old-tagged",
+    "action": { "type": "Delete" },
+    "condition": {
+      "tagState": "TAGGED",
+      "olderThan": "14d"
+    }
+  },
+  {
+    "name": "keep-minimum-versions",
+    "action": { "type": "Keep" },
+    "mostRecentVersions": {
+      "packageNamePrefixes": ["hht-monitor-worker"],
+      "keepCount": 5
+    }
+  }
+]
