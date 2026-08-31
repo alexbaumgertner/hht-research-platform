@@ -48,6 +48,11 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
+      # apps/worker's tsconfig references the built @hht/shared, so its .d.ts
+      # must exist before `pnpm typecheck` / `pnpm test`.
+      - name: Build @hht/shared
+        run: pnpm --filter @hht/shared build
+
       - name: Lint
         run: pnpm lint
 
@@ -57,8 +62,8 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
-      - name: Build shared + worker
-        run: pnpm --filter @hht/shared build && pnpm --filter @hht/worker build
+      - name: Build worker
+        run: pnpm --filter @hht/worker build
 
       - name: Build web
         run: pnpm --filter @hht/web build
