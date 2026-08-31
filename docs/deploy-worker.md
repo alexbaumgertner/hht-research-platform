@@ -335,6 +335,13 @@ gcloud projects add-iam-policy-binding "$PROJECT_ID" \
   --member="serviceAccount:${DEPLOY_SA}" \
   --role="roles/run.developer"
 
+# Required to update a Job that runs as the default Compute SA
+export PROJECT_NUMBER="$(gcloud projects describe "$PROJECT_ID" --format='value(projectNumber)')"
+export RUNTIME_SA="${PROJECT_NUMBER}-compute@developer.gserviceaccount.com"
+gcloud iam service-accounts add-iam-policy-binding "$RUNTIME_SA" \
+  --member="serviceAccount:${DEPLOY_SA}" \
+  --role="roles/iam.serviceAccountUser"
+
 # Workload Identity Federation pool + GitHub OIDC provider
 gcloud iam workload-identity-pools create github \
   --location=global \
@@ -348,7 +355,6 @@ gcloud iam workload-identity-pools providers create-oidc github \
   --attribute-mapping="google.subject=assertion.sub,attribute.repository=assertion.repository,attribute.actor=assertion.actor" \
   --attribute-condition="assertion.repository=='${GITHUB_REPO}'"
 
-export PROJECT_NUMBER="$(gcloud projects describe "$PROJECT_ID" --format='value(projectNumber)')"
 export WIF_PROVIDER="projects/${PROJECT_NUMBER}/locations/global/workloadIdentityPools/github/providers/github"
 
 gcloud iam service-accounts add-iam-policy-binding "$DEPLOY_SA" \
