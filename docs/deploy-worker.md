@@ -106,8 +106,8 @@ gcloud auth configure-docker "${REGION}-docker.pkg.dev"
 
 export IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/${AR_REPO}/hht-monitor-worker:latest"
 
-# From repo root
-docker build -t "$IMAGE" -f apps/worker/Dockerfile .
+# From repo root — --platform linux/amd64 required when building on Apple Silicon
+docker build --platform linux/amd64 -t "$IMAGE" -f apps/worker/Dockerfile .
 docker push "$IMAGE"
 ```
 
@@ -282,7 +282,7 @@ Re-runs are idempotent on publication `dedupeKey`. Pausing a project in Admin sk
 
 ```bash
 # From repo root — WRITES REAL PRODUCTION DATA
-docker build -t hht-monitor-worker -f apps/worker/Dockerfile .
+docker build --platform linux/amd64 -t hht-monitor-worker -f apps/worker/Dockerfile .
 docker run --rm \
   -e PUBLIC_SITE_URL="https://YOUR_PRODUCTION_URL" \
   -e PAYLOAD_API_KEY="YOUR_PAYLOAD_API_KEY" \
@@ -296,8 +296,82 @@ Use only when you intend to mutate production CMS data.
 
 ## Updating the worker
 
+### Primary: GitHub Actions (CI)
+
+Workflow: [`.github/workflows/deploy-worker.yml`](../.github/workflows/deploy-worker.yml).
+
+On push to `main` / `master` that touches `apps/worker/**`, `packages/shared/**`, `pnpm-lock.yaml`, or the workflow itself, CI:
+
+1. Authenticates to GCP with **Workload Identity Federation** (OIDC)
+2. Builds the image with `--platform linux/amd64` (required — arm64 images fail silently on Cloud Run)
+3. Pushes `:sha` and `:latest` to Artifact Registry
+4. Updates the Cloud Run Job to the sha-tagged image
+
+It does **not** create Artifact Registry, the Job, Scheduler, or Secret Manager secrets. Manual `workflow_dispatch` can optionally run `gcloud run jobs execute … --wait`.
+
+#### One-time: GitHub ↔ GCP Workload Identity
+
+Create a deploy service account and bind it to GitHub Actions OIDC (replace `OWNER/REPO` with this repo):
+
 ```bash
-docker build -t "$IMAGE" -f apps/worker/Dockerfile .
+export PROJECT_ID="hht-research-platform"
+export REGION="europe-west1"
+export AR_REPO="hht-containers"
+export JOB_NAME="hht-monitor-worker"
+export DEPLOY_SA="github-actions-worker@${PROJECT_ID}.iam.gserviceaccount.com"
+export GITHUB_REPO="OWNER/REPO"   # e.g. alexbaumgertner/hht-research-platform
+
+gcloud iam service-accounts create github-actions-worker \
+  --display-name="GitHub Actions worker deploy"
+
+# Push images
+gcloud artifacts repositories add-iam-policy-binding "$AR_REPO" \
+  --location="$REGION" \
+  --member="serviceAccount:${DEPLOY_SA}" \
+  --role="roles/artifactregistry.writer"
+
+# Update Cloud Run Job image
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+  --member="serviceAccount:${DEPLOY_SA}" \
+  --role="roles/run.developer"
+
+# Workload Identity Federation pool + GitHub OIDC provider
+gcloud iam workload-identity-pools create github \
+  --location=global \
+  --display-name="GitHub Actions"
+
+gcloud iam workload-identity-pools providers create-oidc github \
+  --location=global \
+  --workload-identity-pool=github \
+  --display-name="GitHub" \
+  --issuer-uri="https://token.actions.githubusercontent.com" \
+  --attribute-mapping="google.subject=assertion.sub,attribute.repository=assertion.repository,attribute.actor=assertion.actor" \
+  --attribute-condition="assertion.repository=='${GITHUB_REPO}'"
+
+export PROJECT_NUMBER="$(gcloud projects describe "$PROJECT_ID" --format='value(projectNumber)')"
+export WIF_PROVIDER="projects/${PROJECT_NUMBER}/locations/global/workloadIdentityPools/github/providers/github"
+
+gcloud iam service-accounts add-iam-policy-binding "$DEPLOY_SA" \
+  --role="roles/iam.workloadIdentityUser" \
+  --member="principalSet://iam.googleapis.com/projects/${PROJECT_NUMBER}/locations/global/workloadIdentityPools/github/attribute.repository/${GITHUB_REPO}"
+```
+
+Add these **GitHub repository secrets** (Settings → Secrets and variables → Actions):
+
+| Secret                           | Value                                                                 |
+| -------------------------------- | --------------------------------------------------------------------- |
+| `GCP_WORKLOAD_IDENTITY_PROVIDER` | Full provider name (`$WIF_PROVIDER` above)                            |
+| `GCP_SERVICE_ACCOUNT`            | `github-actions-worker@hht-research-platform.iam.gserviceaccount.com` |
+
+Do not put `PAYLOAD_API_KEY` or `AI_GATEWAY_API_KEY` in GitHub — the Job already loads them from Secret Manager.
+
+Gate production merges with branch protection requiring the existing `CI` workflow to pass.
+
+### Fallback: manual update
+
+```bash
+# --platform linux/amd64 is required when building on Apple Silicon
+docker build --platform linux/amd64 -t "$IMAGE" -f apps/worker/Dockerfile .
 docker push "$IMAGE"
 gcloud run jobs update "$JOB_NAME" --region="$REGION" --image="$IMAGE"
 # Optional immediate run:
@@ -311,5 +385,3 @@ gcloud run jobs execute "$JOB_NAME" --region="$REGION" --wait
 - Worker overview: [`apps/worker/README.md`](../apps/worker/README.md)
 - Contract: [`specs/001-research-monitoring-mvp/contracts/monitoring-worker.md`](../specs/001-research-monitoring-mvp/contracts/monitoring-worker.md)
 - Owner setup in Admin: root [`README.md`](../README.md) (SC-001)
-
-Future improvement: GitHub Actions or Terraform to build/push and apply the Job + Scheduler (not covered here).

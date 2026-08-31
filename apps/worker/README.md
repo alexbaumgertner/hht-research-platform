@@ -14,10 +14,10 @@ Required env: `PUBLIC_SITE_URL`, `PAYLOAD_API_KEY`, `AI_GATEWAY_API_KEY`. Option
 ### Docker
 
 ```bash
-docker build -t hht-monitor-worker -f apps/worker/Dockerfile .
+docker build --platform linux/amd64 -t hht-monitor-worker -f apps/worker/Dockerfile .
 docker run --env-file .env hht-monitor-worker
 ```
 
 ### GCP deploy
 
-Full guide (Artifact Registry → Cloud Run Job → one Cloud Scheduler → connect to live Vercel): [`docs/deploy-worker.md`](../../docs/deploy-worker.md).
+Production updates go through GitHub Actions (`.github/workflows/deploy-worker.yml`) on relevant pushes to `main`. Full guide (one-time GCP setup, WIF for CI, Scheduler, Vercel connect): [`docs/deploy-worker.md`](../../docs/deploy-worker.md).

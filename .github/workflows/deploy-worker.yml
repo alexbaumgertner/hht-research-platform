@@ -1,0 +1,72 @@
+name: Deploy worker
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'apps/worker/**'
+      - 'packages/shared/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/deploy-worker.yml'
+  workflow_dispatch:
+    inputs:
+      execute_job:
+        description: Run the Cloud Run Job after updating the image
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  GCP_PROJECT_ID: hht-research-platform
+  GCP_REGION: europe-west1
+  GCP_AR_REPO: hht-containers
+  GCP_JOB_NAME: hht-monitor-worker
+  IMAGE: europe-west1-docker.pkg.dev/hht-research-platform/hht-containers/hht-monitor-worker
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Artifact Registry Docker auth
+        run: gcloud auth configure-docker "${GCP_REGION}-docker.pkg.dev" --quiet
+
+      - name: Build worker image
+        run: |
+          docker build --platform linux/amd64 \
+            -t "${IMAGE}:${GITHUB_SHA}" \
+            -t "${IMAGE}:latest" \
+            -f apps/worker/Dockerfile .
+
+      - name: Push worker image
+        run: |
+          docker push "${IMAGE}:${GITHUB_SHA}"
+          docker push "${IMAGE}:latest"
+
+      - name: Update Cloud Run Job
+        run: |
+          gcloud run jobs update "${GCP_JOB_NAME}" \
+            --project="${GCP_PROJECT_ID}" \
+            --region="${GCP_REGION}" \
+            --image="${IMAGE}:${GITHUB_SHA}"
+
+      - name: Execute Cloud Run Job
+        if: github.event_name == 'workflow_dispatch' && inputs.execute_job
+        run: |
+          gcloud run jobs execute "${GCP_JOB_NAME}" \
+            --project="${GCP_PROJECT_ID}" \
+            --region="${GCP_REGION}" \
+            --wait
