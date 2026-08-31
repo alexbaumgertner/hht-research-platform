@@ -20,18 +20,18 @@ const config: Config = defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  webServer: process.env.CI
-    ? undefined
-    : {
-        command: 'pnpm dev',
-        // Playwright only treats 2xx/3xx as ready — `/` returns 404 (locale
-        // segment required), so probe a real locale route instead.
-        url: `${baseURL}/en`,
-        reuseExistingServer: !process.env.CI,
-        timeout: 120_000,
-        stdout: 'pipe',
-        stderr: 'pipe',
-      },
+  webServer: {
+    // CI runs against a production build (`next start`, needs a prior
+    // `pnpm --filter @hht/web build`); locally use the dev server.
+    command: process.env.CI ? 'pnpm start' : 'pnpm dev',
+    // Playwright only treats 2xx/3xx as ready — `/` returns 404 (locale
+    // segment required), so probe a real locale route instead.
+    url: `${baseURL}/en`,
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
+    stdout: 'pipe',
+    stderr: 'pipe',
+  },
 });
 
 export default config;
