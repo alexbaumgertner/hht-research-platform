@@ -327,11 +327,16 @@ export GITHUB_REPO="OWNER/REPO"   # e.g. alexbaumgertner/hht-research-platform
 gcloud iam service-accounts create github-actions-worker \
   --display-name="GitHub Actions worker deploy"
 
-# Push images + manage cleanup policies (free-tier retention)
+# Push images + manage cleanup policies (needs repositories.update)
 gcloud artifacts repositories add-iam-policy-binding "$AR_REPO" \
   --location="$REGION" \
   --member="serviceAccount:${DEPLOY_SA}" \
-  --role="roles/artifactregistry.repoAdmin"
+  --role="roles/artifactregistry.admin"
+
+# Project-level also required for set-cleanup-policies in CI
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+  --member="serviceAccount:${DEPLOY_SA}" \
+  --role="roles/artifactregistry.admin"
 
 # Update Cloud Run Job image
 gcloud projects add-iam-policy-binding "$PROJECT_ID" \
