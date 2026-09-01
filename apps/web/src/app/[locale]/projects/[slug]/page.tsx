@@ -55,7 +55,7 @@ export default async function ProjectFeedPage({ params }: Props) {
       </div>
 
       <Suspense fallback={null}>
-        <MaterialsFeed materials={docs} locale={locale} />
+        <MaterialsFeed materials={docs} locale={locale} slug={slug} />
       </Suspense>
     </Stack>
   );

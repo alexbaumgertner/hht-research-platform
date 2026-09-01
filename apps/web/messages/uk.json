@@ -42,7 +42,10 @@
     "whyItMatters": "Чому це важливо",
     "originalLink": "Відкрити першоджерело",
     "backToFeed": "Назад до стрічки",
-    "translationFallback": "Відкрити машинний переклад"
+    "abstractHeading": "Анотація",
+    "notFound": "Цей матеріал не знайдено.",
+    "loadError": "Не вдалося завантажити цей матеріал. Спробуйте ще раз.",
+    "retry": "Повторити"
   },
   "LocaleSwitcher": {
     "label": "Мова"

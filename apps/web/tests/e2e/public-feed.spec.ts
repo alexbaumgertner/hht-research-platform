@@ -14,7 +14,6 @@ test.describe('public materials feed', () => {
 
     // No digest headings / no add-edit-delete controls
     await expect(page.getByRole('button', { name: /add|edit|delete|create/i })).toHaveCount(0);
-    await expect(page.locator('a[href*="/publications/"]')).toHaveCount(0);
 
     // Source badges (five categories)
     for (const label of [/PubMed/i, /Clinical trials/i, /News/i, /Guideline/i, /Social/i]) {
@@ -24,12 +23,12 @@ test.describe('public materials feed', () => {
     // High-importance treatment (text label, not colour alone)
     await expect(page.getByText(/High importance/i).first()).toBeVisible();
 
-    // Title links open externally in a new tab
-    const external = page.locator('article a[target="_blank"][rel*="noopener"]').first();
-    await expect(external).toBeVisible();
-    const href = await external.getAttribute('href');
-    expect(href).toMatch(/^https?:\/\//);
-    expect(href).not.toContain('/publications/');
+    // Title links go to the on-site detail page (same tab)
+    const titleLink = page.locator('article a[href*="/publications/"]').first();
+    await expect(titleLink).toBeVisible();
+    await expect(titleLink).not.toHaveAttribute('target', '_blank');
+    await expect(page.locator('article a[target="_blank"]')).toHaveCount(0);
+    await expect(page.getByText(/opens in a new tab/i)).toHaveCount(0);
   });
 
   test('filters: search, chips, importance, combined, clear', async ({ page }) => {

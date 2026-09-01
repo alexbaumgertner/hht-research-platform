@@ -122,11 +122,11 @@ async function seed() {
       startedAt: new Date().toISOString(),
       finishedAt: new Date().toISOString(),
       stats: {
-        candidates: 7,
+        candidates: 8,
         deduped: 0,
         irrelevant: 0,
-        summarized: 7,
-        published: 7,
+        summarized: 8,
+        published: 8,
       },
     },
     overrideAccess: true,
@@ -142,6 +142,7 @@ async function seed() {
     publishedOrUpdatedAt?: string | null;
     url: string;
     translateDe?: boolean;
+    includeAbstract?: boolean;
   }> = [
     {
       key: 'pubmed-high',
@@ -213,6 +214,17 @@ async function seed() {
       publishedOrUpdatedAt: null,
       url: 'https://clinicaltrials.gov/study/NCTSEEDNODATE',
     },
+    {
+      key: 'no-abstract',
+      title: 'Trial protocol with summary but no stored abstract',
+      importance: 'medium',
+      sourceType: 'clinicaltrials',
+      monitoredSource: trialsSource,
+      objective: 'Protocol summary without collected abstract text.',
+      publishedOrUpdatedAt: '2026-08-06T10:00:00.000Z',
+      url: 'https://clinicaltrials.gov/study/NCTSEEDNOABS',
+      includeAbstract: false,
+    },
   ];
 
   const publicationIds: Array<string | number> = [];
@@ -238,7 +250,9 @@ async function seed() {
           project: projectId,
           dedupeKey: `seed:${slug}:${sample.key}`,
           title: sample.title,
-          abstractOrBody: sample.objective || sample.title,
+          ...(sample.includeAbstract === false
+            ? {}
+            : { abstractOrBody: sample.objective || sample.title }),
           sourceType: sample.sourceType,
           originalUrl: sample.url,
           relevance: 'relevant',
@@ -309,7 +323,41 @@ async function seed() {
     overrideAccess: true,
   });
 
+  const unpublishedExisting = await payload.find({
+    collection: 'publications',
+    where: {
+      and: [
+        { project: { equals: projectId } },
+        { dedupeKey: { equals: `seed:${slug}:unpublished` } },
+      ],
+    },
+    limit: 1,
+    overrideAccess: true,
+  });
+  let unpublishedId = unpublishedExisting.docs[0]?.id;
+  if (!unpublishedId) {
+    const unpublished = await payload.create({
+      collection: 'publications',
+      data: {
+        project: projectId,
+        dedupeKey: `seed:${slug}:unpublished`,
+        title: 'Unpublished item that must not appear publicly',
+        abstractOrBody: 'Secret abstract that must not leak.',
+        sourceType: 'pubmed',
+        originalUrl: 'https://example.com/unpublished',
+        relevance: 'relevant',
+        importance: 'high',
+        firstSeenRun: run.id,
+        monitoredSource: pubmedSource,
+        externalIds: { pmid: 'SEED-unpublished' },
+      },
+      overrideAccess: true,
+    });
+    unpublishedId = unpublished.id;
+  }
+
   console.log(`Seeded project "${slug}" with ${publicationIds.length} materials.`);
+  console.log(`Unpublished id for not-found check: ${unpublishedId}`);
   process.exit(0);
 }
 

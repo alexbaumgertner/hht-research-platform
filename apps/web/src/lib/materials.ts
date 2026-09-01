@@ -20,6 +20,31 @@ export type Material = {
   isFallback: boolean;
 };
 
+export const SUMMARY_SECTION_KEYS = [
+  'objective',
+  'methods',
+  'results',
+  'limitations',
+  'whyItMatters',
+] as const;
+
+export type SummarySectionKey = (typeof SUMMARY_SECTION_KEYS)[number];
+export type DetailSummary = Partial<Record<SummarySectionKey, string>>;
+
+export type MaterialDetail = {
+  id: string;
+  source: MaterialSourceOrFallback;
+  importance: DisplayImportance;
+  date: string | null;
+  originalUrl: string | null;
+  title: string;
+  summary: DetailSummary;
+  abstractOrBody: string | null;
+  displayedLocale: Locale;
+  isFallback: boolean;
+  abstractIsFallback: boolean;
+};
+
 /** Ordered chip set for the source filter (FR-025). */
 export const MATERIAL_SOURCES: readonly MaterialSource[] = [
   'pubmed',
@@ -42,6 +67,7 @@ export type PublicationForMaterial = {
   importance?: Importance | null;
   publishedOrUpdatedAt?: string | null;
   originalUrl?: string | null;
+  abstractOrBody?: string | null;
   summary?: Partial<Summary> | null;
   monitoredSource?:
     | {
@@ -107,6 +133,22 @@ export type LocalizedContent = {
   isFallback: boolean;
 };
 
+export type LocalizedDetailContent = {
+  title: string;
+  summary: DetailSummary;
+  displayedLocale: Locale;
+  isFallback: boolean;
+};
+
+export function pickNonEmptySections(summary: Partial<Summary> | null | undefined): DetailSummary {
+  const out: DetailSummary = {};
+  for (const key of SUMMARY_SECTION_KEYS) {
+    const value = summary?.[key]?.trim();
+    if (value) out[key] = value;
+  }
+  return out;
+}
+
 /**
  * R5 locale resolution for title + summary.
  * Partial miss → English with isFallback.
@@ -143,6 +185,46 @@ export function resolveLocalizedContent(input: {
   return {
     title: englishTitle,
     summary: englishPreview,
+    displayedLocale: 'en',
+    isFallback: true,
+  };
+}
+
+/**
+ * Locale resolution for the detail page: full summary sections, empty keys omitted.
+ */
+export function resolveLocalizedDetail(input: {
+  locale: Locale;
+  englishTitle: string;
+  englishSummary: Partial<Summary> | null | undefined;
+  translation?: TranslationForMaterial | null;
+}): LocalizedDetailContent {
+  const { locale, englishTitle, englishSummary, translation } = input;
+  const englishSections = pickNonEmptySections(englishSummary);
+
+  if (locale === 'en') {
+    return {
+      title: englishTitle,
+      summary: englishSections,
+      displayedLocale: 'en',
+      isFallback: false,
+    };
+  }
+
+  const translatedTitle = translation?.title?.trim();
+  const translatedFields = translation?.fields;
+  if (translatedTitle && hasCompleteSummary(translatedFields)) {
+    return {
+      title: translatedTitle,
+      summary: pickNonEmptySections(translatedFields),
+      displayedLocale: locale,
+      isFallback: false,
+    };
+  }
+
+  return {
+    title: englishTitle,
+    summary: englishSections,
     displayedLocale: 'en',
     isFallback: true,
   };
@@ -196,6 +278,45 @@ export function toMaterial(
     summary: localized.summary,
     displayedLocale: localized.displayedLocale,
     isFallback: localized.isFallback,
+  };
+}
+
+/** Internal publication → reader-facing Material Detail (003). */
+export function toMaterialDetail(
+  publication: PublicationForMaterial,
+  locale: Locale,
+  translation?: TranslationForMaterial | null,
+): MaterialDetail {
+  const source = resolveSource(
+    publication.sourceType,
+    extractDisplayCategory(publication.monitoredSource),
+  );
+  const importance = collapseImportance(publication.importance);
+  const date = publication.publishedOrUpdatedAt ?? null;
+  const originalUrl = sanitizeHttpUrl(publication.originalUrl);
+
+  const localized = resolveLocalizedDetail({
+    locale,
+    englishTitle: publication.title?.trim() || '',
+    englishSummary: publication.summary,
+    translation,
+  });
+
+  const title = localized.title.trim() || placeholderTitle(source, date);
+  const abstractOrBody = publication.abstractOrBody?.trim() || null;
+
+  return {
+    id: String(publication.id),
+    source,
+    importance,
+    date,
+    originalUrl,
+    title,
+    summary: localized.summary,
+    abstractOrBody,
+    displayedLocale: localized.displayedLocale,
+    isFallback: localized.isFallback,
+    abstractIsFallback: Boolean(abstractOrBody) && locale !== 'en',
   };
 }
 

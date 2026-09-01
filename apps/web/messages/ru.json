@@ -42,7 +42,10 @@
     "whyItMatters": "Почему это важно",
     "originalLink": "Открыть первоисточник",
     "backToFeed": "Назад к ленте",
-    "translationFallback": "Открыть машинный перевод"
+    "abstractHeading": "Аннотация",
+    "notFound": "Этот материал не найден.",
+    "loadError": "Не удалось загрузить этот материал. Попробуйте ещё раз.",
+    "retry": "Повторить"
   },
   "LocaleSwitcher": {
     "label": "Язык"

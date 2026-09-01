@@ -1,81 +1,47 @@
+import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { Anchor, Stack, Text, Title } from '@mantine/core';
-import { sanitizeHttpUrl } from '@hht/shared';
+import { Stack } from '@mantine/core';
+
+import { MaterialDetailView } from '@/components/MaterialDetailView';
 import { TextLink } from '@/components/TextLink';
+import type { MaterialDetail } from '@/lib/materials';
 import { getPublicSiteUrl } from '@/lib/siteUrl';
 
 type Props = {
   params: Promise<{ locale: string; slug: string; publicationId: string }>;
 };
 
-type PublicationResponse = {
-  id: string;
-  title: string;
-  originalUrl: string;
-  importance: string | null;
-  locale: string;
-  summary: {
-    objective: string;
-    methods: string;
-    results: string;
-    limitations: string;
-    whyItMatters: string;
-  };
-  translationFallbackUrl: string | null;
-};
-
-async function fetchPublication(baseUrl: string, id: string, locale: string) {
+async function fetchMaterialDetail(
+  baseUrl: string,
+  slug: string,
+  id: string,
+  locale: string,
+): Promise<MaterialDetail | 'not-found'> {
   const res = await fetch(
-    `${baseUrl}/api/public/publications/${id}?locale=${encodeURIComponent(locale)}`,
+    `${baseUrl}/api/public/projects/${slug}/materials/${id}?locale=${encodeURIComponent(locale)}`,
     { cache: 'no-store' },
   );
-  if (!res.ok) return null;
-  return res.json() as Promise<PublicationResponse>;
+  if (res.status === 404) return 'not-found';
+  if (!res.ok) throw new Error('Failed to load material');
+  return res.json() as Promise<MaterialDetail>;
 }
 
 export default async function PublicationPage({ params }: Props) {
   const { locale, slug, publicationId } = await params;
   const t = await getTranslations('Publication');
   const baseUrl = getPublicSiteUrl();
-  const pub = await fetchPublication(baseUrl, publicationId, locale);
+  const detail = await fetchMaterialDetail(baseUrl, slug, publicationId, locale);
 
-  if (!pub) {
-    return <Text>Not found</Text>;
+  if (detail === 'not-found') {
+    notFound();
   }
 
-  const originalUrl = sanitizeHttpUrl(pub.originalUrl);
-  const translationFallbackUrl = sanitizeHttpUrl(pub.translationFallbackUrl);
-
-  const sections = [
-    { key: 'objective' as const, label: t('objective') },
-    { key: 'methods' as const, label: t('methods') },
-    { key: 'results' as const, label: t('results') },
-    { key: 'limitations' as const, label: t('limitations') },
-    { key: 'whyItMatters' as const, label: t('whyItMatters') },
-  ];
-
   return (
-    <Stack gap="lg">
+    <Stack gap="lg" maw={720} mx="auto" w="100%">
       <TextLink href={`/projects/${slug}`} size="sm">
         {t('backToFeed')}
       </TextLink>
-      <Title order={1}>{pub.title}</Title>
-      {originalUrl ? (
-        <Anchor href={originalUrl} target="_blank" rel="noopener noreferrer">
-          {t('originalLink')}
-        </Anchor>
-      ) : null}
-      {translationFallbackUrl ? (
-        <Anchor href={translationFallbackUrl} target="_blank" rel="noopener noreferrer">
-          {t('translationFallback')}
-        </Anchor>
-      ) : null}
-      {sections.map((section) => (
-        <Stack key={section.key} gap={4}>
-          <Title order={3}>{section.label}</Title>
-          <Text>{pub.summary[section.key]}</Text>
-        </Stack>
-      ))}
+      <MaterialDetailView detail={detail} locale={locale} />
     </Stack>
   );
 }

@@ -42,7 +42,10 @@
     "whyItMatters": "Warum es wichtig ist",
     "originalLink": "Originalquelle ansehen",
     "backToFeed": "Zurück zum Feed",
-    "translationFallback": "Maschinenübersetzung öffnen"
+    "abstractHeading": "Abstract",
+    "notFound": "Dieses Material wurde nicht gefunden.",
+    "loadError": "Dieses Material konnte nicht geladen werden. Bitte erneut versuchen.",
+    "retry": "Erneut versuchen"
   },
   "LocaleSwitcher": {
     "label": "Sprache"

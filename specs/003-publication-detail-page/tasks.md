@@ -28,8 +28,8 @@ Monorepo: `apps/web/` only (UI, public API, messages, E2E). No `apps/worker/` or
 
 **Purpose**: Shared view-model type and reader-facing copy so later phases use one vocabulary
 
-- [ ] T001 Define `MaterialDetail` (id, source, importance, date, originalUrl, title, summary with optional section keys, abstractOrBody, displayedLocale, isFallback, abstractIsFallback) in `apps/web/src/lib/materials.ts` alongside the existing `Material` type
-- [ ] T002 [P] Add `Publication` keys `notFound`, `loadError`, `retry`, `abstractHeading` (and keep `originalLink` / `backToFeed` / section headings) using “material” never “publication” in `apps/web/messages/en.json`, `apps/web/messages/de.json`, `apps/web/messages/tr.json`, `apps/web/messages/ru.json`, and `apps/web/messages/uk.json`
+- [x] T001 Define `MaterialDetail` (id, source, importance, date, originalUrl, title, summary with optional section keys, abstractOrBody, displayedLocale, isFallback, abstractIsFallback) in `apps/web/src/lib/materials.ts` alongside the existing `Material` type
+- [x] T002 [P] Add `Publication` keys `notFound`, `loadError`, `retry`, `abstractHeading` (and keep `originalLink` / `backToFeed` / section headings) using “material” never “publication” in `apps/web/messages/en.json`, `apps/web/messages/de.json`, `apps/web/messages/tr.json`, `apps/web/messages/ru.json`, and `apps/web/messages/uk.json`
 
 ---
 
@@ -39,11 +39,11 @@ Monorepo: `apps/web/` only (UI, public API, messages, E2E). No `apps/worker/` or
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T003 Implement `toMaterialDetail` in `apps/web/src/lib/materials.ts` per `data-model.md` and `research.md` R7–R9: reuse `resolveSource`, `collapseImportance`, `placeholderTitle`; omit empty summary keys; `abstractOrBody` trimmed or `null`; `abstractIsFallback` true only when abstract is present and requested locale is not `en`
-- [ ] T004 [P] Add Jest cases for empty-section omit, null abstract, importance collapse, placeholder title, and `abstractIsFallback` in `apps/web/src/lib/materials.test.ts`
-- [ ] T005 Implement `GET` in `apps/web/src/app/api/public/projects/[slug]/materials/[id]/route.ts` per `contracts/material-detail-api.md`: public, `locale` query default `en`, 400 on invalid locale, 404 with `{ "error": "Not found" }` when id missing **or** project slug mismatches **or** `feedPublishedAt` unset, 200 with `toMaterialDetail` otherwise (missing summary is 200, not 404)
-- [ ] T006 [P] Delete `apps/web/src/app/api/public/publications/[id]/route.ts` (Payload `/api/publications` must stay)
-- [ ] T007 Confirm no remaining imports or fetches of `/api/public/publications/` under `apps/web/` (page rewrite in US1 will be the last consumer — leave a failing grep note if the old page still calls it until T012)
+- [x] T003 Implement `toMaterialDetail` in `apps/web/src/lib/materials.ts` per `data-model.md` and `research.md` R7–R9: reuse `resolveSource`, `collapseImportance`, `placeholderTitle`; omit empty summary keys; `abstractOrBody` trimmed or `null`; `abstractIsFallback` true only when abstract is present and requested locale is not `en`
+- [x] T004 [P] Add Jest cases for empty-section omit, null abstract, importance collapse, placeholder title, and `abstractIsFallback` in `apps/web/src/lib/materials.test.ts`
+- [x] T005 Implement `GET` in `apps/web/src/app/api/public/projects/[slug]/materials/[id]/route.ts` per `contracts/material-detail-api.md`: public, `locale` query default `en`, 400 on invalid locale, 404 with `{ "error": "Not found" }` when id missing **or** project slug mismatches **or** `feedPublishedAt` unset, 200 with `toMaterialDetail` otherwise (missing summary is 200, not 404)
+- [x] T006 [P] Delete `apps/web/src/app/api/public/publications/[id]/route.ts` (Payload `/api/publications` must stay)
+- [x] T007 Confirm no remaining imports or fetches of `/api/public/publications/` under `apps/web/` (page rewrite in US1 will be the last consumer — leave a failing grep note if the old page still calls it until T012)
 
 **Checkpoint**: Mapping and gated detail GET exist; unpublished IDs 404; user-story UI can begin
 
@@ -59,17 +59,17 @@ Monorepo: `apps/web/` only (UI, public API, messages, E2E). No `apps/worker/` or
 
 > Write these first; they MUST fail against the current outbound-title feed and summary-only detail page
 
-- [ ] T008 [P] [US1] Rewrite `apps/web/tests/e2e/public-feed.spec.ts` so titles are same-tab links containing `/publications/`, there are zero `article a[target="_blank"]` on the feed, and zero visible “opens in a new tab” (invert the 002 assertions)
-- [ ] T009 [P] [US1] Add `apps/web/tests/e2e/public-material-detail.spec.ts` asserting content order (source/summary before abstract), omitted empty abstract, not-found copy for a bogus id, and no loading spinner on the happy path
-- [ ] T010 [P] [US1] Extend `apps/web/src/scripts/seed-public-feed.ts` so at least one published material has `abstractOrBody`, one published material has none, one has empty summary sections, and one unpublished publication id is logged for the not-found check
+- [x] T008 [P] [US1] Rewrite `apps/web/tests/e2e/public-feed.spec.ts` so titles are same-tab links containing `/publications/`, there are zero `article a[target="_blank"]` on the feed, and zero visible “opens in a new tab” (invert the 002 assertions)
+- [x] T009 [P] [US1] Add `apps/web/tests/e2e/public-material-detail.spec.ts` asserting content order (source/summary before abstract), omitted empty abstract, not-found copy for a bogus id, and no loading spinner on the happy path
+- [x] T010 [P] [US1] Extend `apps/web/src/scripts/seed-public-feed.ts` so at least one published material has `abstractOrBody`, one published material has none, one has empty summary sections, and one unpublished publication id is logged for the not-found check
 
 ### Implementation for User Story 1
 
-- [ ] T011 [P] [US1] Implement `apps/web/src/components/MaterialDetailView.tsx` in FR-025 order: header (title, `SourceBadge`, date when known, high-importance accent/tint/muted label on the header only) → populated summary headings → full abstract block (omit if null); no original-publication link yet (US2)
-- [ ] T012 [US1] Rewrite `apps/web/src/app/[locale]/projects/[slug]/publications/[publicationId]/page.tsx` to fetch `GET /api/public/projects/{slug}/materials/{id}?locale=`: 404 → `notFound()`, non-OK → throw, 200 → `MaterialDetailView`; `cache: 'no-store'`; back-to-feed `TextLink` to `/projects/{slug}`
-- [ ] T013 [P] [US1] Add `apps/web/src/app/[locale]/projects/[slug]/publications/[publicationId]/not-found.tsx` with distinct not-found copy and a back-to-feed link (FR-030) — wording must differ from load-error
-- [ ] T014 [P] [US1] Add `apps/web/src/app/[locale]/projects/[slug]/publications/[publicationId]/error.tsx` with distinct load-error copy and `reset()` retry (FR-031), leaving locale layout chrome in place
-- [ ] T015 [US1] Change `apps/web/src/components/MaterialCard.tsx` so the title is a next-intl `Link` to `/projects/{slug}/publications/{id}` (same tab), remove visible `opensInNewTab`, and stop using `material.url`; pass `slug` through `apps/web/src/components/MaterialsFeed.tsx` from `apps/web/src/app/[locale]/projects/[slug]/page.tsx`
+- [x] T011 [P] [US1] Implement `apps/web/src/components/MaterialDetailView.tsx` in FR-025 order: header (title, `SourceBadge`, date when known, high-importance accent/tint/muted label on the header only) → populated summary headings → full abstract block (omit if null); no original-publication link yet (US2)
+- [x] T012 [US1] Rewrite `apps/web/src/app/[locale]/projects/[slug]/publications/[publicationId]/page.tsx` to fetch `GET /api/public/projects/{slug}/materials/{id}?locale=`: 404 → `notFound()`, non-OK → throw, 200 → `MaterialDetailView`; `cache: 'no-store'`; back-to-feed `TextLink` to `/projects/{slug}`
+- [x] T013 [P] [US1] Add `apps/web/src/app/[locale]/projects/[slug]/publications/[publicationId]/not-found.tsx` with distinct not-found copy and a back-to-feed link (FR-030) — wording must differ from load-error
+- [x] T014 [P] [US1] Add `apps/web/src/app/[locale]/projects/[slug]/publications/[publicationId]/error.tsx` with distinct load-error copy and `reset()` retry (FR-031), leaving locale layout chrome in place
+- [x] T015 [US1] Change `apps/web/src/components/MaterialCard.tsx` so the title is a next-intl `Link` to `/projects/{slug}/publications/{id}` (same tab), remove visible `opensInNewTab`, and stop using `material.url`; pass `slug` through `apps/web/src/components/MaterialsFeed.tsx` from `apps/web/src/app/[locale]/projects/[slug]/page.tsx`
 
 **Checkpoint**: User Story 1 is a usable MVP — open the feed, open a material on-site, read summary then abstract without leaving
 
@@ -83,11 +83,11 @@ Monorepo: `apps/web/` only (UI, public API, messages, E2E). No `apps/worker/` or
 
 ### Tests for User Story 2
 
-- [ ] T016 [P] [US2] Extend `apps/web/tests/e2e/public-material-detail.spec.ts` to assert the original-source control has `target="_blank"` and `rel` containing `noopener`, sits in the header (not between summary and abstract), and is absent when `originalUrl` is null
+- [x] T016 [P] [US2] Extend `apps/web/tests/e2e/public-material-detail.spec.ts` to assert the original-source control has `target="_blank"` and `rel` containing `noopener`, sits in the header (not between summary and abstract), and is absent when `originalUrl` is null
 
 ### Implementation for User Story 2
 
-- [ ] T017 [US2] Add the original-publication `Anchor` to `apps/web/src/components/MaterialDetailView.tsx` in the header: sanitized `originalUrl` only, `target="_blank"` `rel="noopener noreferrer"`, visible label from `Publication.originalLink` (no word “publication”), `aria-label` that includes new-tab meaning via `Materials.opensInNewTab` without rendering that string visibly (FR-014, FR-026, FR-027)
+- [x] T017 [US2] Add the original-publication `Anchor` to `apps/web/src/components/MaterialDetailView.tsx` in the header: sanitized `originalUrl` only, `target="_blank"` `rel="noopener noreferrer"`, visible label from `Publication.originalLink` (no word “publication”), `aria-label` that includes new-tab meaning via `Materials.opensInNewTab` without rendering that string visibly (FR-014, FR-026, FR-027)
 
 **Checkpoint**: User Stories 1 and 2 both work — read on-site, then optionally open the publisher in a new tab
 
@@ -101,13 +101,13 @@ Monorepo: `apps/web/` only (UI, public API, messages, E2E). No `apps/worker/` or
 
 ### Tests for User Story 3
 
-- [ ] T018 [P] [US3] Add Jest cases for `displayedLocale` / `isFallback` on title+summary and `abstractIsFallback` in `apps/web/src/lib/materials.test.ts`
-- [ ] T019 [P] [US3] Extend `apps/web/tests/e2e/public-material-detail.spec.ts` to switch locale and assert translated section headings plus a fallback note when summary or abstract is not in the active language
+- [x] T018 [P] [US3] Add Jest cases for `displayedLocale` / `isFallback` on title+summary and `abstractIsFallback` in `apps/web/src/lib/materials.test.ts`
+- [x] T019 [P] [US3] Extend `apps/web/tests/e2e/public-material-detail.spec.ts` to switch locale and assert translated section headings plus a fallback note when summary or abstract is not in the active language
 
 ### Implementation for User Story 3
 
-- [ ] T020 [US3] Render the feed-style fallback note on `apps/web/src/components/MaterialDetailView.tsx` when `isFallback` and/or `abstractIsFallback`; do not render `translationFallbackUrl` / “Open machine translation”
-- [ ] T021 [US3] Finish every `Publication` key used by the detail page in `apps/web/messages/en.json`, `apps/web/messages/de.json`, `apps/web/messages/tr.json`, `apps/web/messages/ru.json`, and `apps/web/messages/uk.json`, and remove unused `translationFallback` if nothing else reads it
+- [x] T020 [US3] Render the feed-style fallback note on `apps/web/src/components/MaterialDetailView.tsx` when `isFallback` and/or `abstractIsFallback`; do not render `translationFallbackUrl` / “Open machine translation”
+- [x] T021 [US3] Finish every `Publication` key used by the detail page in `apps/web/messages/en.json`, `apps/web/messages/de.json`, `apps/web/messages/tr.json`, `apps/web/messages/ru.json`, and `apps/web/messages/uk.json`, and remove unused `translationFallback` if nothing else reads it
 
 **Checkpoint**: All three stories are independently functional — on-site reading, original link, five-locale chrome
 
@@ -117,11 +117,11 @@ Monorepo: `apps/web/` only (UI, public API, messages, E2E). No `apps/worker/` or
 
 **Purpose**: Accessibility, layout, leftover surfaces, and quickstart sign-off
 
-- [ ] T022 [P] Verify keyboard tab order and visible focus on feed title, back-to-feed, original link, and load-error retry in `apps/web/src/components/MaterialCard.tsx`, `apps/web/src/components/MaterialDetailView.tsx`, `apps/web/src/app/[locale]/projects/[slug]/publications/[publicationId]/error.tsx`, and `apps/web/src/app/[locale]/projects/[slug]/publications/[publicationId]/not-found.tsx` (FR-023)
-- [ ] T023 [P] Confirm single-column wrap at 320px with no horizontal scroll in `apps/web/src/components/MaterialDetailView.tsx` and `apps/web/src/app/[locale]/projects/[slug]/publications/[publicationId]/page.tsx` (FR-022)
-- [ ] T024 Grep reader-facing strings under `apps/web/messages/` and the detail UI so the word “publication” does not appear in copy a reader can see (FR-021); URL path `/publications/` may remain (`research.md` R12)
-- [ ] T025 [P] Smoke that `GET /api/public/publications/:id` is gone (404, not a JSON body) and that `apps/web/tests/e2e/i18n-locales.spec.ts` still passes
-- [ ] T026 Run the full [quickstart.md](./quickstart.md) gate: `seed:public-feed`, manual table in all five locales, `pnpm --filter @hht/web test`, `pnpm --filter @hht/web test:e2e`, lint, typecheck, and production build
+- [x] T022 [P] Verify keyboard tab order and visible focus on feed title, back-to-feed, original link, and load-error retry in `apps/web/src/components/MaterialCard.tsx`, `apps/web/src/components/MaterialDetailView.tsx`, `apps/web/src/app/[locale]/projects/[slug]/publications/[publicationId]/error.tsx`, and `apps/web/src/app/[locale]/projects/[slug]/publications/[publicationId]/not-found.tsx` (FR-023)
+- [x] T023 [P] Confirm single-column wrap at 320px with no horizontal scroll in `apps/web/src/components/MaterialDetailView.tsx` and `apps/web/src/app/[locale]/projects/[slug]/publications/[publicationId]/page.tsx` (FR-022)
+- [x] T024 Grep reader-facing strings under `apps/web/messages/` and the detail UI so the word “publication” does not appear in copy a reader can see (FR-021); URL path `/publications/` may remain (`research.md` R12)
+- [x] T025 [P] Smoke that `GET /api/public/publications/:id` is gone (404, not a JSON body) and that `apps/web/tests/e2e/i18n-locales.spec.ts` still passes
+- [x] T026 Run the full [quickstart.md](./quickstart.md) gate: `seed:public-feed`, manual table in all five locales, `pnpm --filter @hht/web test`, `pnpm --filter @hht/web test:e2e`, lint, typecheck, and production build
 
 ---
 

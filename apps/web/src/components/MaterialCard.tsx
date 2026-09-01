@@ -4,14 +4,16 @@ import { Box, Group, Stack, Text } from '@mantine/core';
 import { useTranslations } from 'next-intl';
 
 import { SourceBadge } from '@/components/SourceBadge';
+import { TextLink } from '@/components/TextLink';
 import type { Material } from '@/lib/materials';
 
 type Props = {
   material: Material;
   locale: string;
+  slug: string;
 };
 
-export function MaterialCard({ material, locale }: Props) {
+export function MaterialCard({ material, locale, slug }: Props) {
   const t = useTranslations('Materials');
   const isHigh = material.importance === 'high';
   const dateLabel = material.date
@@ -21,22 +23,6 @@ export function MaterialCard({ material, locale }: Props) {
         day: 'numeric',
       })
     : null;
-
-  const titleContent = material.url ? (
-    <a
-      href={material.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      style={{ fontWeight: 600, color: 'inherit', textDecoration: 'underline' }}
-    >
-      {material.title}
-      <Text component="span" size="xs" c="dimmed" ml={6}>
-        {t('opensInNewTab')}
-      </Text>
-    </a>
-  ) : (
-    <Text fw={600}>{material.title}</Text>
-  );
 
   return (
     <Box
@@ -63,7 +49,13 @@ export function MaterialCard({ material, locale }: Props) {
             </Text>
           ) : null}
         </Group>
-        {titleContent}
+        <TextLink
+          href={`/projects/${slug}/publications/${material.id}`}
+          fw={600}
+          underline="always"
+        >
+          {material.title}
+        </TextLink>
         {material.summary ? (
           <Text size="sm" c="dimmed" lineClamp={3}>
             {material.summary}

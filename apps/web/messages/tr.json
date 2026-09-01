@@ -42,7 +42,10 @@
     "whyItMatters": "Neden önemli",
     "originalLink": "Orijinal kaynağı görüntüle",
     "backToFeed": "Akışa dön",
-    "translationFallback": "Makine çevirisini aç"
+    "abstractHeading": "Özet",
+    "notFound": "Bu materyal bulunamadı.",
+    "loadError": "Bu materyal yüklenemedi. Lütfen yeniden deneyin.",
+    "retry": "Yeniden dene"
   },
   "LocaleSwitcher": {
     "label": "Dil"

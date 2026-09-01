@@ -42,7 +42,10 @@
     "whyItMatters": "Why it matters",
     "originalLink": "View original source",
     "backToFeed": "Back to feed",
-    "translationFallback": "Open machine translation"
+    "abstractHeading": "Abstract",
+    "notFound": "This material could not be found.",
+    "loadError": "This material could not be loaded. Please try again.",
+    "retry": "Retry"
   },
   "LocaleSwitcher": {
     "label": "Language"

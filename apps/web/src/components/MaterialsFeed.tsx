@@ -21,6 +21,7 @@ import {
 type Props = {
   materials: Material[];
   locale: string;
+  slug: string;
 };
 
 function parseSources(raw: string | null): MaterialSource[] {
@@ -32,7 +33,7 @@ function parseSources(raw: string | null): MaterialSource[] {
     .filter((s): s is MaterialSource => allowed.has(s));
 }
 
-export function MaterialsFeed({ materials, locale }: Props) {
+export function MaterialsFeed({ materials, locale, slug }: Props) {
   const t = useTranslations('Materials');
   const router = useRouter();
   const pathname = usePathname();
@@ -106,7 +107,7 @@ export function MaterialsFeed({ materials, locale }: Props) {
       ) : (
         <Stack gap="sm">
           {filtered.map((material) => (
-            <MaterialCard key={material.id} material={material} locale={locale} />
+            <MaterialCard key={material.id} material={material} locale={locale} slug={slug} />
           ))}
         </Stack>
       )}

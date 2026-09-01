@@ -3,11 +3,14 @@ import type { Summary } from '@hht/shared';
 import {
   collapseImportance,
   filterMaterials,
+  pickNonEmptySections,
   placeholderTitle,
   resolveEmptyState,
   resolveLocalizedContent,
+  resolveLocalizedDetail,
   resolveSource,
   toMaterial,
+  toMaterialDetail,
 } from './materials';
 
 const fullSummary: Summary = {
@@ -266,5 +269,106 @@ describe('resolveEmptyState', () => {
     expect(resolveEmptyState(0, 0)).toBe('empty-project');
     expect(resolveEmptyState(5, 0)).toBe('no-matches');
     expect(resolveEmptyState(5, 2)).toBeNull();
+  });
+});
+
+describe('pickNonEmptySections', () => {
+  it('omits blank keys', () => {
+    expect(pickNonEmptySections({ objective: 'Obj', methods: '  ', results: '' })).toEqual({
+      objective: 'Obj',
+    });
+    expect(pickNonEmptySections(null)).toEqual({});
+  });
+});
+
+describe('resolveLocalizedDetail', () => {
+  it('returns full English sections for en', () => {
+    const result = resolveLocalizedDetail({
+      locale: 'en',
+      englishTitle: 'English title',
+      englishSummary: fullSummary,
+    });
+    expect(result.isFallback).toBe(false);
+    expect(result.summary.objective).toBe('Obj');
+    expect(result.summary.whyItMatters).toBe('Why');
+  });
+
+  it('falls back on miss with English sections', () => {
+    const result = resolveLocalizedDetail({
+      locale: 'de',
+      englishTitle: 'English title',
+      englishSummary: fullSummary,
+      translation: null,
+    });
+    expect(result.isFallback).toBe(true);
+    expect(result.displayedLocale).toBe('en');
+    expect(result.summary.objective).toBe('Obj');
+  });
+});
+
+describe('toMaterialDetail', () => {
+  it('omits empty summary sections and null abstract', () => {
+    const detail = toMaterialDetail(
+      {
+        id: '1',
+        title: 'Paper',
+        sourceType: 'pubmed',
+        importance: 'critical',
+        publishedOrUpdatedAt: '2026-03-01T00:00:00.000Z',
+        originalUrl: 'https://example.com/p',
+        summary: { objective: 'Only objective', methods: '  ' },
+        abstractOrBody: '  ',
+      },
+      'en',
+    );
+    expect(detail.importance).toBe('high');
+    expect(detail.summary).toEqual({ objective: 'Only objective' });
+    expect(detail.abstractOrBody).toBeNull();
+    expect(detail.abstractIsFallback).toBe(false);
+    expect(detail.originalUrl).toBe('https://example.com/p');
+  });
+
+  it('uses placeholder title when empty', () => {
+    const detail = toMaterialDetail(
+      {
+        id: 7,
+        title: ' ',
+        sourceType: 'pubmed',
+        publishedOrUpdatedAt: '2026-01-02T00:00:00.000Z',
+      },
+      'en',
+    );
+    expect(detail.title).toBe('pubmed · 2026-01-02');
+  });
+
+  it('sets abstractIsFallback when locale is not English and abstract exists', () => {
+    const detail = toMaterialDetail(
+      {
+        id: '1',
+        title: 'English only',
+        sourceType: 'pubmed',
+        summary: fullSummary,
+        abstractOrBody: 'Stored abstract in English.',
+      },
+      'de',
+      null,
+    );
+    expect(detail.isFallback).toBe(true);
+    expect(detail.abstractOrBody).toBe('Stored abstract in English.');
+    expect(detail.abstractIsFallback).toBe(true);
+    expect(detail.displayedLocale).toBe('en');
+  });
+
+  it('does not mark abstract fallback for English locale', () => {
+    const detail = toMaterialDetail(
+      {
+        id: '1',
+        title: 'Paper',
+        sourceType: 'pubmed',
+        abstractOrBody: 'Abstract text',
+      },
+      'en',
+    );
+    expect(detail.abstractIsFallback).toBe(false);
   });
 });
