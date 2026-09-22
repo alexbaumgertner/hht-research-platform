@@ -1,5 +1,5 @@
 import { CONTENT_TRANSLATION_LOCALES, dedupeKey, type Summary } from '@hht/shared';
-import type { CmsClient } from '../cms/client.js';
+import type { CmsClient, CmsId } from '../cms/client.js';
 import { pubmedAdapter } from '../adapters/pubmed.js';
 import { clinicalTrialsAdapter } from '../adapters/clinicaltrials.js';
 import { rssAdapter } from '../adapters/rss.js';
@@ -54,7 +54,7 @@ async function pregenerateTranslations(
 }
 
 export type ProjectForRun = {
-  id: string;
+  id: CmsId;
   name: string;
   slug: string;
   keywords: string[];
@@ -63,7 +63,7 @@ export type ProjectForRun = {
   emailNotificationEnabled: boolean;
   ownerEmail?: string;
   sources: Array<{
-    id: string;
+    id: CmsId;
     type: 'pubmed' | 'clinicaltrials' | 'rss';
     rssUrl?: string | null;
     enabled: boolean;
@@ -170,14 +170,14 @@ export async function runProject(
       }
 
       sourceResults.push({
-        sourceId: source.id,
+        sourceId: String(source.id),
         status: 'success',
         fetchedCount: batch.length,
         acceptedCount: accepted,
       });
     } catch (err) {
       sourceResults.push({
-        sourceId: source.id,
+        sourceId: String(source.id),
         status: 'failure',
         error: err instanceof Error ? err.message : String(err),
         fetchedCount: 0,
@@ -213,7 +213,7 @@ export async function runProject(
           to: project.ownerEmail,
           projectName: project.name,
           projectSlug: project.slug,
-          projectId: project.id,
+          projectId: String(project.id),
         });
       }
     } catch (err) {

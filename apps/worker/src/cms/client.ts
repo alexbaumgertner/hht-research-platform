@@ -8,6 +8,12 @@ import {
 
 type Json = Record<string, unknown>;
 
+/**
+ * Payload document id as returned by REST. Numeric on Postgres; must be sent back
+ * unchanged — relationship validation rejects "4" where it expects 4.
+ */
+export type CmsId = string | number;
+
 function requireEnv(name: string): string {
   const value = process.env[name];
   if (!value) throw new Error(`Missing required env ${name}`);
@@ -47,7 +53,7 @@ export class CmsClient {
 
   async listDueProjects(): Promise<
     Array<{
-      id: string;
+      id: CmsId;
       name: string;
       slug: string;
       keywords: string[];
@@ -58,7 +64,7 @@ export class CmsClient {
       emailNotificationEnabled: boolean;
       ownerEmail?: string;
       sources: Array<{
-        id: string;
+        id: CmsId;
         type: 'pubmed' | 'clinicaltrials' | 'rss';
         rssUrl?: string | null;
         enabled: boolean;
@@ -101,7 +107,7 @@ export class CmsClient {
             return String(pid) === String(project.id);
           })
           .map((s) => ({
-            id: String(s.id),
+            id: s.id,
             type: s.type,
             rssUrl: s.rssUrl,
             enabled: s.enabled !== false,
@@ -123,7 +129,7 @@ export class CmsClient {
             : undefined;
 
         return {
-          id: project.id as string,
+          id: project.id,
           name: project.name,
           slug: project.slug,
           keywords,
@@ -139,7 +145,7 @@ export class CmsClient {
       .filter((p): p is NonNullable<typeof p> => Boolean(p));
   }
 
-  async createRun(projectId: string | number, triggeredBy: 'schedule' | 'manual') {
+  async createRun(projectId: CmsId, triggeredBy: 'schedule' | 'manual') {
     return this.request<{ doc: { id: string | number } }>(`/api/monitoring-runs`, {
       method: 'POST',
       body: JSON.stringify({
@@ -158,11 +164,11 @@ export class CmsClient {
     });
   }
 
-  async findPublicationByDedupe(projectId: string, dedupeKey: string) {
+  async findPublicationByDedupe(projectId: CmsId, dedupeKey: string) {
     const qs = new URLSearchParams({
       limit: '1',
       depth: '0',
-      'where[and][0][project][equals]': projectId,
+      'where[and][0][project][equals]': String(projectId),
       'where[and][1][dedupeKey][equals]': dedupeKey,
     });
     const result = await this.request<{ docs: Array<{ id: string | number }> }>(
@@ -199,7 +205,7 @@ export class CmsClient {
     });
   }
 
-  async patchProjectWatermark(projectId: string, finishedAt: string) {
+  async patchProjectWatermark(projectId: CmsId, finishedAt: string) {
     return this.request(`/api/research-projects/${projectId}`, {
       method: 'PATCH',
       body: JSON.stringify({ lastSuccessfulRunAt: finishedAt }),
