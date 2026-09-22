@@ -2,8 +2,8 @@
 
 | Field      | Value                                                                   |
 | ---------- | ----------------------------------------------------------------------- |
-| Status     | Fix ready (worker); recovery steps pending                              |
-| Duration   | 2026-08-31 21:00 UTC → fix deploy (22+ days)                            |
+| Status     | Resolved 2026-09-22 20:06 UTC (first digest after fix)                  |
+| Duration   | 2026-08-31 21:00 UTC → 2026-09-22 20:06 UTC (22 days)                   |
 | Impact     | No new digests for project `hht`; September PubMed papers skipped       |
 | Detected   | 2026-09-22, by an external look at the public site, not by monitoring   |
 | Root cause | Worker sent `monitoredSource` as a string id; Payload rejected it (400) |
@@ -77,7 +77,16 @@ re-ran every hour and made LLM calls each time.
 4. Verify: the next `hht` run returns `201` on `POST /api/publications` (Vercel runtime logs), and a
    new digest appears on `/ru/projects/hht`.
 
-## Follow-ups
+## Outcome
+
+- 2026-09-22 20:00 UTC run: 128 × `201` on Payload writes, 0 errors; digest published 20:06 UTC;
+  the `hht` feed went from 24 to 40 materials (September window recovered).
+- Seed project `hht-research` and its data deleted from production (JSON backup kept by the owner).
+- Follow-ups below shipped in PR #1 (2026-09-22), plus: job task timeout raised to 30m; ERROR log
+  alert and `/api/health` uptime check emailing the owner; dates, full abstracts and translations
+  backfilled for all 40 feed items.
+
+## Follow-ups (done)
 
 Tracked in [`docs/roadmap-2026-q4.md`](../roadmap-2026-q4.md):
 
