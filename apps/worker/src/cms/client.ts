@@ -68,6 +68,7 @@ export class CmsClient {
         type: 'pubmed' | 'clinicaltrials' | 'rss';
         rssUrl?: string | null;
         enabled: boolean;
+        lastSuccessfulFetchAt: string | null;
       }>;
     }>
   > {
@@ -93,6 +94,7 @@ export class CmsClient {
         type: 'pubmed' | 'clinicaltrials' | 'rss';
         rssUrl?: string | null;
         enabled?: boolean;
+        lastSuccessfulFetchAt?: string | null;
       }>;
     }>(`/api/monitored-sources?limit=500&depth=0`);
 
@@ -111,6 +113,7 @@ export class CmsClient {
             type: s.type,
             rssUrl: s.rssUrl,
             enabled: s.enabled !== false,
+            lastSuccessfulFetchAt: s.lastSuccessfulFetchAt ?? null,
           }));
 
         const due = isProjectDue({
@@ -205,11 +208,76 @@ export class CmsClient {
     });
   }
 
-  async patchProjectWatermark(projectId: CmsId, finishedAt: string) {
+  async patchProjectWatermark(projectId: CmsId, at: string) {
     return this.request(`/api/research-projects/${projectId}`, {
       method: 'PATCH',
-      body: JSON.stringify({ lastSuccessfulRunAt: finishedAt }),
+      body: JSON.stringify({ lastSuccessfulRunAt: at }),
     });
+  }
+
+  async patchSourceWatermark(sourceId: CmsId, at: string) {
+    return this.request(`/api/monitored-sources/${sourceId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ lastSuccessfulFetchAt: at }),
+    });
+  }
+
+  async listRunningRuns() {
+    const qs = new URLSearchParams({
+      limit: '100',
+      depth: '0',
+      'where[status][equals]': 'running',
+    });
+    const result = await this.request<{
+      docs: Array<{
+        id: CmsId;
+        project: CmsId | { id: CmsId };
+        status: string;
+        startedAt?: string | null;
+      }>;
+    }>(`/api/monitoring-runs?${qs.toString()}`);
+    return result.docs;
+  }
+
+  /** Publications visible on the public feed (carried by a published digest). */
+  async listFeedPublications(): Promise<
+    Array<{
+      id: CmsId;
+      title: string;
+      sourceType: 'pubmed' | 'clinicaltrials' | 'rss';
+      externalIds?: { pmid?: string | null; nctId?: string | null } | null;
+      summary?: Record<string, string | null> | null;
+      publishedOrUpdatedAt?: string | null;
+      publicationTypes?: string[] | null;
+    }>
+  > {
+    const qs = new URLSearchParams({
+      limit: '1000',
+      depth: '0',
+      pagination: 'false',
+      'where[feedPublishedAt][exists]': 'true',
+    });
+    const result = await this.request<{
+      docs: Awaited<ReturnType<CmsClient['listFeedPublications']>>;
+    }>(`/api/publications?${qs.toString()}`);
+    return result.docs;
+  }
+
+  async updatePublication(id: CmsId, data: Json) {
+    return this.request(`/api/publications/${id}?depth=0`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async listTranslations(): Promise<Array<{ publication: CmsId; locale: string }>> {
+    const result = await this.request<{
+      docs: Array<{ publication: CmsId | { id: CmsId }; locale: string }>;
+    }>(`/api/content-translations?limit=5000&depth=0&pagination=false`);
+    return result.docs.map((d) => ({
+      publication: typeof d.publication === 'object' ? d.publication.id : d.publication,
+      locale: d.locale,
+    }));
   }
 
   get batchSize(): number {

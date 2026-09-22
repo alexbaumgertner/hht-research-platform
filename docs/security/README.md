@@ -37,7 +37,7 @@ Point-in-time security reviews of the platform, one file per review, named
 | F4  | Stored XSS via `originalUrl` rendered as `href`      | Medium   | 2026-08-29 (`d8a6838`) | fixed    | `sanitizeHttpUrl` at ingest, storage, projection, and render            |
 | F5  | Public read broader than the curated API implies     | Medium   | 2026-08-29 (`d8a6838`) | fixed    | Collection read → `isAuthenticatedOrWorker`; GraphQL disabled           |
 | H1  | Prompt injection from external content               | Low      | 2026-08-29 (`d8a6838`) | fixed    | Delimited untrusted content + system instructions                       |
-| H2  | No ownership check on `manualRun`                    | Low      | 2026-08-29 (`d8a6838`) | fixed    | Admin or project owner only                                             |
+| H2  | No ownership check on `manualRun`                    | Low      | 2026-08-29 (`d8a6838`) | fixed    | Endpoint removed 2026-09-23 (unused stub)                               |
 | H3  | `assertLinkOnlyEmail` is never called                | Low      | 2026-08-29 (`d8a6838`) | fixed    | Enforced in `sendDigestPublishedEmail` before Resend                    |
 | H4  | Shared static bearer secret (`X-Payload-API-Key`)    | Low      | 2026-08-29 (`d8a6838`) | fixed    | `timingSafeEqual`; native per-user API keys remain a follow-up          |
 | H5  | User enumeration by `worker`-role accounts           | Low      | 2026-08-29 (`d8a6838`) | fixed    | `Users.read` admin-or-self                                              |

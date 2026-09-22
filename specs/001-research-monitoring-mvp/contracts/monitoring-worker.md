@@ -37,6 +37,7 @@ A project is **due** when all of:
    - `daily`: ≥ 24h since last success (or null)
    - `weekly`: ≥ 7d
    - `monthly`: ≥ 28d (calendar-simple MVP)
+   - minus a 30-minute tolerance (`DUE_TOLERANCE_MS`) so the hourly tick does not drift the cadence
 
 Paused projects are skipped; watermark unchanged.
 
@@ -47,7 +48,10 @@ Paused projects are skipped; watermark unchanged.
 1. Create `MonitoringRun` (`status=running`, `triggeredBy=schedule|manual`)
 2. For each enabled source (isolate failures):
    - Fetch candidates matching **any** keyword (OR)
-   - Window: if `lastSuccessfulRunAt` null → bootstrap lookback; else since watermark
+   - Window: since the source's own `lastSuccessfulFetchAt`, else the project's
+     `lastSuccessfulRunAt`, else bootstrap lookback (amended 2026-09-23 — a failed source keeps its
+     window instead of losing it when other sources succeed)
+   - On source success → set that source's `lastSuccessfulFetchAt` to the run start
    - Cap at `BATCH_SIZE_PER_SOURCE`
    - Record per-source success/failure in `sourceResults`
 3. Dedupe → classify → (if relevant) summarize + importance
@@ -56,7 +60,11 @@ Paused projects are skipped; watermark unchanged.
    - all sources ok → `completed`
    - some source failed but run finished others → `completed_partial_failure`
    - catastrophic / no sources processed → `failed` (do not advance watermark)
-6. On `completed` | `completed_partial_failure` → set `lastSuccessfulRunAt`
+6. On `completed` | `completed_partial_failure` → set project `lastSuccessfulRunAt` to the run start
+   (drives scheduling only)
+7. Every source/project/digest failure is logged as structured JSON with `severity: ERROR`
+   (Cloud Logging alert policy). Runs left `running` for more than 2h are marked `failed` by the next
+   job.
 
 ---
 

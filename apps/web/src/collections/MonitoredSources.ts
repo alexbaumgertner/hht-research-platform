@@ -1,7 +1,12 @@
 import type { CollectionConfig } from 'payload';
 import { isValidHttpUrl } from '@hht/shared';
 
-import { isAuthenticated, isWorkerOrAdmin } from '../access';
+import {
+  canUpdateMonitoredSource,
+  isAuthenticated,
+  isWorkerOrAdmin,
+  isWorkerOrAdminFieldLevel,
+} from '../access';
 
 export const MonitoredSources: CollectionConfig = {
   slug: 'monitored-sources',
@@ -13,7 +18,7 @@ export const MonitoredSources: CollectionConfig = {
   access: {
     read: isWorkerOrAdmin,
     create: isAuthenticated,
-    update: isAuthenticated,
+    update: canUpdateMonitoredSource,
     delete: isAuthenticated,
   },
   hooks: {
@@ -88,6 +93,19 @@ export const MonitoredSources: CollectionConfig = {
       name: 'enabled',
       type: 'checkbox',
       defaultValue: true,
+    },
+    {
+      name: 'lastSuccessfulFetchAt',
+      type: 'date',
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+        description:
+          'Per-source watermark set by the worker when this source succeeds. A failing source keeps its window for the next run.',
+      },
+      access: {
+        update: isWorkerOrAdminFieldLevel,
+      },
     },
   ],
 };

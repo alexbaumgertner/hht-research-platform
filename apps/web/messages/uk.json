@@ -8,7 +8,8 @@
   "Project": {
     "feedTitle": "Матеріали",
     "empty": "Для цього проєкту ще нічого не опубліковано.",
-    "backHome": "Усі проєкти"
+    "backHome": "Усі проєкти",
+    "lastChecked": "Джерела востаннє перевірено: {date}"
   },
   "Materials": {
     "badge": {

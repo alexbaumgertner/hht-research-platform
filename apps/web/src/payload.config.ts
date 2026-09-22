@@ -13,7 +13,6 @@ import { MonitoringRuns } from './collections/MonitoringRuns';
 import { Publications } from './collections/Publications';
 import { Digests } from './collections/Digests';
 import { ContentTranslations } from './collections/ContentTranslations';
-import { manualRunEndpoint } from './endpoints/manualRun';
 import { shouldPushSchema } from './lib/databaseTarget';
 import { requiredEnv } from './lib/env';
 import { loadLocalEnv } from './lib/loadLocalEnv';
@@ -40,7 +39,6 @@ export default buildConfig({
     Digests,
     ContentTranslations,
   ],
-  endpoints: [manualRunEndpoint],
   editor: lexicalEditor(),
   secret: requiredEnv('PAYLOAD_SECRET', 'dev-secret-change-me'),
   typescript: {

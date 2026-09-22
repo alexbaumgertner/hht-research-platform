@@ -162,7 +162,7 @@ gcloud run jobs create "$JOB_NAME" \
   --region="$REGION" \
   --tasks=1 \
   --max-retries=1 \
-  --task-timeout=15m \
+  --task-timeout=30m \
   --memory=1Gi \
   --cpu=1 \
   --set-env-vars="PUBLIC_SITE_URL=https://YOUR_PRODUCTION_URL" \
@@ -187,7 +187,7 @@ gcloud run jobs create "$JOB_NAME" \
   --region="$REGION" \
   --tasks=1 \
   --max-retries=1 \
-  --task-timeout=15m \
+  --task-timeout=30m \
   --memory=1Gi \
   --cpu=1 \
   --set-env-vars="PUBLIC_SITE_URL=https://YOUR_PRODUCTION_URL,PAYLOAD_API_KEY=YOUR_PAYLOAD_API_KEY,AI_GATEWAY_API_KEY=YOUR_AI_GATEWAY_API_KEY"
@@ -266,15 +266,49 @@ gcloud run jobs execute "$JOB_NAME" --region="$REGION" --wait
 | Wrong host / redirects / empty responses  | Trailing slash on `PUBLIC_SITE_URL`, or pointing at Preview instead of Production |
 | Scheduler succeeds but job never runs     | Invoker SA missing `roles/run.invoker` on the job, or OIDC used instead of OAuth  |
 | No email                                  | `RESEND_API_KEY` unset, or project notification disabled in Admin                 |
+| Job green but nothing published           | Check ERROR logs (`jsonPayload.message` starts with `[worker]`) and `/api/health` |
 
 ### Exit codes
 
-| Code     | Meaning                                                                                                   |
-| -------- | --------------------------------------------------------------------------------------------------------- |
-| `0`      | Job finished. Per-project failures are recorded in CMS; Scheduler should not treat this as infra failure. |
-| Non-zero | Infrastructure / missing env. Scheduler may retry.                                                        |
+| Code     | Meaning                                                                                                                                                        |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `0`      | Job finished. Per-project failures are recorded in CMS and logged at `severity: ERROR` (alerted, see below); Scheduler should not treat this as infra failure. |
+| Non-zero | Infrastructure / missing env. Scheduler may retry.                                                                                                             |
 
 Re-runs are idempotent on publication `dedupeKey`. Pausing a project in Admin skips it without advancing `lastSuccessfulRunAt`.
+
+---
+
+## Monitoring & alerts
+
+A green job is not proof of a working pipeline (see
+[`docs/incidents/2026-09-pipeline-silent-failure.md`](incidents/2026-09-pipeline-silent-failure.md)).
+Two independent signals email the owner:
+
+| Signal                        | What it catches                                         | Where                                                                                        |
+| ----------------------------- | ------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Log alert `hht-worker-errors` | Any source/project/digest/translation failure in a run  | Cloud Monitoring alert policy on `severity>=ERROR` for `cloud_run_job/hht-monitor-worker`    |
+| Uptime check `hht-health`     | Dead-man switch: no successful run within schedule + 6h | Cloud Monitoring uptime check on `GET /api/health` (returns `503` when a project is overdue) |
+
+The worker writes structured JSON lines (`severity`, `message`, context fields); in Logs Explorer
+filter with `jsonPayload.message:"[worker]"`.
+
+`/api/health` is public and returns per-project `lastSuccessfulRunAt`, `latestDigestPublishedAt`
+and `stale`.
+
+## One-off maintenance scripts
+
+The image also contains backfill scripts. Run them with the job's own secrets by overriding the
+container args:
+
+```bash
+# Dates, full PubMed abstracts and publication types for items already on the feed
+gcloud run jobs execute "$JOB_NAME" --region="$REGION" --args=dist/scripts/backfill-source-metadata.js --wait
+# Missing content-translations for items already on the feed
+gcloud run jobs execute "$JOB_NAME" --region="$REGION" --args=dist/scripts/backfill-translations.js --wait
+```
+
+Both are idempotent.
 
 ---
 

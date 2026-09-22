@@ -26,5 +26,6 @@ export async function GET(_req: Request, { params }: Params) {
     slug: project.slug,
     name: project.name,
     description: project.description ?? null,
+    lastSuccessfulRunAt: project.lastSuccessfulRunAt ?? null,
   });
 }

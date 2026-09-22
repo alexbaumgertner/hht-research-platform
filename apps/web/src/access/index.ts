@@ -79,5 +79,17 @@ export const canUpdateResearchProject: Access = ({ req, data }) => {
   return keys.every((key) => key === 'lastSuccessfulRunAt');
 };
 
+/**
+ * Monitored-sources update: owners edit sources in Admin; the header-only worker
+ * key may advance the per-source watermark (lastSuccessfulFetchAt) and nothing else.
+ */
+export const canUpdateMonitoredSource: Access = ({ req, data }) => {
+  if (req.user) return true;
+  if (!isWorkerOrAdmin({ req })) return false;
+
+  const keys = Object.keys((data ?? {}) as Record<string, unknown>);
+  return keys.every((key) => key === 'lastSuccessfulFetchAt');
+};
+
 /** Deny all writes for anonymous visitors (explicit). */
 export const denyWrite: Access = () => false;

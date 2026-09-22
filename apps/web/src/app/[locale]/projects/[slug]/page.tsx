@@ -15,7 +15,12 @@ async function fetchProject(baseUrl: string, slug: string) {
   const res = await fetch(`${baseUrl}/api/public/projects/${slug}`, { cache: 'no-store' });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error('Failed to load project');
-  return res.json() as Promise<{ name: string; description: string | null; slug: string }>;
+  return res.json() as Promise<{
+    name: string;
+    description: string | null;
+    slug: string;
+    lastSuccessfulRunAt: string | null;
+  }>;
 }
 
 async function fetchMaterials(baseUrl: string, slug: string, locale: string) {
@@ -49,6 +54,17 @@ export default async function ProjectFeedPage({ params }: Props) {
           {project.name}
         </Title>
         {project.description ? <Text c="dimmed">{project.description}</Text> : null}
+        {project.lastSuccessfulRunAt ? (
+          <Text size="xs" c="dimmed" mt="xs">
+            {t('lastChecked', {
+              date: new Date(project.lastSuccessfulRunAt).toLocaleDateString(locale, {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              }),
+            })}
+          </Text>
+        ) : null}
         <Text mt="sm" fw={500}>
           {t('feedTitle')}
         </Text>

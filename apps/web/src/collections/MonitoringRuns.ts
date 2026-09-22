@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload';
 
-import { isAuthenticated, isWorkerOrAdmin } from '../access';
+import { isAuthenticated, isAuthenticatedOrWorker, isWorkerOrAdmin } from '../access';
 
 export const MonitoringRuns: CollectionConfig = {
   slug: 'monitoring-runs',
@@ -10,7 +10,8 @@ export const MonitoringRuns: CollectionConfig = {
     defaultColumns: ['startedAt', 'status', 'triggeredBy', 'project'],
   },
   access: {
-    read: isAuthenticated,
+    // Worker reads runs to reap ones left `running` by a killed job.
+    read: isAuthenticatedOrWorker,
     create: isWorkerOrAdmin,
     update: isWorkerOrAdmin,
     delete: isAuthenticated,
