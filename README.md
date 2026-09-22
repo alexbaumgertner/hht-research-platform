@@ -41,8 +41,8 @@ See `specs/001-research-monitoring-mvp/` for the full Spec Kit plan, data model,
 
 ```bash
 pnpm install
-cp .env.example .env   # fill DATABASE_URL, PAYLOAD_SECRET, etc.
-docker compose up -d   # optional local Postgres
+cp .env.example .env   # fill PAYLOAD_SECRET, etc.
+docker compose up -d   # local Postgres — DATABASE_URL must point here, never at production
 pnpm --filter @hht/shared build
 pnpm --filter @hht/web dev
 ```

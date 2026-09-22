@@ -2,12 +2,17 @@
  * Seed hht-research with materials across all five source categories,
  * both importance levels, missing summary/date, and partial translations.
  *
+ * Local databases only (see lib/databaseTarget.ts); the demo project is created paused.
+ *
  * Usage: DATABASE_URL=... PAYLOAD_SECRET=... pnpm --filter @hht/web seed:public-feed
  */
 import { getPayload } from 'payload';
 import config from '@payload-config';
 
+import { assertLocalDatabaseForScript } from '../lib/databaseTarget';
+
 async function seed() {
+  assertLocalDatabaseForScript('seed:public-feed');
   const payload = await getPayload({ config });
 
   const existingUsers = await payload.find({
@@ -48,7 +53,8 @@ async function seed() {
         description: 'Monitoring materials related to Hereditary Hemorrhagic Telangiectasia.',
         keywords: [{ value: 'HHT' }, { value: 'hereditary hemorrhagic telangiectasia' }],
         schedule: 'daily',
-        monitoringStatus: 'active',
+        // Demo data must never be picked up by the monitoring worker.
+        monitoringStatus: 'paused',
         emailNotificationEnabled: false,
         owner: ownerId,
         hasPublishedDigest: false,
