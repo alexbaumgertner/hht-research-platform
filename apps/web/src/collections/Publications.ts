@@ -88,6 +88,16 @@ export const Publications: CollectionConfig = {
       type: 'date',
     },
     {
+      name: 'publicationTypes',
+      type: 'text',
+      hasMany: true,
+      admin: {
+        readOnly: true,
+        description:
+          'Source study/article types (PubMed PublicationType), e.g. "Randomized Controlled Trial".',
+      },
+    },
+    {
       name: 'relevance',
       type: 'select',
       defaultValue: 'pending',

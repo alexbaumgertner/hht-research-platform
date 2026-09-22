@@ -8,7 +8,8 @@
   "Project": {
     "feedTitle": "Materyaller",
     "empty": "Bu proje için henüz yayımlanmış materyal yok.",
-    "backHome": "Tüm projeler"
+    "backHome": "Tüm projeler",
+    "lastChecked": "Kaynaklar en son kontrol edildi: {date}"
   },
   "Materials": {
     "badge": {

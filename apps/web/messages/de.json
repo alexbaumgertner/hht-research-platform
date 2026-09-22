@@ -8,7 +8,8 @@
   "Project": {
     "feedTitle": "Materialien",
     "empty": "Für dieses Projekt wurde noch nichts veröffentlicht.",
-    "backHome": "Alle Projekte"
+    "backHome": "Alle Projekte",
+    "lastChecked": "Quellen zuletzt geprüft: {date}"
   },
   "Materials": {
     "badge": {

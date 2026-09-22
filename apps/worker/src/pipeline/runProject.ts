@@ -11,9 +11,11 @@ import {
   formatDigestStepError,
   resolveRunStatus,
   shouldPublishDigest,
+  sourceSince,
   statusAfterDigestStepFailure,
 } from './publish.js';
 import { sendDigestPublishedEmail } from '../notify/digestEmail.js';
+import { logError, logInfo } from '../log.js';
 
 const adapters: Record<'pubmed' | 'clinicaltrials' | 'rss', SourceAdapter> = {
   pubmed: pubmedAdapter,
@@ -44,10 +46,7 @@ async function pregenerateTranslations(
           fields,
         });
       } catch (err) {
-        console.error(
-          `[worker] translation failed for publication ${pub.id} locale=${locale}`,
-          err,
-        );
+        logError('translation failed', err, { publicationId: pub.id, locale });
       }
     }
   }
@@ -67,6 +66,7 @@ export type ProjectForRun = {
     type: 'pubmed' | 'clinicaltrials' | 'rss';
     rssUrl?: string | null;
     enabled: boolean;
+    lastSuccessfulFetchAt?: string | null;
   }>;
 };
 
@@ -75,6 +75,9 @@ export async function runProject(
   project: ProjectForRun,
   triggeredBy: 'schedule' | 'manual' = 'schedule',
 ): Promise<void> {
+  // Watermarks use the run start: items indexed while the run is in progress
+  // are picked up next time instead of falling into a gap.
+  const startedAt = new Date().toISOString();
   const created = await cms.createRun(project.id, triggeredBy);
   const runId = created.doc.id;
 
@@ -95,14 +98,13 @@ export async function runProject(
   };
 
   const qualifying: Array<{ id: string | number; title: string; summary: Summary }> = [];
-  const since = project.lastSuccessfulRunAt ? new Date(project.lastSuccessfulRunAt) : null;
 
   for (const source of project.sources.filter((s) => s.enabled)) {
     try {
       const adapter = adapters[source.type];
       const fetched = await adapter.fetchCandidates({
         keywords: project.keywords,
-        since,
+        since: sourceSince(source, project),
         bootstrapLookbackDays: project.bootstrapLookbackDays,
         limit: cms.batchSize,
         rssUrl: source.rssUrl || undefined,
@@ -136,6 +138,7 @@ export async function runProject(
             sourceType: candidate.sourceType,
             originalUrl: candidate.originalUrl,
             publishedOrUpdatedAt: candidate.publishedOrUpdatedAt?.toISOString(),
+            publicationTypes: candidate.publicationTypes,
             relevance: 'irrelevant',
             firstSeenRun: runId,
             monitoredSource: source.id,
@@ -159,6 +162,7 @@ export async function runProject(
           sourceType: candidate.sourceType,
           originalUrl: candidate.originalUrl,
           publishedOrUpdatedAt: candidate.publishedOrUpdatedAt?.toISOString(),
+          publicationTypes: candidate.publicationTypes,
           relevance: 'relevant',
           importance,
           summary,
@@ -175,7 +179,23 @@ export async function runProject(
         fetchedCount: batch.length,
         acceptedCount: accepted,
       });
+
+      try {
+        await cms.patchSourceWatermark(source.id, startedAt);
+      } catch (err) {
+        // Non-fatal: the source re-fetches the same window next run (deduped).
+        logError('source watermark update failed', err, {
+          projectId: project.id,
+          sourceId: source.id,
+        });
+      }
     } catch (err) {
+      logError('source failed', err, {
+        projectId: project.id,
+        projectSlug: project.slug,
+        sourceId: source.id,
+        sourceType: source.type,
+      });
       sourceResults.push({
         sourceId: String(source.id),
         status: 'failure',
@@ -217,7 +237,10 @@ export async function runProject(
         });
       }
     } catch (err) {
-      console.error('[worker] digest publish step failed', err);
+      logError('digest publish step failed', err, {
+        projectId: project.id,
+        projectSlug: project.slug,
+      });
       errorSummary = formatDigestStepError(err);
       status = statusAfterDigestStepFailure(status);
     }
@@ -233,6 +256,13 @@ export async function runProject(
   });
 
   if (advanceWatermark) {
-    await cms.patchProjectWatermark(project.id, finishedAt);
+    await cms.patchProjectWatermark(project.id, startedAt);
+  }
+
+  const summary = { projectId: project.id, projectSlug: project.slug, status, stats, digestId };
+  if (status === 'failed') {
+    logError('run failed', undefined, { ...summary, errorSummary });
+  } else {
+    logInfo('run finished', summary);
   }
 }

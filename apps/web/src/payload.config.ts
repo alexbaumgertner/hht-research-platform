@@ -13,7 +13,7 @@ import { MonitoringRuns } from './collections/MonitoringRuns';
 import { Publications } from './collections/Publications';
 import { Digests } from './collections/Digests';
 import { ContentTranslations } from './collections/ContentTranslations';
-import { manualRunEndpoint } from './endpoints/manualRun';
+import { shouldPushSchema } from './lib/databaseTarget';
 import { requiredEnv } from './lib/env';
 import { loadLocalEnv } from './lib/loadLocalEnv';
 import { getPublicSiteUrl } from './lib/siteUrl';
@@ -39,7 +39,6 @@ export default buildConfig({
     Digests,
     ContentTranslations,
   ],
-  endpoints: [manualRunEndpoint],
   editor: lexicalEditor(),
   secret: requiredEnv('PAYLOAD_SECRET', 'dev-secret-change-me'),
   typescript: {
@@ -49,6 +48,8 @@ export default buildConfig({
     pool: {
       connectionString: requiredEnv('DATABASE_URL'),
     },
+    // Dev auto-push must never alter a managed database from a laptop.
+    push: shouldPushSchema(),
   }),
   email: resendAdapter({
     defaultFromAddress: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',

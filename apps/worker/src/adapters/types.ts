@@ -11,6 +11,8 @@ export type Candidate = {
   abstractOrBody?: string;
   originalUrl: string;
   publishedOrUpdatedAt?: Date;
+  /** PubMed PublicationType values (e.g. "Randomized Controlled Trial"); feeds importance rubric. */
+  publicationTypes?: string[];
   sourceType: 'pubmed' | 'clinicaltrials' | 'rss';
 };
 

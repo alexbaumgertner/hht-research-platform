@@ -45,3 +45,29 @@ export function resolveRunStatus(outcomes: SourceOutcome[]): {
   }
   return { status: 'completed', advanceWatermark: true };
 }
+
+/**
+ * Where a source's "what's new" window starts. Each source keeps its own
+ * watermark so one failing source does not lose its window when others succeed
+ * (the project watermark only drives scheduling). Sources that have never
+ * succeeded on their own inherit the project watermark (pre-migration data).
+ */
+export function sourceSince(
+  source: { lastSuccessfulFetchAt?: string | null },
+  project: { lastSuccessfulRunAt: string | null },
+): Date | null {
+  const raw = source.lastSuccessfulFetchAt ?? project.lastSuccessfulRunAt;
+  return raw ? new Date(raw) : null;
+}
+
+/** Worker task timeout is 30m; anything still `running` after 2h was killed or crashed. */
+export const STALE_RUN_AFTER_MS = 2 * 60 * 60 * 1000;
+
+export function isStaleRun(
+  run: { status: string; startedAt?: string | null },
+  now: Date = new Date(),
+  maxAgeMs: number = STALE_RUN_AFTER_MS,
+): boolean {
+  if (run.status !== 'running' || !run.startedAt) return false;
+  return now.getTime() - new Date(run.startedAt).getTime() > maxAgeMs;
+}

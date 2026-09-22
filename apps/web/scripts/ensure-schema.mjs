@@ -11,6 +11,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 process.env.NODE_ENV = 'development';
+// Deploy builds target the managed database on purpose (see lib/databaseTarget.ts).
+process.env.PAYLOAD_ALLOW_REMOTE_PUSH = '1';
 
 // Ephemeral secret for schema push only — never serves traffic.
 process.env.PAYLOAD_SECRET ||= randomUUID();

@@ -1,6 +1,7 @@
 import type { AccessArgs } from 'payload';
 
 import {
+  canUpdateMonitoredSource,
   canUpdateResearchProject,
   isAuthenticated,
   isAuthenticatedOrWorker,
@@ -130,5 +131,45 @@ describe('safeEqualString', () => {
     expect(safeEqualString('abc', 'abc')).toBe(true);
     expect(safeEqualString('abc', 'abd')).toBe(false);
     expect(safeEqualString('abc', 'ab')).toBe(false);
+  });
+});
+
+describe('monitored-sources access.update', () => {
+  const originalKey = process.env.PAYLOAD_API_KEY;
+
+  beforeEach(() => {
+    process.env.PAYLOAD_API_KEY = 'test-worker-key';
+  });
+
+  afterEach(() => {
+    process.env.PAYLOAD_API_KEY = originalKey;
+  });
+
+  it('allows any logged-in user full update (owner edits sources in Admin)', () => {
+    expect(
+      canUpdateMonitoredSource({ ...mockReq({ user: { roles: [] } }), data: { label: 'x' } }),
+    ).toBe(true);
+  });
+
+  it('allows the worker API key to advance lastSuccessfulFetchAt only', () => {
+    const req = mockReq({ apiKey: 'test-worker-key' });
+    expect(
+      canUpdateMonitoredSource({
+        ...req,
+        data: { lastSuccessfulFetchAt: '2026-09-23T00:00:00.000Z' },
+      }),
+    ).toBe(true);
+    expect(canUpdateMonitoredSource({ ...req, data: { rssUrl: 'https://evil.test/feed' } })).toBe(
+      false,
+    );
+  });
+
+  it('denies anonymous callers', () => {
+    expect(
+      canUpdateMonitoredSource({
+        ...mockReq({ user: null }),
+        data: { lastSuccessfulFetchAt: 'x' },
+      }),
+    ).toBe(false);
   });
 });
