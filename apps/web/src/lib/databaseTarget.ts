@@ -39,3 +39,19 @@ export function assertLocalDatabaseForScript(scriptName: string, env: Env = proc
       'Point DATABASE_URL at a local Postgres (docker compose up -d) or set ALLOW_REMOTE_DATABASE=1.',
   );
 }
+
+/**
+ * `next dev`, tests and scripts must not run against a managed database by
+ * accident (e.g. DATABASE_URL pulled into .env.development.local by
+ * `vercel env pull`). Production runtime and deploy builds are exempt.
+ */
+export function assertDevDatabaseIsLocal(env: Env = process.env): void {
+  if (env.NODE_ENV === 'production') return;
+  if (isLocalDatabaseUrl(env.DATABASE_URL)) return;
+  if (env.PAYLOAD_ALLOW_REMOTE_PUSH === '1' || env.ALLOW_REMOTE_DATABASE === '1') return;
+  const host = databaseHost(env.DATABASE_URL) ?? 'unknown host';
+  throw new Error(
+    `Refusing to start against remote database ${host} outside production. ` +
+      'Use the docker compose Postgres in apps/web/.env.local, or set ALLOW_REMOTE_DATABASE=1 deliberately.',
+  );
+}

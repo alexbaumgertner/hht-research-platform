@@ -13,12 +13,14 @@ import { MonitoringRuns } from './collections/MonitoringRuns';
 import { Publications } from './collections/Publications';
 import { Digests } from './collections/Digests';
 import { ContentTranslations } from './collections/ContentTranslations';
-import { shouldPushSchema } from './lib/databaseTarget';
+import { AuthCodes } from './collections/AuthCodes';
+import { assertDevDatabaseIsLocal, shouldPushSchema } from './lib/databaseTarget';
 import { requiredEnv } from './lib/env';
 import { loadLocalEnv } from './lib/loadLocalEnv';
 import { getPublicSiteUrl } from './lib/siteUrl';
 
 loadLocalEnv();
+assertDevDatabaseIsLocal();
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -29,6 +31,10 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    components: {
+      beforeLogin: ['/components/admin/EmailCodeLogin#EmailCodeLogin'],
+      logout: { Button: '/components/admin/LogoutButton#LogoutButton' },
+    },
   },
   collections: [
     Users,
@@ -38,6 +44,7 @@ export default buildConfig({
     Publications,
     Digests,
     ContentTranslations,
+    AuthCodes,
   ],
   editor: lexicalEditor(),
   secret: requiredEnv('PAYLOAD_SECRET', 'dev-secret-change-me'),
