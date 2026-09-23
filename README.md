@@ -35,6 +35,17 @@ Topic-agnostic research monitoring: configure sources in Payload Admin, run a Do
 
 Deploy the worker to GCP and connect it to production web: [`docs/deploy-worker.md`](docs/deploy-worker.md).
 
+### Databases per environment
+
+| Environment         | Database                                                                                      |
+| ------------------- | --------------------------------------------------------------------------------------------- |
+| Production          | Neon main branch (Vercel Marketplace integration `hht-research-platform-web-db`)              |
+| Preview deployments | A Neon branch `preview/<git-branch>` created per deployment by the integration (copy of prod) |
+| Local               | `docker compose` Postgres — never production (see `apps/web/src/lib/databaseTarget.ts`)       |
+
+Preview builds run `ensure-schema` against their own branch, so schema changes in a PR never touch
+production before merge. Branches are removed together with their Vercel deployments.
+
 See `specs/001-research-monitoring-mvp/` for the full Spec Kit plan, data model, and contracts.
 
 ## Setup
