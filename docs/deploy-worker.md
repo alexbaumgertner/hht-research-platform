@@ -285,10 +285,10 @@ A green job is not proof of a working pipeline (see
 [`docs/incidents/2026-09-pipeline-silent-failure.md`](incidents/2026-09-pipeline-silent-failure.md)).
 Two independent signals email the owner:
 
-| Signal                        | What it catches                                         | Where                                                                                        |
-| ----------------------------- | ------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| Log alert `hht-worker-errors` | Any source/project/digest/translation failure in a run  | Cloud Monitoring alert policy on `severity>=ERROR` for `cloud_run_job/hht-monitor-worker`    |
-| Uptime check `hht-health`     | Dead-man switch: no successful run within schedule + 6h | Cloud Monitoring uptime check on `GET /api/health` (returns `503` when a project is overdue) |
+| Signal                        | What it catches                                         | Where                                                                                                                        |
+| ----------------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Log alert `hht-worker-errors` | Any source/project/digest/translation failure in a run  | Cloud Monitoring alert policy on `severity>=ERROR` for `cloud_run_job/hht-monitor-worker`                                    |
+| Uptime check `hht-health`     | Dead-man switch: no successful run within schedule + 6h | Cloud Monitoring uptime check on `GET https://hhtnews.growtomiddle.dev/api/health` (returns `503` when a project is overdue) |
 
 The worker writes structured JSON lines (`severity`, `message`, context fields); in Logs Explorer
 filter with `jsonPayload.message:"[worker]"`.

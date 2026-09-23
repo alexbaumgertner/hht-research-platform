@@ -27,6 +27,8 @@ HHT Research Platform — це інструмент із відкритим ко
 
 Topic-agnostic research monitoring: configure sources in Payload Admin, run a Dockerized worker to fetch → dedupe → classify → summarize → publish digests, and read a public locale-prefixed feed.
 
+Live: **https://hhtnews.growtomiddle.dev** (Vercel, functions in `fra1`; Neon in Frankfurt).
+
 ## Stack
 
 - `apps/web` — Next.js 16 + Payload CMS 3 + Mantine + next-intl (Vercel)
