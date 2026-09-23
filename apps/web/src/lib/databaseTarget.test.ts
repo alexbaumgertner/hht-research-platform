@@ -1,4 +1,5 @@
 import {
+  assertDevDatabaseIsLocal,
   assertLocalDatabaseForScript,
   isLocalDatabaseUrl,
   shouldPushSchema,
@@ -49,6 +50,43 @@ describe('assertLocalDatabaseForScript', () => {
     expect(() =>
       assertLocalDatabaseForScript('seed', {
         DATABASE_URL: 'postgres://u:p@db.neon.tech/db',
+        ALLOW_REMOTE_DATABASE: '1',
+      }),
+    ).not.toThrow();
+  });
+});
+
+describe('assertDevDatabaseIsLocal', () => {
+  const remote = 'postgres://u:p@db.neon.tech/db';
+
+  it('blocks non-production processes from a remote database', () => {
+    expect(() =>
+      assertDevDatabaseIsLocal({ NODE_ENV: 'development', DATABASE_URL: remote }),
+    ).toThrow(/db\.neon\.tech/);
+    expect(() => assertDevDatabaseIsLocal({ DATABASE_URL: remote })).toThrow();
+  });
+
+  it('allows production, local databases and explicit opt-ins', () => {
+    expect(() =>
+      assertDevDatabaseIsLocal({ NODE_ENV: 'production', DATABASE_URL: remote }),
+    ).not.toThrow();
+    expect(() =>
+      assertDevDatabaseIsLocal({
+        NODE_ENV: 'development',
+        DATABASE_URL: 'postgres://u:p@localhost/db',
+      }),
+    ).not.toThrow();
+    expect(() =>
+      assertDevDatabaseIsLocal({
+        NODE_ENV: 'development',
+        DATABASE_URL: remote,
+        PAYLOAD_ALLOW_REMOTE_PUSH: '1',
+      }),
+    ).not.toThrow();
+    expect(() =>
+      assertDevDatabaseIsLocal({
+        NODE_ENV: 'development',
+        DATABASE_URL: remote,
         ALLOW_REMOTE_DATABASE: '1',
       }),
     ).not.toThrow();

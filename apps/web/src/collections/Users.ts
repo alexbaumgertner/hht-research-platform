@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload';
 
 import { isAdmin, usersReadAccess } from '../access';
+import { emailCodeStrategy } from '../lib/auth/strategy';
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -10,6 +11,10 @@ export const Users: CollectionConfig = {
   },
   auth: {
     useAPIKey: true,
+    // No passwords: admins sign in with a one-time code sent by email
+    // (/api/auth/request-code + verify-code). Fields stay so the schema is unchanged.
+    disableLocalStrategy: { enableFields: true, optionalPassword: true },
+    strategies: [emailCodeStrategy],
   },
   access: {
     read: usersReadAccess,

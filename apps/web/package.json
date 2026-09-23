@@ -16,7 +16,8 @@
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "seed:public-feed": "tsx src/scripts/seed-public-feed.ts",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.ts --passWithNoTests",
-    "test:e2e": "playwright test --config=playwright.config.ts"
+    "test:e2e": "playwright test --config=playwright.config.ts",
+    "create-admin": "tsx src/scripts/create-admin.ts"
   },
   "dependencies": {
     "@ai-sdk/gateway": "^4.0.64",
