@@ -191,8 +191,8 @@ Dates assume about 3.5 evenings/week. Each estimate is in evenings (2–3 h).
 
 > **Status 2026-09-23: done** except the failure drill. H1–H4 and the spec 004 scope shipped in
 > PR #1 without a separate Spec Kit spec. The seed project was deleted. Alerts are live (ERROR log
-> alert + `/api/health` uptime check). Open follow-up: Vercel Preview shares the production
-> `DATABASE_URL`, so every PR preview build pushes its schema into production.
+> alert + `/api/health` uptime check). Preview deployments now get their own Neon branch
+> (`preview/<git-branch>`, enabled 2026-09-23), so PR builds no longer push schema into production.
 
 **Goal:** the pipeline publishes real items again, can't fail silently, and the site shows nothing fake.
 
