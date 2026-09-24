@@ -22,7 +22,8 @@
     "latestIssueHeading": "Neuestes Update",
     "readIssue": "Dieses Update lesen",
     "allIssues": "Alle Updates",
-    "noIssuesYet": "Noch keine Updates veröffentlicht."
+    "noIssuesYet": "Noch keine Updates veröffentlicht.",
+    "notFound": "Dieses Projekt wurde nicht gefunden."
   },
   "Materials": {
     "badge": {

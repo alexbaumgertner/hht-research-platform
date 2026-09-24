@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import { cache } from 'react';
 import { getTranslations } from 'next-intl/server';
 import { Stack, Title } from '@mantine/core';
@@ -43,7 +44,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale: rawLocale, slug } = await params;
   const locale = toLocale(rawLocale);
   const project = await fetchProject(getPublicSiteUrl(), slug);
-  if (!project) return {};
+  if (!project) {
+    const t = await getTranslations({ locale, namespace: 'Project' });
+    return { title: t('notFound') };
+  }
 
   const [tIssue, tProject] = await Promise.all([
     getTranslations({ locale, namespace: 'Issue' }),
@@ -74,7 +78,7 @@ export default async function IssueArchivePage({ params }: Props) {
   ]);
 
   if (!project) {
-    return null;
+    notFound();
   }
 
   return (

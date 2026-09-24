@@ -22,7 +22,8 @@
     "latestIssueHeading": "Son güncelleme",
     "readIssue": "Bu güncellemeyi oku",
     "allIssues": "Tüm güncellemeler",
-    "noIssuesYet": "Henüz yayımlanmış güncelleme yok."
+    "noIssuesYet": "Henüz yayımlanmış güncelleme yok.",
+    "notFound": "Bu proje bulunamadı."
   },
   "Materials": {
     "badge": {

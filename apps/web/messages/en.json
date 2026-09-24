@@ -22,7 +22,8 @@
     "latestIssueHeading": "Latest update",
     "readIssue": "Read this issue",
     "allIssues": "All issues",
-    "noIssuesYet": "No updates published yet."
+    "noIssuesYet": "No updates published yet.",
+    "notFound": "This project could not be found."
   },
   "Materials": {
     "badge": {

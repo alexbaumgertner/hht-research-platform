@@ -474,7 +474,7 @@ ready for cross-cutting polish.
 
 **Purpose**: Rollout readiness, documentation, and the checks that span multiple stories.
 
-- [ ] T060 [P] Update `docs/deploy-worker.md` with the note that `AI_GATEWAY_API_KEY` is now
+- [x] T060 [P] Update `docs/deploy-worker.md` with the note that `AI_GATEWAY_API_KEY` is now
       required on Vercel (Production and Preview) for issue-text translation (research R6, plan.md
       Project Structure).
 - [x] T061 Update `apps/web/src/lib/health.ts` and `apps/web/src/app/api/health/route.ts` to pass
@@ -484,7 +484,7 @@ ready for cross-cutting polish.
 - [x] T062 Update `apps/worker/src/cms/client.ts`'s `listDueProjects` to read `publishWeekday`
       and `publishHourUtc` from `GET /api/research-projects?depth=1&…` and pass them as `anchor` to
       `isProjectDue` (contract worker-issue-text.md §3.1).
-- [ ] T063 [P] Run the full automated check suite from quickstart.md §6
+- [x] T063 [P] Run the full automated check suite from quickstart.md §6
       (`pnpm lint && pnpm format:check && pnpm typecheck`, `pnpm test`,
       `pnpm --filter @hht/web seed:public-feed && pnpm test:e2e`) and fix any remaining failures.
 - [ ] T064 Walk the production rollout checklist in quickstart.md §7 up through step 6 (schema

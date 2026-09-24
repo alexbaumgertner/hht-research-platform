@@ -22,7 +22,8 @@
     "latestIssueHeading": "Останнє оновлення",
     "readIssue": "Читати це оновлення",
     "allIssues": "Усі оновлення",
-    "noIssuesYet": "Оновлень ще не опубліковано."
+    "noIssuesYet": "Оновлень ще не опубліковано.",
+    "notFound": "Цей проєкт не знайдено."
   },
   "Materials": {
     "badge": {

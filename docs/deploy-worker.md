@@ -41,7 +41,10 @@ Important:
   - `PUBLIC_SITE_URL` (stable production URL, no trailing slash)
   - `PAYLOAD_API_KEY` (worker will use the **same** value)
   - `PAYLOAD_SECRET` / `DATABASE_URL` (web only; not needed on the worker)
-- [ ] [Vercel AI Gateway](https://vercel.com/docs/ai-gateway) API key for classify/summarize
+  - `AI_GATEWAY_API_KEY` (required on **Production and Preview** for on-demand issue-text
+    translation in the web app; see § Environment variables)
+- [ ] [Vercel AI Gateway](https://vercel.com/docs/ai-gateway) API key for classify/summarize (worker)
+      and issue-text translation (web)
 - [ ] Optional: [Resend](https://resend.com) API key for digest email notifications
 
 Enable APIs:
@@ -74,6 +77,14 @@ gcloud services enable \
 | `PUBLIC_SITE_URL` | Yes      | Same as Vercel. Example: `https://your-app.vercel.app`. No trailing slash. |
 | `PAYLOAD_API_KEY` | Yes      | Same secret as Vercel. Worker sends it as `X-Payload-API-Key`.             |
 
+### Vercel-only (`apps/web`)
+
+| Variable             | Required             | Notes                                                                                  |
+| -------------------- | -------------------- | -------------------------------------------------------------------------------------- |
+| `AI_GATEWAY_API_KEY` | Yes (Prod + Preview) | Issue-text translation on first request (`de`/`tr`/`ru`/`uk`). Without it, non-English |
+|                      |                      | issue pages fall back to English with a note. Set on **Production and Preview**; local |
+|                      |                      | dev can use `.env.local`. Optional `AI_GATEWAY_MODEL` (default `openai/gpt-4o-mini`).  |
+
 ### Worker-only (set on the Cloud Run Job)
 
 | Variable                | Required | Notes                                                      |
@@ -86,7 +97,9 @@ gcloud services enable \
 
 `BOOTSTRAP_LOOKBACK_DAYS` in `.env.example` is **not** read by the worker process; lookback comes from each project's `bootstrapLookbackDays` field (default 30).
 
-`AI_GATEWAY_API_KEY` belongs on the Cloud Run Job for the monitoring pipeline. You may also set it on Vercel later for web-only features (e.g. on-demand translation); that is separate from this worker deploy.
+`AI_GATEWAY_API_KEY` is required in **two** places: on the Cloud Run Job (classify/summarize in the
+monitoring pipeline) and on Vercel Production **and** Preview (on-demand issue-text translation in
+`apps/web`). Use the same gateway key for both unless you intentionally split billing.
 
 ---
 
