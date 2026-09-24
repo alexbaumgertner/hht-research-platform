@@ -29,16 +29,47 @@ export function safeEqualString(a: string, b: string): boolean {
   return timingSafeEqual(bufA, bufB);
 }
 
-function isWorkerOrAdminRequest(req: {
+type RequestLike = {
   user?: unknown;
-  headers: { get(name: string): string | null };
-}): boolean {
-  if (userHasWorkerOrAdminRole(req.user)) return true;
+  headers?: { get(name: string): string | null } | null;
+};
 
-  const headerKey = req.headers.get('x-payload-api-key') || req.headers.get('X-Payload-API-Key');
+function hasWorkerApiKeyHeader(req: RequestLike): boolean {
+  const headerKey = req.headers?.get('x-payload-api-key');
   const expected = process.env.PAYLOAD_API_KEY;
   return Boolean(expected && headerKey && safeEqualString(headerKey, expected));
 }
+
+function isWorkerOrAdminRequest(req: RequestLike): boolean {
+  if (userHasWorkerOrAdminRole(req.user)) return true;
+  return hasWorkerApiKeyHeader(req);
+}
+
+/**
+ * The worker writes either with the header-only X-Payload-API-Key (no `req.user`)
+ * or as a Users account with the `worker` role.
+ */
+export function isWorkerRequest(req: RequestLike): boolean {
+  if (req.user) {
+    const roles = (req.user as { roles?: string[] }).roles;
+    return Boolean(roles?.includes('worker'));
+  }
+  return hasWorkerApiKeyHeader(req);
+}
+
+/**
+ * Who is writing, decided by the request rather than the payload (the admin form
+ * submits every stored field). `system` is an unauthenticated Local API call
+ * (seed scripts, hooks) and is neither an owner edit nor a worker write.
+ */
+export type WriteOrigin = 'owner' | 'worker' | 'system';
+
+export function classifyWrite(req: RequestLike): WriteOrigin {
+  if (isWorkerRequest(req)) return 'worker';
+  return req.user ? 'owner' : 'system';
+}
+
+export const isWorkerFieldLevel: FieldAccess = ({ req }) => isWorkerRequest(req);
 
 /**
  * Worker authenticates via Payload API key on a Users account,

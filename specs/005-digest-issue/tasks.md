@@ -57,21 +57,21 @@ implementation phase depends on. No user story work can begin until this phase i
 
 ### Schema and hooks (data-model.md §1–§3)
 
-- [ ] T003 Add the new fields (`issueSummaryPoints`, `issueItemSentences`, `issueTextStatus`,
+- [x] T003 Add the new fields (`issueSummaryPoints`, `issueItemSentences`, `issueTextStatus`,
       `issueTextAttempts`, `issueTextError`, `issueTextGeneratedAt`, `issueTextSource`,
       `issueTextRevision`, `hiddenFromPublic`) to `apps/web/src/collections/Digests.ts`, with the
       validation that every `issueSummaryPoints[].items[]` and `issueItemSentences[].publication`
       must be one of the digest's `publications` (data-model.md §1 "Validation and invariants").
-- [ ] T004 In `apps/web/src/collections/Digests.ts`, change `beforeValidate`'s "Cannot publish an
+- [x] T004 In `apps/web/src/collections/Digests.ts`, change `beforeValidate`'s "Cannot publish an
       empty digest" check to run only on `create`, or on `update` when `publications` is present in
       the incoming data (data-model.md §1, contract worker-issue-text.md §2.5), so a worker PATCH
       that omits `publications` is not rejected.
-- [ ] T005 [P] Determine "owner write vs worker write" in `apps/web/src/access/index.ts` (or the
+- [x] T005 [P] Determine "owner write vs worker write" in `apps/web/src/access/index.ts` (or the
       shared access helper it already exports, e.g. `isWorkerOrAdmin`/`canUpdateResearchProject`):
       an owner write is any authenticated write that is not the header-only `X-Payload-API-Key` and
       not a `req.user` with the `worker` role (data-model.md §1 "Owner write vs worker write").
       Export a small helper usable from a collection hook to classify the current `req`.
-- [ ] T006 Add the revision-bump, owner-edit, and re-queue hook behaviour to
+- [x] T006 Add the revision-bump, owner-edit, and re-queue hook behaviour to
       `apps/web/src/collections/digestHooks.ts`: `beforeChange` bumps `issueTextRevision` when the
       normalized English text (`issueSummaryPoints` text + sorted item ids; `issueItemSentences`
       text by publication id) differs from `originalDoc`; an owner write on that same change also
@@ -81,13 +81,13 @@ implementation phase depends on. No user story work can begin until this phase i
       (update, revision changed) calls
       `req.payload.db.deleteMany({ collection: 'issue-translations', where: { digest: { equals: id } }, req })`,
       sharing `req` (data-model.md §1 hook table; the documented 504 lesson).
-- [ ] T007 [P] Extend `apps/web/tests/e2e/../../src/collections/digestHooks.test.ts` →
+- [x] T007 [P] Extend `apps/web/tests/e2e/../../src/collections/digestHooks.test.ts` →
       `apps/web/src/collections/digestHooks.test.ts` with cases: revision bump only on a real text
       change (not a no-op re-save); attempts reset on re-queue to `pending`; an owner edit (admin
       session) on a `pending`/`failed` digest → `ready` + `edited`; a worker write (header key or
       `worker` role) keeps `generated` and its own status; an owner edit plus re-queue in the same
       save → `pending` wins (quickstart.md §6).
-- [ ] T008 [P] Create `apps/web/src/collections/IssueTranslations.ts`: fields `digest`
+- [x] T008 [P] Create `apps/web/src/collections/IssueTranslations.ts`: fields `digest`
       (relationship → `digests`, required, index), `locale` (select `de|tr|ru|uk`, required),
       `status` (select `pending|ready|failed`, required), `sourceRevision` (number, required),
       `leaseExpiresAt` (date), `retryAfter` (date), `attempts` (number, default `1`), `error` (text),
@@ -96,40 +96,40 @@ implementation phase depends on. No user story work can begin until this phase i
       `['digest', 'locale']`; `access`: `read: isAuthenticated`, `create`/`update`: deny over REST,
       `delete: isAuthenticated`; admin grouped under "Research", `useAsTitle: 'locale'`, columns
       `digest, locale, status, sourceRevision, updatedAt` (data-model.md §2).
-- [ ] T009 [P] Register `IssueTranslations` in `apps/web/src/payload.config.ts`.
-- [ ] T010 [P] Add `publishWeekday` (select `monday`…`sunday`), `publishHourUtc` (number, 0–23,
+- [x] T009 [P] Register `IssueTranslations` in `apps/web/src/payload.config.ts`.
+- [x] T010 [P] Add `publishWeekday` (select `monday`…`sunday`), `publishHourUtc` (number, 0–23,
       integer), and `audienceContext` (textarea) to
       `apps/web/src/collections/ResearchProjects.ts`, with `admin.condition` showing
       `publishWeekday`/`publishHourUtc` only for the relevant `schedule` values (data-model.md §3),
       and a `beforeValidate` check rejecting `publishWeekday` without `publishHourUtc` (or the
       reverse) on a weekly project ("Set both publish weekday and hour, or neither").
-- [ ] T011 Verify the additive schema pushes cleanly: run
+- [x] T011 Verify the additive schema pushes cleanly: run
       `pnpm --filter @hht/shared build && pnpm --filter @hht/web ensure-schema` against local
       Postgres (`docker compose up -d`) and confirm no rename prompts (data-model.md §7,
       quickstart.md Prerequisites).
 
 ### Shared pure logic (`packages/shared`)
 
-- [ ] T012 [P] Add `PublishWeekdaySchema` (`z.enum([...])`), `ScheduleAnchor` type, and
+- [x] T012 [P] Add `PublishWeekdaySchema` (`z.enum([...])`), `ScheduleAnchor` type, and
       `IssueTextStatusSchema` / `IssueTranslationStatusSchema` (`z.enum(['pending','ready','failed'])`)
       to `packages/shared/src/index.ts` (data-model.md §4), re-exporting from `schedule.ts` /
       `issueOrder.ts` as appropriate.
-- [ ] T013 [P] Implement `latestScheduledSlot(schedule, anchor, now)` in
+- [x] T013 [P] Implement `latestScheduledSlot(schedule, anchor, now)` in
       `packages/shared/src/schedule.ts`: weekly with weekday+hour → latest `{weekday} {hour}:00 UTC`
       ≤ `now`; daily with hour → latest `{hour}:00 UTC` ≤ `now`; otherwise `null` (research R5,
       contract worker-issue-text.md §3.1–§3.2). Extend `isProjectDue` and `isProjectStale` to accept
       an optional `anchor` and use the slot-based rule when a slot is returned, falling back to the
       existing interval rule when `null` (backward compatible `ScheduleDueInput`).
-- [ ] T014 [P] Add the required test cases to `packages/shared/src/schedule.test.ts`: the R5
+- [x] T014 [P] Add the required test cases to `packages/shared/src/schedule.test.ts`: the R5
       worked-example table row by row; a weekly anchor with a failed 04:00 run due at 05:00, 06:00…
       until success; `monthly` with an anchor set → legacy rule; weekly with no anchor → legacy
       rule; `daily → weekly` switch on a Thursday after a Thursday run → not due until the next
       Monday slot; staleness at Monday 10:01 vs not-stale at 09:59 (contract worker-issue-text.md
       §3.3).
-- [ ] T015 [P] Create `packages/shared/src/issueOrder.ts`: `IMPORTANCE_RANK` (`critical` >
+- [x] T015 [P] Create `packages/shared/src/issueOrder.ts`: `IMPORTANCE_RANK` (`critical` >
       `high` > `medium` > `low` > missing) and `compareIssueItems(a, b)` — raw importance rank desc,
       then `publishedOrUpdatedAt` desc (nulls last), then id asc (research R14, data-model.md §4).
-- [ ] T016 [P] Create `packages/shared/src/issueOrder.test.ts` covering importance → date → id
+- [x] T016 [P] Create `packages/shared/src/issueOrder.test.ts` covering importance → date → id
       ordering, including the nulls-last and tie-break cases.
 
 **Checkpoint**: Schema, hooks, and shared ordering/scheduling logic are in place and tested.

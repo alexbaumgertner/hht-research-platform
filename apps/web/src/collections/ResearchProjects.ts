@@ -33,6 +33,13 @@ export const ResearchProjects: CollectionConfig = {
         if (operation === 'create' && !data.monitoringStatus) {
           data.monitoringStatus = 'active';
         }
+        if (data.schedule === 'weekly') {
+          const hasWeekday = data.publishWeekday != null;
+          const hasHour = data.publishHourUtc != null;
+          if (hasWeekday !== hasHour) {
+            throw new Error('Set both publish weekday and hour, or neither');
+          }
+        }
         return data;
       },
     ],
@@ -83,6 +90,55 @@ export const ResearchProjects: CollectionConfig = {
         { label: 'Weekly', value: 'weekly' },
         { label: 'Monthly', value: 'monthly' },
       ],
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'publishWeekday',
+          type: 'select',
+          options: [
+            { label: 'Monday', value: 'monday' },
+            { label: 'Tuesday', value: 'tuesday' },
+            { label: 'Wednesday', value: 'wednesday' },
+            { label: 'Thursday', value: 'thursday' },
+            { label: 'Friday', value: 'friday' },
+            { label: 'Saturday', value: 'saturday' },
+            { label: 'Sunday', value: 'sunday' },
+          ],
+          admin: {
+            condition: (data) => data?.schedule === 'weekly',
+            description:
+              'Weekly issues publish on this day. Leave empty to keep a rolling 7-day cadence.',
+          },
+        },
+        {
+          name: 'publishHourUtc',
+          type: 'number',
+          min: 0,
+          max: 23,
+          validate: (value: number | null | undefined) => {
+            if (value == null) return true;
+            if (!Number.isInteger(value) || value < 0 || value > 23) {
+              return 'Publish hour must be a whole hour from 0 to 23 (UTC)';
+            }
+            return true;
+          },
+          admin: {
+            step: 1,
+            condition: (data) => data?.schedule === 'weekly' || data?.schedule === 'daily',
+            description: 'Hour of day in UTC (0–23) at which the scheduled run publishes.',
+          },
+        },
+      ],
+    },
+    {
+      name: 'audienceContext',
+      type: 'textarea',
+      admin: {
+        description:
+          'Who reads the issues, in plain words. Used in the prompts that write the issue text.',
+      },
     },
     {
       name: 'monitoringStatus',
