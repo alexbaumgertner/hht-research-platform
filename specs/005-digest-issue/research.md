@@ -92,7 +92,8 @@ The one sweep covers four requirements with one code path:
    when there are fewer than 3 items: `minSummaryPoints = min(3, n)`).
 3. **Map and validate** (pure function, Jest-tested). Map `n` to publication ids. Then enforce:
    - every item has exactly one sentence of ≤ 35 words (the prompt asks for ≤ 30);
-   - `min(3, n)`–5 points, ≤ 120 words in total;
+   - `min(3, n)`–5 points, ≤ 120 words in total (the prompt asks for ≤ 100, keeping headroom
+     like sentences' 30 vs 35);
    - every point references ≥ 1 valid item number (invalid numbers are dropped, and a point left
      with no reference fails validation);
    - the guard patterns below find nothing.

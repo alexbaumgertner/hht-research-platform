@@ -12,6 +12,11 @@ export const MAX_SENTENCE_WORDS = 35;
 export const MIN_SUMMARY_POINTS = 3;
 export const MAX_SUMMARY_POINTS = 5;
 export const MAX_SUMMARY_WORDS = 120;
+/**
+ * The prompt asks for fewer words than validation allows, like sentences (30 vs 35):
+ * asking for exactly the limit made the model overshoot it (125 words, 2026-09-24).
+ */
+export const PROMPT_SUMMARY_WORDS = 100;
 
 /** Defence in depth for FR-005/FR-006; manual review (SC-004) is still the acceptance check. */
 export const DOSE_PATTERN = /\b\d+(?:[.,]\d+)?\s?(mg|mcg|µg|g|ml|iu|units?)\b/i;
@@ -156,7 +161,7 @@ Sentence: ${escapeUntrusted(sentences.get(item.n) ?? '')}
     system: `You write the short summary at the top of a weekly research update.
 ${projectContext(project)}
 ${SAFETY_RULES}
-Write ${minSummaryPoints(items.length)} to ${MAX_SUMMARY_POINTS} points, at most ${MAX_SUMMARY_WORDS} words in total, about the most important news in the numbered items below.
+Write ${minSummaryPoints(items.length)} to ${MAX_SUMMARY_POINTS} points, at most ${PROMPT_SUMMARY_WORDS} words in total, about the most important news in the numbered items below.
 Each point is one or two plain sentences. In "items", list the numbers of the items the point is based on; every point must cite at least one item.
 Use only the numbered items below.`,
     prompt: described.join('\n\n'),
