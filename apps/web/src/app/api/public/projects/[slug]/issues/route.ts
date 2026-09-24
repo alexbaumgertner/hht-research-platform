@@ -2,6 +2,7 @@ import { LocaleSchema, type Locale } from '@hht/shared';
 import { NextResponse } from 'next/server';
 
 import { findProjectBySlug, listVisibleIssues, loadIssueSummary } from '@/lib/issueQueries';
+import { findReadyIssueTranslations } from '@/lib/issueTranslationStore';
 import { toIssueSummaryListItem } from '@/lib/issues';
 
 type Params = { params: Promise<{ slug: string }> };
@@ -36,11 +37,20 @@ export async function GET(req: Request, { params }: Params) {
   }
 
   const digests = await listVisibleIssues(project.id, limit);
-  const docs = await Promise.all(
-    digests.map(async (digest) => {
-      const loaded = await loadIssueSummary(digest, project, locale);
-      return toIssueSummaryListItem(loaded.digest, loaded.publications, locale);
-    }),
+  const [loadedIssues, translations] = await Promise.all([
+    Promise.all(digests.map((digest) => loadIssueSummary(digest, project, locale))),
+    locale === 'en'
+      ? Promise.resolve(new Map<string, never>())
+      : findReadyIssueTranslations(digests, locale),
+  ]);
+
+  const docs = loadedIssues.map((loaded) =>
+    toIssueSummaryListItem(
+      loaded.digest,
+      loaded.publications,
+      locale,
+      translations.get(String(loaded.digest.id))?.summaryPoints[0] ?? null,
+    ),
   );
 
   docs.sort((a, b) => {

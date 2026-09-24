@@ -380,13 +380,13 @@ the cached translation is served instantly with no new delay.
 
 ### Implementation for User Story 5
 
-- [ ] T048 [US5] Create `apps/web/src/lib/issueTranslator.ts`: a translator interface with a
+- [x] T048 [US5] Create `apps/web/src/lib/issueTranslator.ts`: a translator interface with a
       `gateway` implementation (using the existing `ai` + `@ai-sdk/gateway` packages,
       `AI_GATEWAY_API_KEY`/`AI_GATEWAY_MODEL`, default model `openai/gpt-4o-mini`) and a `stub`
       implementation returning deterministic `[<locale>] …` text with a configurable delay
       (`ISSUE_TRANSLATOR_STUB_DELAY_MS`), selected via `ISSUE_TRANSLATOR` and refusing `stub` when
       `VERCEL_ENV === 'production'` (research R6, contract public-issues-api.md §4).
-- [ ] T049 [US5] Create `apps/web/src/lib/issueTranslation.ts`: the claim/wait/reclaim state
+- [x] T049 [US5] Create `apps/web/src/lib/issueTranslation.ts`: the claim/wait/reclaim state
       machine against the `issue-translations` collection — read the `(digest, locale)` row; serve
       `ready` rows matching `sourceRevision`; treat `pending` with a live lease as "wait" (poll
       every 400 ms); treat `failed` with `retryAfter` in the future as "serve English, no retry";
@@ -396,10 +396,10 @@ the cached translation is served instantly with no new delay.
       to `failed` with `retryAfter: now + 15min` (discarding the result if the row was deleted by an
       edit in the meantime) (research R7, R9, data-model.md §2). Behind an interface so it can be
       tested against an in-memory unique-key fake store.
-- [ ] T050 [P] [US5] Create `apps/web/src/lib/issueTranslation.test.ts` against a unique-key
+- [x] T050 [P] [US5] Create `apps/web/src/lib/issueTranslation.test.ts` against a unique-key
       fake store: lost race → waiter; expired lease → reclaim by id; cooldown respected; revision
       mismatch → reclaim (quickstart.md §6).
-- [ ] T051 [US5] Wire the wait-then-fallback flow into
+- [x] T051 [US5] Wire the wait-then-fallback flow into
       `apps/web/src/app/api/public/projects/[slug]/issues/[id]/route.ts`: for a non-`en` locale,
       start `translateAndStore()` (using T048/T049) as a promise registered with `after()` from
       `next/server`, `await Promise.race([promise, sleepUntil(deadline)])` with
@@ -407,26 +407,29 @@ the cached translation is served instantly with no new delay.
       `translation.status: 'pending'`; a waiter (lost the race or found a live lease) polls the row
       every 400 ms until `ready`/`failed`/deadline; crawlers get the identical code path (no
       user-agent branching) (research R8, contract public-issues-api.md §2 timing table).
-- [ ] T052 [US5] Ensure `apps/web/src/app/api/public/projects/[slug]/issues/route.ts` (archive)
+- [x] T052 [US5] Ensure `apps/web/src/app/api/public/projects/[slug]/issues/route.ts` (archive)
       and the latest-issue-card query never trigger a translation — they only use an existing
       `ready` row matching `sourceRevision`, else English (contract public-issues-api.md §1, "Never
       triggers a translation").
-- [ ] T053 [US5] Create
+- [x] T053 [US5] Create
       `apps/web/src/app/api/test/issue-translations/route.ts`: a test-only reset/read endpoint that
       returns 404 unless `ISSUE_TRANSLATOR=stub` and `VERCEL_ENV !== 'production'`, used by the
       single-flight spec to clear rows for its dedicated digest and to read row count/`attempts`
       (research R16, quickstart.md §3).
+      _Also reports stub invocation counts, sets a per-digest stub delay on reset (so only the
+      slow-path test waits 11 s), and has an `edit-first-point` action that edits the digest
+      through the real `Digests` hooks for T055's invalidation case._
 - [x] T054 [US5] Extend `apps/web/src/scripts/seed-public-feed.ts` with: a digest with
       `issueTextStatus: ready`, 3 summary points (with item refs) and one sentence per item
       including one ClinicalTrials.gov item; a digest with `issueTextStatus: pending` and no text; a
       digest with `hiddenFromPublic: true` whose materials stay in the feed; and a digest reserved
       for the single-flight spec (quickstart.md Prerequisites, §6).
-- [ ] T055 [P] [US5] Create `apps/web/tests/e2e/issue-translation.spec.ts`: 8 concurrent
+- [x] T055 [P] [US5] Create `apps/web/tests/e2e/issue-translation.spec.ts`: 8 concurrent
       `GET`s for one untranslated issue+locale → exactly one `issue-translations` row with
       `attempts === 1` (via the T053 reset route, clearing state first so CI's `retries: 2` doesn't
       see a stale row); a slow stub → English + `pending` note within 8 s, then translated on
       reload; an edit/regeneration invalidation case (quickstart.md §3, §6).
-- [ ] T056 [US5] Add `Issue.translationPending` / `Issue.translationUnavailable` rendering to
+- [x] T056 [US5] Add `Issue.translationPending` / `Issue.translationUnavailable` rendering to
       `IssueView.tsx` when `isFallback` is true, matching `translation.status` (contract
       issue-pages.md §2 step 3).
 

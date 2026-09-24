@@ -1,5 +1,6 @@
 import type { Locale } from '@hht/shared';
 
+import type { IssueText } from '@/lib/issueTranslator';
 import {
   sentenceByPublicationId,
   visibleSummaryPointItemIds,
@@ -10,6 +11,10 @@ import {
 import { toMaterial, type DisplayImportance, type MaterialSourceOrFallback } from '@/lib/materials';
 
 export type IssueTranslationStatus = 'not-needed' | 'ready' | 'pending' | 'failed' | 'unavailable';
+
+/** What the translation layer resolved for this response; `text` only when `ready`. */
+export type IssueTextTranslation =
+  { status: 'ready'; text: IssueText } | { status: Exclude<IssueTranslationStatus, 'ready'> };
 
 export type IssueSummaryListItem = {
   id: string;
@@ -95,8 +100,38 @@ export function buildIssueMetaDescription(input: {
   });
 }
 
-function buildIssueItems(loaded: LoadedIssue, locale: Locale): IssueDetailItem[] {
+function visiblePublicationIds(publications: IssuePublicationDoc[]): Set<string> {
+  return new Set(publications.map((publication) => String(publication.id)));
+}
+
+/**
+ * The English issue text a translation is made from: summary points in display
+ * order (translations are positional) and the visible items' sentences.
+ */
+export function issueTranslationSource(loaded: LoadedIssue): IssueText {
+  const visibleIds = visiblePublicationIds(loaded.publications);
   const sentences = sentenceByPublicationId(loaded.digest);
+  return {
+    summaryPoints: visibleSummaryPointItemIds(loaded.digest, visibleIds).map((point) => point.text),
+    itemSentences: loaded.publications.flatMap((publication) => {
+      const sentence = sentences.get(String(publication.id));
+      return sentence ? [{ publicationId: String(publication.id), sentence }] : [];
+    }),
+  };
+}
+
+export function hasIssueText(text: IssueText): boolean {
+  return text.summaryPoints.length > 0 || text.itemSentences.length > 0;
+}
+
+function buildIssueItems(
+  loaded: LoadedIssue,
+  locale: Locale,
+  translated: IssueText | null,
+): IssueDetailItem[] {
+  const sentences = translated
+    ? new Map(translated.itemSentences.map((row) => [row.publicationId, row.sentence]))
+    : sentenceByPublicationId(loaded.digest);
 
   return loaded.publications.map((publication) => {
     const material = toMaterial(
@@ -117,26 +152,40 @@ function buildIssueItems(loaded: LoadedIssue, locale: Locale): IssueDetailItem[]
   });
 }
 
-function englishSummaryPoints(digest: IssueDigestDoc, visibleIds: Set<string>) {
-  const points = visibleSummaryPointItemIds(digest, visibleIds);
+function summaryPoints(
+  digest: IssueDigestDoc,
+  visibleIds: Set<string>,
+  translated: IssueText | null,
+): IssueDetail['summary'] {
+  const points = visibleSummaryPointItemIds(digest, visibleIds).map((point, index) => ({
+    text: translated?.summaryPoints[index] ?? point.text,
+    itemIds: point.itemIds,
+  }));
   return points.length > 0 ? { points } : null;
 }
 
+/**
+ * `translatedExcerpt` comes only from an existing `ready` translation at the
+ * current revision; listings never start one.
+ */
 export function toIssueSummaryListItem(
   digest: IssueDigestDoc,
   publications: IssuePublicationDoc[],
   locale: Locale,
+  translatedExcerpt: string | null = null,
 ): IssueSummaryListItem {
-  const visibleIds = new Set(publications.map((publication) => String(publication.id)));
+  const visibleIds = visiblePublicationIds(publications);
   const firstPoint = visibleSummaryPointItemIds(digest, visibleIds)[0]?.text ?? null;
+  const excerpt = locale !== 'en' && firstPoint ? (translatedExcerpt ?? firstPoint) : firstPoint;
+  const isFallback = locale !== 'en' && firstPoint != null && translatedExcerpt == null;
 
   return {
     id: String(digest.id),
     date: digest.publishedAt,
     itemCount: publications.length,
-    excerpt: firstPoint,
-    displayedLocale: locale === 'en' || !firstPoint ? 'en' : 'en',
-    isFallback: locale !== 'en' && Boolean(firstPoint),
+    excerpt,
+    displayedLocale: isFallback ? 'en' : locale,
+    isFallback,
   };
 }
 
@@ -144,12 +193,14 @@ export function toIssueDetail(
   loaded: LoadedIssue,
   locale: Locale,
   t: IssueMetaTranslator,
-  translationStatus: IssueTranslationStatus = 'not-needed',
+  translation: IssueTextTranslation = { status: 'not-needed' },
 ): IssueDetail {
-  const visibleIds = new Set(loaded.publications.map((publication) => String(publication.id)));
-  const summary = englishSummaryPoints(loaded.digest, visibleIds);
-  const items = buildIssueItems(loaded, locale);
+  const visibleIds = visiblePublicationIds(loaded.publications);
+  const translated = locale !== 'en' && translation.status === 'ready' ? translation.text : null;
+  const summary = summaryPoints(loaded.digest, visibleIds, translated);
+  const items = buildIssueItems(loaded, locale, translated);
   const firstSummaryPoint = summary?.points[0]?.text ?? null;
+  const isFallback = locale !== 'en' && !translated && hasIssueText(issueTranslationSource(loaded));
 
   return {
     id: String(loaded.digest.id),
@@ -160,9 +211,9 @@ export function toIssueDetail(
     },
     summary,
     items,
-    displayedLocale: 'en',
-    isFallback: locale !== 'en',
-    translation: { status: translationStatus },
+    displayedLocale: isFallback ? 'en' : locale,
+    isFallback,
+    translation: { status: translation.status },
     meta: {
       title: buildIssueMetaTitle({
         t,

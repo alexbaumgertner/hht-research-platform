@@ -30,6 +30,7 @@ export async function IssueView({ issue, locale }: Props) {
     day: 'numeric',
   });
   const positionById = new Map(issue.items.map((item, index) => [item.id, index + 1]));
+  const textLang = issue.isFallback ? issue.displayedLocale : undefined;
 
   return (
     <Stack gap="lg" maw={720} mx="auto" w="100%">
@@ -40,8 +41,16 @@ export async function IssueView({ issue, locale }: Props) {
           {t('summaryHeading')}
         </Title>
 
+        {issue.isFallback ? (
+          <Text size="sm" c="dimmed" role="note">
+            {issue.translation.status === 'pending'
+              ? t('translationPending')
+              : t('translationUnavailable')}
+          </Text>
+        ) : null}
+
         {issue.summary ? (
-          <ol style={listStyle('var(--mantine-spacing-sm)')}>
+          <ol style={listStyle('var(--mantine-spacing-sm)')} lang={textLang}>
             {issue.summary.points.map((point) => (
               <li key={point.text} style={itemStyle}>
                 <Text component="span">{point.text}</Text>
@@ -110,7 +119,7 @@ export async function IssueView({ issue, locale }: Props) {
                       </Text>
                     ) : null}
                   </Group>
-                  {item.sentence ? <Text>{item.sentence}</Text> : null}
+                  {item.sentence ? <Text lang={textLang}>{item.sentence}</Text> : null}
                 </Stack>
               </li>
             );

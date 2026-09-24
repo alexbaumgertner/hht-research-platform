@@ -7,6 +7,7 @@ import type { IssueDigestDoc, IssueProjectDoc, IssuePublicationDoc } from '@/lib
 import {
   buildIssueMetaDescription,
   buildIssueMetaTitle,
+  issueTranslationSource,
   toIssueDetail,
   toIssueSummaryListItem,
   truncateDescription,
@@ -99,6 +100,37 @@ describe('toIssueSummaryListItem', () => {
     expect(item.isFallback).toBe(true);
     expect(item.displayedLocale).toBe('en');
   });
+
+  it('uses a cached translated excerpt when one is given', () => {
+    const item = toIssueSummaryListItem(readyDigest, publications, 'ru', '[ru] Первый пункт.');
+    expect(item).toMatchObject({
+      excerpt: '[ru] Первый пункт.',
+      displayedLocale: 'ru',
+      isFallback: false,
+    });
+  });
+});
+
+describe('issueTranslationSource', () => {
+  it('collects summary points in order and visible item sentences', () => {
+    expect(
+      issueTranslationSource({
+        digest: readyDigest,
+        project,
+        publications: [publications[0]],
+        translationByPubId: new Map(),
+      }),
+    ).toEqual({
+      summaryPoints: [
+        'First summary point about new findings.',
+        'Second point about care.',
+        'Third point for families.',
+      ],
+      itemSentences: [
+        { publicationId: '10', sentence: 'Researchers studied a possible treatment.' },
+      ],
+    });
+  });
 });
 
 describe('toIssueDetail', () => {
@@ -129,6 +161,68 @@ describe('toIssueDetail', () => {
     expect(detail.meta.title).toBe('HHT Research: update of September 28, 2026');
     expect(detail.meta.description).toBe('First summary point about new findings.');
     expect(detail.meta.description.length).toBeLessThanOrEqual(160);
+  });
+
+  it('overlays a ready translation on points, sentences, and meta description', () => {
+    const detail = toIssueDetail(
+      { digest: readyDigest, project, publications, translationByPubId: new Map() },
+      'ru',
+      tRu,
+      {
+        status: 'ready',
+        text: {
+          summaryPoints: ['[ru] Первый.', '[ru] Второй.', '[ru] Третий.'],
+          itemSentences: [
+            { publicationId: '10', sentence: '[ru] Исследование.' },
+            { publicationId: '11', sentence: '[ru] Набор участников.' },
+          ],
+        },
+      },
+    );
+
+    expect(detail).toMatchObject({
+      displayedLocale: 'ru',
+      isFallback: false,
+      translation: { status: 'ready' },
+      meta: { description: '[ru] Первый.' },
+    });
+    expect(detail.summary?.points[0]).toEqual({ text: '[ru] Первый.', itemIds: ['10', '11'] });
+    expect(detail.items.map((item) => item.sentence)).toEqual([
+      '[ru] Исследование.',
+      '[ru] Набор участников.',
+    ]);
+  });
+
+  it('falls back to English with the pending status while a translation runs', () => {
+    const detail = toIssueDetail(
+      { digest: readyDigest, project, publications, translationByPubId: new Map() },
+      'uk',
+      tEn,
+      { status: 'pending' },
+    );
+
+    expect(detail).toMatchObject({
+      displayedLocale: 'en',
+      isFallback: true,
+      translation: { status: 'pending' },
+    });
+    expect(detail.summary?.points[0]?.text).toBe('First summary point about new findings.');
+  });
+
+  it('is not a fallback when there is no English text to translate', () => {
+    const detail = toIssueDetail(
+      {
+        digest: pendingDigest,
+        project,
+        publications: [publications[0]],
+        translationByPubId: new Map(),
+      },
+      'de',
+      tEn,
+      { status: 'unavailable' },
+    );
+
+    expect(detail).toMatchObject({ displayedLocale: 'de', isFallback: false });
   });
 
   it('returns summary null when no English points exist', () => {

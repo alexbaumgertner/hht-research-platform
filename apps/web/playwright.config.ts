@@ -27,6 +27,9 @@ const config: Config = defineConfig({
     // Playwright only treats 2xx/3xx as ready — `/` returns 404 (locale
     // segment required), so probe a real locale route instead.
     url: `${baseURL}/en`,
+    // Issue-text translation never reaches the LLM gateway from e2e; the stub also
+    // enables `/api/test/issue-translations` for the single-flight spec.
+    env: { ISSUE_TRANSLATOR: 'stub', ISSUE_TRANSLATOR_STUB_DELAY_MS: '0' },
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
     stdout: 'pipe',
