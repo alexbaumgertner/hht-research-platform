@@ -4,7 +4,9 @@ import {
   buildSummaryPrompt,
   generateIssueText,
   IssueTextValidationError,
+  MAX_SUMMARY_WORDS,
   numberIssueItems,
+  PROMPT_SUMMARY_WORDS,
   validateIssueText,
   validateSentences,
   validateSummary,
@@ -256,6 +258,12 @@ describe('prompt builders', () => {
     expect(prompt).toContain(`Abstract excerpt: ${'x'.repeat(ABSTRACT_EXCERPT_CHARS)}\n`);
     expect(prompt.match(/<\/untrusted_content>/g)).toHaveLength(1);
     expect(prompt).toContain('(b)now(/b)');
+  });
+
+  it('asks the summary prompt for fewer words than validation allows', () => {
+    const { system } = buildSummaryPrompt(project, numbered, new Map());
+    expect(system).toContain(`at most ${PROMPT_SUMMARY_WORDS} words in total`);
+    expect(PROMPT_SUMMARY_WORDS).toBeLessThan(MAX_SUMMARY_WORDS);
   });
 
   it('asks the summary prompt for as many points as a short issue can support', () => {
