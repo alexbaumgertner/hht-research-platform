@@ -321,7 +321,8 @@ async function seed() {
   const pub = (key: string) => {
     const id = publicationIdsByKey.get(key);
     if (id == null) throw new Error(`Missing seed publication: ${key}`);
-    return id;
+    // Postgres ids are numeric; the generated Payload types require `number`.
+    return id as number;
   };
 
   async function ensureDigest(input: {
@@ -329,10 +330,10 @@ async function seed() {
     publicationKeys: string[];
     issueTextStatus?: 'pending' | 'ready' | 'failed';
     hiddenFromPublic?: boolean;
-    issueSummaryPoints?: Array<{ text: string; items: Array<string | number> }>;
-    issueItemSentences?: Array<{ publication: string | number; sentence: string }>;
+    issueSummaryPoints?: Array<{ text: string; items: number[] }>;
+    issueItemSentences?: Array<{ publication: number; sentence: string }>;
   }) {
-    const publications = input.publicationKeys.map(pub) as number[];
+    const publications = input.publicationKeys.map(pub);
     const existing = await payload.find({
       collection: 'digests',
       where: {

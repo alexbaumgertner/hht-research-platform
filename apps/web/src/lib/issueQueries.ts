@@ -68,7 +68,10 @@ async function loadTranslations(
   return translationByPubId;
 }
 
-function mapPublicationDoc(doc: Record<string, unknown>): IssuePublicationDoc {
+// `object`, not `Record<string, unknown>`: generated Payload interfaces (present on Vercel
+// builds) have no index signature.
+function mapPublicationDoc(source: object): IssuePublicationDoc {
+  const doc = source as Record<string, unknown>;
   return {
     id: doc.id as string | number,
     title: doc.title as string | null | undefined,
@@ -119,7 +122,8 @@ async function loadVisiblePublications(publicationRefs: unknown): Promise<IssueP
   return sortIssuePublications(publications.docs.map((doc) => mapPublicationDoc(doc)));
 }
 
-function mapDigestDoc(doc: Record<string, unknown>): IssueDigestDoc {
+function mapDigestDoc(source: object): IssueDigestDoc {
+  const doc = source as Record<string, unknown>;
   return {
     id: doc.id as string | number,
     publishedAt: String(doc.publishedAt),
