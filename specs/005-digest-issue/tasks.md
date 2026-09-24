@@ -34,10 +34,10 @@ deployable (per plan.md "Project Structure").
 
 **Purpose**: Turn on the required CI check before any feature code lands, per research R16.
 
-- [ ] T001 Add `pnpm --filter @hht/web seed:public-feed` as a step after "Push DB schema" (which
+- [x] T001 Add `pnpm --filter @hht/web seed:public-feed` as a step after "Push DB schema" (which
       runs `ensure-schema`) in `.github/workflows/ci.yml`, before the `Playwright` step, with the
       same `env` block already present in the job.
-- [ ] T002 Run `pnpm --filter @hht/web seed:public-feed && pnpm test:e2e` locally against the CI
+- [x] T002 Run `pnpm --filter @hht/web seed:public-feed && pnpm test:e2e` locally against the CI
       Postgres config and fix whatever the now-un-skipped seeded specs surface in
       `apps/web/tests/e2e/public-feed.spec.ts`, `apps/web/tests/e2e/public-material-detail.spec.ts`,
       and `apps/web/tests/e2e/monitoring-digest.spec.ts`. Do not touch feature code in this task —
