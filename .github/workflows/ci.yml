@@ -80,6 +80,9 @@ jobs:
       - name: Push DB schema
         run: pnpm --filter @hht/web ensure-schema
 
+      - name: Seed public feed
+        run: pnpm --filter @hht/web seed:public-feed
+
       - name: Playwright
         run: pnpm test:e2e
         env:
