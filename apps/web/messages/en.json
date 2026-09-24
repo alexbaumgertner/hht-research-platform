@@ -18,7 +18,11 @@
     "lastChecked": "Sources last checked: {date}",
     "metaDescription": "Weekly research updates for {projectName}, explained in plain language with a link to every source.",
     "imageTagline": "Weekly research updates in plain language",
-    "imageAlt": "Preview card for {projectName}"
+    "imageAlt": "Preview card for {projectName}",
+    "latestIssueHeading": "Latest update",
+    "readIssue": "Read this issue",
+    "allIssues": "All issues",
+    "noIssuesYet": "No updates published yet."
   },
   "Materials": {
     "badge": {

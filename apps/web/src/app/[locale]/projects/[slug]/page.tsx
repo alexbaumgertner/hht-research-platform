@@ -3,8 +3,10 @@ import { getTranslations } from 'next-intl/server';
 import { Stack, Text, Title } from '@mantine/core';
 import { Suspense, cache } from 'react';
 
+import { LatestIssueCard } from '@/components/LatestIssueCard';
 import { MaterialsFeed } from '@/components/MaterialsFeed';
 import { TextLink } from '@/components/TextLink';
+import type { IssueSummaryListItem } from '@/lib/issues';
 import type { Material } from '@/lib/materials';
 import { buildPageMetadata, shareImagePath, toLocale } from '@/lib/metadata';
 import { getPublicSiteUrl } from '@/lib/siteUrl';
@@ -32,6 +34,20 @@ async function fetchMaterials(baseUrl: string, slug: string, locale: string) {
   );
   if (!res.ok) throw new Error('Failed to load materials');
   return res.json() as Promise<{ docs: Material[] }>;
+}
+
+async function fetchLatestIssue(
+  baseUrl: string,
+  slug: string,
+  locale: string,
+): Promise<IssueSummaryListItem | null> {
+  const res = await fetch(
+    `${baseUrl}/api/public/projects/${slug}/issues?limit=1&locale=${encodeURIComponent(locale)}`,
+    { cache: 'no-store' },
+  );
+  if (!res.ok) return null;
+  const body = (await res.json()) as { docs: IssueSummaryListItem[] };
+  return body.docs[0] ?? null;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -64,7 +80,10 @@ export default async function ProjectFeedPage({ params }: Props) {
     return <Text>Not found</Text>;
   }
 
-  const { docs } = await fetchMaterials(baseUrl, slug, locale);
+  const [{ docs }, latestIssue] = await Promise.all([
+    fetchMaterials(baseUrl, slug, locale),
+    fetchLatestIssue(baseUrl, slug, locale),
+  ]);
 
   return (
     <Stack gap="lg" maw={720} mx="auto" w="100%">
@@ -87,14 +106,20 @@ export default async function ProjectFeedPage({ params }: Props) {
             })}
           </Text>
         ) : null}
-        <Text mt="sm" fw={500}>
-          {t('feedTitle')}
-        </Text>
       </div>
 
-      <Suspense fallback={null}>
-        <MaterialsFeed materials={docs} locale={locale} slug={slug} />
-      </Suspense>
+      {latestIssue ? (
+        <LatestIssueCard issue={latestIssue} projectSlug={slug} locale={locale} />
+      ) : (
+        <Text>{t('noIssuesYet')}</Text>
+      )}
+
+      <div>
+        <Text fw={500}>{t('feedTitle')}</Text>
+        <Suspense fallback={null}>
+          <MaterialsFeed materials={docs} locale={locale} slug={slug} />
+        </Suspense>
+      </div>
     </Stack>
   );
 }

@@ -106,6 +106,79 @@ test.describe('public issue page', () => {
   }
 });
 
+test.describe('project page and issue archive', () => {
+  test('latest issue card, archive order, links, and hidden digest exclusion', async ({ page }) => {
+    if (!(await skipWithoutSeed(page))) return;
+
+    const issuesRes = await page.request.get(
+      `/api/public/projects/${PROJECT_SLUG}/issues?locale=en`,
+    );
+    if (!issuesRes.ok()) {
+      test.skip(true, 'Seeded issues required');
+      return;
+    }
+    const { docs: visibleIssues } = (await issuesRes.json()) as {
+      docs: Array<{ id: string; date: string; excerpt: string | null }>;
+    };
+    if (visibleIssues.length < 2) {
+      test.skip(true, 'At least two visible issues required');
+      return;
+    }
+
+    await page.goto(`/en/projects/${PROJECT_SLUG}`);
+    await expect(page.getByRole('heading', { name: /latest update/i })).toBeVisible();
+    await expect(
+      page.getByText(/Researchers are exploring new treatment options for severe nosebleeds/i),
+    ).toBeVisible();
+    await expect(page.getByRole('link', { name: /read this issue/i })).toBeVisible();
+    await expect(
+      page.getByText(/This hidden issue should not appear in the public archive/i),
+    ).toHaveCount(0);
+
+    await page.getByRole('link', { name: /all issues/i }).click();
+    await expect(page).toHaveURL(/\/en\/projects\/hht-research\/issues$/);
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(
+      page.getByText(/This hidden issue should not appear in the public archive/i),
+    ).toHaveCount(0);
+
+    const archiveLinks = page.getByRole('listitem').getByRole('link');
+    await expect(archiveLinks).toHaveCount(visibleIssues.length);
+
+    const linkHrefs = await archiveLinks.evaluateAll((anchors) =>
+      anchors.map((anchor) => anchor.getAttribute('href')),
+    );
+    const linkedIds = linkHrefs
+      .map((href) => href?.match(/\/issues\/([^/?#]+)/)?.[1])
+      .filter((id): id is string => Boolean(id));
+    expect(linkedIds).toEqual(visibleIssues.map((issue) => issue.id));
+
+    const archiveDates = await page
+      .getByRole('listitem')
+      .evaluateAll((items) =>
+        items.map((item) => item.querySelector('a')?.textContent?.trim() ?? ''),
+      );
+    const apiDates = visibleIssues.map((issue) =>
+      new Date(issue.date).toLocaleDateString('en', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      }),
+    );
+    expect(archiveDates).toEqual(apiDates);
+
+    await archiveLinks.first().click();
+    await expect(page).toHaveURL(
+      new RegExp(`/en/projects/${PROJECT_SLUG}/issues/${visibleIssues[0].id}$`),
+    );
+
+    await page.goto(`/en/projects/${PROJECT_SLUG}`);
+    await expect(
+      page.getByRole('link', { name: /Patient community thread on epistaxis care/i }),
+    ).toBeVisible();
+  });
+});
+
 test.describe('public issue page accessibility', () => {
   test.use({ javaScriptEnabled: false, viewport: { width: 360, height: 800 } });
 

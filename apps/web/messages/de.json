@@ -18,7 +18,11 @@
     "lastChecked": "Quellen zuletzt geprüft: {date}",
     "metaDescription": "Wöchentliche Forschungsupdates zu {projectName}, leicht verständlich erklärt und mit Link zu jeder Quelle.",
     "imageTagline": "Wöchentliche Forschungsupdates in einfacher Sprache",
-    "imageAlt": "Vorschaubild für {projectName}"
+    "imageAlt": "Vorschaubild für {projectName}",
+    "latestIssueHeading": "Neuestes Update",
+    "readIssue": "Dieses Update lesen",
+    "allIssues": "Alle Updates",
+    "noIssuesYet": "Noch keine Updates veröffentlicht."
   },
   "Materials": {
     "badge": {

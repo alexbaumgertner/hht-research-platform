@@ -1,12 +1,45 @@
-import type { IssueSummaryListItem } from '@/lib/issues';
+import { Card, Group, Stack, Text, Title } from '@mantine/core';
+import { getTranslations } from 'next-intl/server';
+
+import { TextLink } from '@/components/TextLink';
+import { formatIssueDate, type IssueSummaryListItem } from '@/lib/issues';
+import { toLocale } from '@/lib/metadata';
 
 type Props = {
-  issue: IssueSummaryListItem | null;
+  issue: IssueSummaryListItem;
   projectSlug: string;
+  locale: string;
 };
 
-/** Latest-issue card shell — styling and links are completed in US4 (T044). */
-export function LatestIssueCard({ issue }: Props) {
-  if (!issue) return null;
-  return <div>{issue.excerpt ?? issue.date}</div>;
+export async function LatestIssueCard({ issue, projectSlug, locale }: Props) {
+  const t = await getTranslations('Project');
+  const dateLabel = formatIssueDate(issue.date, toLocale(locale));
+
+  return (
+    <Card
+      padding="md"
+      radius="md"
+      withBorder
+      component="section"
+      aria-labelledby="latest-issue-heading"
+    >
+      <Stack gap="sm">
+        <Title order={2} id="latest-issue-heading" size="h4">
+          {t('latestIssueHeading')}
+        </Title>
+        <Text fw={600}>{dateLabel}</Text>
+        {issue.excerpt ? (
+          <Text size="sm" c="dimmed" style={{ overflowWrap: 'anywhere' }}>
+            {issue.excerpt}
+          </Text>
+        ) : null}
+        <Group gap="md">
+          <TextLink href={`/projects/${projectSlug}/issues/${issue.id}`}>{t('readIssue')}</TextLink>
+          <TextLink href={`/projects/${projectSlug}/issues`} size="sm" c="dimmed">
+            {t('allIssues')}
+          </TextLink>
+        </Group>
+      </Stack>
+    </Card>
+  );
 }

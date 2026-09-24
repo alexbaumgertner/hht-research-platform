@@ -79,8 +79,7 @@ test.describe('share metadata for chat-app crawlers', () => {
     expect(meta.image).toContain(`/en/projects/${PROJECT_SLUG}/opengraph-image`);
   });
 
-  // The archive page is created in T046; un-fixme this once it exists.
-  test.fixme('archive page keeps the project image', async ({ request }) => {
+  test('archive page keeps the project image', async ({ request }) => {
     const meta = await expectShareable(request, `/en/projects/${PROJECT_SLUG}/issues`);
     expect(meta.image).toContain(`/en/projects/${PROJECT_SLUG}/opengraph-image`);
   });

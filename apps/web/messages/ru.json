@@ -18,7 +18,11 @@
     "lastChecked": "Источники последний раз проверены: {date}",
     "metaDescription": "Еженедельные новости исследований для {projectName} простым языком, со ссылкой на каждый источник.",
     "imageTagline": "Еженедельные новости исследований простым языком",
-    "imageAlt": "Превью для {projectName}"
+    "imageAlt": "Превью для {projectName}",
+    "latestIssueHeading": "Последнее обновление",
+    "readIssue": "Читать это обновление",
+    "allIssues": "Все обновления",
+    "noIssuesYet": "Обновлений пока не опубликовано."
   },
   "Materials": {
     "badge": {

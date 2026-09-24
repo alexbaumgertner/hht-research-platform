@@ -345,20 +345,20 @@ published issue is listed newest first, each linking to its issue page.
 
 ### Implementation for User Story 4
 
-- [ ] T044 [US4] Finish `apps/web/src/components/LatestIssueCard.tsx` (date + excerpt, "Read
+- [x] T044 [US4] Finish `apps/web/src/components/LatestIssueCard.tsx` (date + excerpt, "Read
       this issue" and "All issues" links) fed by `GET …/issues?limit=1`, and
       `apps/web/src/components/IssueArchiveList.tsx` (every visible issue, newest first, each row
       showing date/item count/excerpt, linking to its issue page) fed by `GET …/issues` (contract
       public-issues-api.md §1, contract issue-pages.md §1).
-- [ ] T045 [US4] Update `apps/web/src/app/[locale]/projects/[slug]/page.tsx` to render
+- [x] T045 [US4] Update `apps/web/src/app/[locale]/projects/[slug]/page.tsx` to render
       `LatestIssueCard` above the unchanged flat materials feed (FR-019), with `Project.noIssuesYet`
       shown when there is no visible issue yet.
-- [ ] T046 [US4] Create `apps/web/src/app/[locale]/projects/[slug]/issues/page.tsx` (the
+- [x] T046 [US4] Create `apps/web/src/app/[locale]/projects/[slug]/issues/page.tsx` (the
       archive) rendering `IssueArchiveList`, with `generateMetadata` per contract issue-pages.md §3
       (`Issue.archiveMetaTitle`, inherited project image), built with `buildPageMetadata` and
       `shareImagePath.project(...)` from `apps/web/src/lib/metadata.ts`. Remove the `test.fixme`
       on the archive case in `apps/web/tests/e2e/share-metadata.spec.ts`.
-- [ ] T047 [P] [US4] Extend `apps/web/tests/e2e/public-issue.spec.ts` (or a new archive-focused
+- [x] T047 [P] [US4] Extend `apps/web/tests/e2e/public-issue.spec.ts` (or a new archive-focused
       spec) with: the latest-issue card on the project page, the archive listing newest first with
       working links, a hidden digest absent from both while its materials stay in the flat feed
       (quickstart.md §2, §6).

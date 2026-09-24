@@ -18,7 +18,11 @@
     "lastChecked": "Джерела востаннє перевірено: {date}",
     "metaDescription": "Щотижневі новини досліджень для {projectName} простою мовою, з посиланням на кожне джерело.",
     "imageTagline": "Щотижневі новини досліджень простою мовою",
-    "imageAlt": "Попередній перегляд для {projectName}"
+    "imageAlt": "Попередній перегляд для {projectName}",
+    "latestIssueHeading": "Останнє оновлення",
+    "readIssue": "Читати це оновлення",
+    "allIssues": "Усі оновлення",
+    "noIssuesYet": "Оновлень ще не опубліковано."
   },
   "Materials": {
     "badge": {
