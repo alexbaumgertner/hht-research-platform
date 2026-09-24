@@ -38,6 +38,10 @@ export async function GET() {
         monitoringStatus: project.monitoringStatus,
         lastSuccessfulRunAt: project.lastSuccessfulRunAt ?? null,
         latestDigestPublishedAt: digests.docs[0]?.publishedAt ?? null,
+        anchor: {
+          publishWeekday: project.publishWeekday ?? null,
+          publishHourUtc: project.publishHourUtc ?? null,
+        },
       };
     }),
   );

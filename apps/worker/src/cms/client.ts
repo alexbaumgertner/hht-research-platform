@@ -6,6 +6,7 @@ import {
   type Importance,
   type IssueTextStatus,
   type KeywordInput,
+  type PublishWeekday,
   type Schedule,
   type MonitoringStatus,
   type SourceType,
@@ -156,6 +157,8 @@ export class CmsClient {
         slug: string;
         keywords?: Array<{ value?: string } | string>;
         schedule: Schedule;
+        publishWeekday?: PublishWeekday | null;
+        publishHourUtc?: number | null;
         monitoringStatus: MonitoringStatus;
         lastSuccessfulRunAt?: string | null;
         bootstrapLookbackDays?: number;
@@ -197,6 +200,10 @@ export class CmsClient {
           monitoringStatus: project.monitoringStatus,
           schedule: project.schedule,
           lastSuccessfulRunAt: project.lastSuccessfulRunAt,
+          anchor: {
+            publishWeekday: project.publishWeekday ?? null,
+            publishHourUtc: project.publishHourUtc ?? null,
+          },
         });
 
         if (!due || keywords.length === 0 || !projectSources.some((s) => s.enabled)) {

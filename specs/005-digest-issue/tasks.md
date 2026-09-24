@@ -477,11 +477,11 @@ ready for cross-cutting polish.
 - [ ] T060 [P] Update `docs/deploy-worker.md` with the note that `AI_GATEWAY_API_KEY` is now
       required on Vercel (Production and Preview) for issue-text translation (research R6, plan.md
       Project Structure).
-- [ ] T061 Update `apps/web/src/lib/health.ts` and `apps/web/src/app/api/health/route.ts` to pass
+- [x] T061 Update `apps/web/src/lib/health.ts` and `apps/web/src/app/api/health/route.ts` to pass
       the new anchor fields (`publishWeekday`, `publishHourUtc`) through to the anchor-aware
       `isProjectStale`, keeping the response shape unchanged (contract worker-issue-text.md §3,
       contract public-issues-api.md §3).
-- [ ] T062 Update `apps/worker/src/cms/client.ts`'s `listDueProjects` to read `publishWeekday`
+- [x] T062 Update `apps/worker/src/cms/client.ts`'s `listDueProjects` to read `publishWeekday`
       and `publishHourUtc` from `GET /api/research-projects?depth=1&…` and pass them as `anchor` to
       `isProjectDue` (contract worker-issue-text.md §3.1).
 - [ ] T063 [P] Run the full automated check suite from quickstart.md §6
