@@ -1,4 +1,4 @@
-import { generateText, Output } from 'ai';
+import { generateText, Output, type LanguageModel } from 'ai';
 import { createGateway } from '@ai-sdk/gateway';
 import { z } from 'zod';
 import type { Importance, Summary } from '@hht/shared';
@@ -28,7 +28,7 @@ export function escapeUntrusted(text: string): string {
     .replace(/[<>]/g, (ch) => (ch === '<' ? '(' : ')'));
 }
 
-function getModel() {
+export function getModel(): LanguageModel {
   const apiKey = process.env.AI_GATEWAY_API_KEY;
   if (!apiKey) throw new Error('AI_GATEWAY_API_KEY not configured');
   const gateway = createGateway({ apiKey });

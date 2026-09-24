@@ -1,15 +1,29 @@
 {
+  "Site": {
+    "name": "Araştırma Güncellemeleri",
+    "description": "Yeni tıbbi araştırmalar hakkında haftalık, sade dilde güncellemeler; her kaynağa bağlantıyla.",
+    "tagline": "Yeni araştırmalar, sade bir dille"
+  },
   "Home": {
-    "title": "Araştırma özetleri",
-    "subtitle": "Yapılandırılmış araştırma projeleri için herkese açık izleme özetleri.",
+    "title": "Araştırma güncellemeleri",
+    "subtitle": "Yeni tıbbi araştırmalar hakkında sade dilde özetler; her kaynağa bağlantıyla.",
     "empty": "Henüz yayımlanmış proje yok.",
-    "latestDigest": "Son özet"
+    "latestDigest": "Son güncelleme",
+    "metaTitle": "Sade dilde haftalık araştırma güncellemeleri"
   },
   "Project": {
     "feedTitle": "Materyaller",
     "empty": "Bu proje için henüz yayımlanmış materyal yok.",
     "backHome": "Tüm projeler",
-    "lastChecked": "Kaynaklar en son kontrol edildi: {date}"
+    "lastChecked": "Kaynaklar en son kontrol edildi: {date}",
+    "metaDescription": "{projectName} için haftalık araştırma güncellemeleri; sade bir dille ve her kaynağa bağlantıyla.",
+    "imageTagline": "Sade dilde haftalık araştırma güncellemeleri",
+    "imageAlt": "{projectName} için önizleme görseli",
+    "latestIssueHeading": "Son güncelleme",
+    "readIssue": "Bu güncellemeyi oku",
+    "allIssues": "Tüm güncellemeler",
+    "noIssuesYet": "Henüz yayımlanmış güncelleme yok.",
+    "notFound": "Bu proje bulunamadı."
   },
   "Materials": {
     "badge": {
@@ -47,6 +61,32 @@
     "notFound": "Bu materyal bulunamadı.",
     "loadError": "Bu materyal yüklenemedi. Lütfen yeniden deneyin.",
     "retry": "Yeniden dene"
+  },
+  "Issue": {
+    "heading": "{projectName}: {date} güncellemesi",
+    "metaTitle": "{projectName}: {date} güncellemesi",
+    "metaDescriptionFallback": "{projectName} için {count, plural, one {# yeni materyal} other {# yeni materyal}}.",
+    "summaryHeading": "Yenilikler ve neden önemli",
+    "summaryUnavailable": "Özet henüz hazır değil.",
+    "basedOn": "Dayanak:",
+    "itemsHeading": "Bu güncellemedeki materyaller",
+    "trialLabel": "Kayıtlı çalışma, henüz sonuç yok",
+    "translationPending": "Çeviri devam ediyor. Şimdilik İngilizce gösteriliyor.",
+    "translationUnavailable": "Çeviri geçici olarak kullanılamıyor. İngilizce gösteriliyor.",
+    "archiveTitle": "{projectName} için tüm güncellemeler",
+    "archiveMetaTitle": "Tüm güncellemeler · {projectName}",
+    "archiveEmpty": "Henüz yayımlanmış güncelleme yok.",
+    "itemCount": "{count, plural, one {# materyal} other {# materyal}}",
+    "backToProject": "Projeye dön",
+    "imageCount": "{count, plural, one {# materyal} other {# materyal}}",
+    "imageAlt": "{projectName} için güncelleme önizlemesi",
+    "notFound": "Bu güncelleme bulunamadı.",
+    "loadError": "Bu güncelleme yüklenemedi. Lütfen yeniden deneyin.",
+    "retry": "Yeniden dene"
+  },
+  "Trust": {
+    "disclaimer": "Bu otomatik bir özet, tıbbi tavsiye değildir. Tedavide herhangi bir değişiklik yapmadan önce doktorunuzla konuşun.",
+    "aiLabel": "Özetler, bağlantılı kaynaklardan yapay zeka ile oluşturulmuştur."
   },
   "LocaleSwitcher": {
     "label": "Dil"

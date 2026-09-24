@@ -1,5 +1,5 @@
 import { NextIntlClientProvider } from 'next-intl';
-import { getLocale, getMessages } from 'next-intl/server';
+import { getLocale, getMessages, getTranslations } from 'next-intl/server';
 import { Container, Group, Stack, Title, mantineHtmlProps } from '@mantine/core';
 import { IBM_Plex_Sans } from 'next/font/google';
 
@@ -7,6 +7,7 @@ import { Providers } from '../providers';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher';
 import { MantineColorSchemeInit } from '@/components/MantineColorSchemeInit';
 import { routing } from '@/i18n/routing';
+import { buildRootMetadata, toLocale } from '@/lib/metadata';
 
 const ibmPlexSans = IBM_Plex_Sans({
   subsets: ['latin', 'cyrillic'],
@@ -22,9 +23,15 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  return buildRootMetadata(toLocale(locale));
+}
+
 export default async function LocaleLayout({ children }: Props) {
   const locale = await getLocale();
   const messages = await getMessages();
+  const t = await getTranslations('Site');
 
   return (
     <html lang={locale} className={ibmPlexSans.className} {...mantineHtmlProps}>
@@ -35,7 +42,7 @@ export default async function LocaleLayout({ children }: Props) {
             <Container size="md" py="xl">
               <Stack gap="lg">
                 <Group justify="space-between" align="flex-end" wrap="wrap">
-                  <Title order={3}>Research Monitoring</Title>
+                  <Title order={3}>{t('name')}</Title>
                   <LocaleSwitcher />
                 </Group>
                 {children}

@@ -1,5 +1,6 @@
 import { CmsClient } from './cms/client.js';
 import { logError, logInfo } from './log.js';
+import { sweepIssueText } from './pipeline/issueSweep.js';
 import { isStaleRun } from './pipeline/publish.js';
 import { runProject } from './pipeline/runProject.js';
 
@@ -37,16 +38,21 @@ async function main(): Promise<void> {
   const cms = new CmsClient();
   await reapStaleRuns(cms);
 
-  const projects = await cms.listDueProjects();
-  logInfo('due projects', { count: projects.length, slugs: projects.map((p) => p.slug) });
+  try {
+    const projects = await cms.listDueProjects();
+    logInfo('due projects', { count: projects.length, slugs: projects.map((p) => p.slug) });
 
-  for (const project of projects) {
-    try {
-      logInfo('running project', { projectId: project.id, projectSlug: project.slug });
-      await runProject(cms, project, 'schedule');
-    } catch (err) {
-      logError('project failed', err, { projectId: project.id, projectSlug: project.slug });
+    for (const project of projects) {
+      try {
+        logInfo('running project', { projectId: project.id, projectSlug: project.slug });
+        await runProject(cms, project, 'schedule');
+      } catch (err) {
+        logError('project failed', err, { projectId: project.id, projectSlug: project.slug });
+      }
     }
+  } finally {
+    // Separate from runs: a sweep failure never touches run status or watermarks.
+    await sweepIssueText(cms);
   }
 
   logInfo('complete');

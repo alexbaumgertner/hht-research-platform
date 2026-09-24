@@ -1,14 +1,48 @@
-import type { CollectionConfig } from 'payload';
+import type {
+  CollectionConfig,
+  RelationshipFieldManyValidation,
+  RelationshipFieldSingleValidation,
+} from 'payload';
+import { relationship } from 'payload/shared';
 
-import { isAuthenticated, isAuthenticatedOrWorker, isWorkerOrAdmin } from '../access';
-import { capCreateDepth, resolveRelationshipId, stampFeedPublishedAt } from './digestHooks';
+import {
+  isAdminFieldLevel,
+  isAuthenticated,
+  isAuthenticatedOrWorker,
+  isWorkerFieldLevel,
+  isWorkerOrAdmin,
+} from '../access';
+import {
+  applyIssueTextRules,
+  assertDigestHasPublications,
+  capCreateDepth,
+  invalidateIssueTranslations,
+  resolveRelationshipId,
+  stampFeedPublishedAt,
+  validateRefsWithinDigest,
+} from './digestHooks';
+
+const itemsWithinDigest: RelationshipFieldManyValidation = async (value, options) => {
+  const base = await relationship(value, options);
+  if (base !== true) return base;
+  return validateRefsWithinDigest(value, options.data as Record<string, unknown>);
+};
+
+const publicationWithinDigest: RelationshipFieldSingleValidation = async (value, options) => {
+  const base = await relationship(value, options);
+  if (base !== true) return base;
+  return validateRefsWithinDigest(value, options.data as Record<string, unknown>);
+};
+
+const workerOnlyWrite = { create: isWorkerFieldLevel, update: isWorkerFieldLevel };
+const systemOnlyWrite = { create: () => false, update: () => false };
 
 export const Digests: CollectionConfig = {
   slug: 'digests',
   admin: {
     useAsTitle: 'publishedAt',
     group: 'Research',
-    defaultColumns: ['publishedAt', 'project', 'updatedAt'],
+    defaultColumns: ['publishedAt', 'project', 'issueTextStatus', 'updatedAt'],
   },
   access: {
     read: isAuthenticatedOrWorker,
@@ -18,18 +52,24 @@ export const Digests: CollectionConfig = {
   },
   hooks: {
     beforeValidate: [
-      ({ data }) => {
-        if (!data) return data;
-        const pubs = data.publications as unknown[] | undefined;
-        if (!pubs || pubs.length === 0) {
-          throw new Error('Cannot publish an empty digest');
-        }
+      ({ data, operation }) => {
+        assertDigestHasPublications(data, operation);
         return data;
       },
     ],
     beforeOperation: [({ args, operation }) => capCreateDepth(args, operation)],
+    beforeChange: [
+      ({ data, originalDoc, operation, req }) => {
+        if (operation !== 'update') return data;
+        return applyIssueTextRules({ data, originalDoc, req });
+      },
+    ],
     afterChange: [
-      async ({ doc, req, operation }) => {
+      async ({ doc, previousDoc, req, operation }) => {
+        if (operation === 'update') {
+          await invalidateIssueTranslations(doc, previousDoc, req);
+          return;
+        }
         if (operation !== 'create') return;
         const projectId = resolveRelationshipId(doc.project);
         if (!projectId) return;
@@ -82,6 +122,131 @@ export const Digests: CollectionConfig = {
       // Cap nested populate (project / firstSeenRun) so a default-depth REST
       // create does not N+1 through every related publication.
       maxDepth: 1,
+    },
+    {
+      name: 'hiddenFromPublic',
+      type: 'checkbox',
+      defaultValue: false,
+      access: { create: isAdminFieldLevel, update: isAdminFieldLevel },
+      admin: {
+        position: 'sidebar',
+        description:
+          'Hide this issue page, its archive entry and its share image. Its materials stay in the public feed.',
+      },
+    },
+    {
+      type: 'collapsible',
+      label: 'Issue',
+      fields: [
+        {
+          name: 'issueTextStatus',
+          type: 'select',
+          defaultValue: 'pending',
+          options: [
+            {
+              label: 'Queued for (re)generation (runs at the next hourly check)',
+              value: 'pending',
+            },
+            { label: 'Ready', value: 'ready' },
+            { label: 'Failed', value: 'failed' },
+          ],
+          admin: {
+            description:
+              'Set to "Queued" to regenerate the issue text. Editing the text below marks it Ready. ' +
+              'An edit saved while the hourly check is regenerating this digest is overwritten; re-apply it if that happens.',
+          },
+        },
+        {
+          name: 'issueSummaryPoints',
+          type: 'array',
+          maxRows: 5,
+          labels: { singular: 'Summary point', plural: 'Summary points' },
+          fields: [
+            {
+              name: 'text',
+              type: 'textarea',
+              required: true,
+            },
+            {
+              name: 'items',
+              type: 'relationship',
+              relationTo: 'publications',
+              hasMany: true,
+              required: true,
+              maxDepth: 0,
+              validate: itemsWithinDigest,
+              admin: { description: 'The materials in this digest this point is based on.' },
+            },
+          ],
+        },
+        {
+          name: 'issueItemSentences',
+          type: 'array',
+          labels: { singular: 'Item sentence', plural: 'Item sentences' },
+          fields: [
+            {
+              name: 'publication',
+              type: 'relationship',
+              relationTo: 'publications',
+              required: true,
+              maxDepth: 0,
+              validate: publicationWithinDigest,
+            },
+            {
+              name: 'sentence',
+              type: 'textarea',
+              required: true,
+            },
+          ],
+        },
+        {
+          name: 'issueTextAttempts',
+          type: 'number',
+          defaultValue: 0,
+          min: 0,
+          access: workerOnlyWrite,
+          admin: {
+            readOnly: true,
+            description: 'Failed generation attempts since the last queueing. Stops at 3.',
+          },
+        },
+        {
+          name: 'issueTextError',
+          type: 'text',
+          access: workerOnlyWrite,
+          admin: { readOnly: true, description: 'Last generation failure.' },
+        },
+        {
+          name: 'issueTextGeneratedAt',
+          type: 'date',
+          access: workerOnlyWrite,
+          admin: {
+            readOnly: true,
+            date: { pickerAppearance: 'dayAndTime' },
+          },
+        },
+        {
+          name: 'issueTextSource',
+          type: 'select',
+          options: [
+            { label: 'Generated', value: 'generated' },
+            { label: 'Edited by owner', value: 'edited' },
+          ],
+          access: workerOnlyWrite,
+          admin: { readOnly: true },
+        },
+        {
+          name: 'issueTextRevision',
+          type: 'number',
+          defaultValue: 0,
+          min: 0,
+          access: systemOnlyWrite,
+          admin: {
+            readOnly: true,
+            description: 'Bumped whenever the English text changes; cached translations follow it.',
+          },
+        },
+      ],
     },
   ],
 };

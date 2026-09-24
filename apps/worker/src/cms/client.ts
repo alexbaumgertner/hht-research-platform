@@ -2,8 +2,15 @@ import {
   DEFAULT_BATCH_SIZE_PER_SOURCE,
   DEFAULT_BOOTSTRAP_LOOKBACK_DAYS,
   isProjectDue,
+  keywordText,
+  type Importance,
+  type IssueTextStatus,
+  type KeywordInput,
+  type PublishWeekday,
   type Schedule,
   type MonitoringStatus,
+  type SourceType,
+  type Summary,
 } from '@hht/shared';
 
 type Json = Record<string, unknown>;
@@ -13,6 +20,74 @@ type Json = Record<string, unknown>;
  * unchanged — relationship validation rejects "4" where it expects 4.
  */
 export type CmsId = string | number;
+
+export class CmsHttpError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+    this.name = 'CmsHttpError';
+  }
+}
+
+export type IssueTextWorkDigest = {
+  id: CmsId;
+  project: CmsId;
+  publications: CmsId[];
+  issueTextStatus: IssueTextStatus | null;
+  issueTextAttempts: number;
+  hiddenFromPublic: boolean;
+};
+
+export type IssueProjectDoc = {
+  id: CmsId;
+  name: string;
+  slug: string;
+  keywords: string[];
+  audienceContext: string | null;
+};
+
+export type IssuePublicationDoc = {
+  id: CmsId;
+  title: string;
+  sourceType: SourceType;
+  publicationTypes?: string[] | null;
+  importance?: Importance | null;
+  publishedOrUpdatedAt?: string | null;
+  summary?: Partial<Record<keyof Summary, string | null>> | null;
+  abstractOrBody?: string | null;
+};
+
+const ISSUE_PUBLICATION_FIELDS = [
+  'title',
+  'sourceType',
+  'publicationTypes',
+  'importance',
+  'publishedOrUpdatedAt',
+  'summary',
+  'abstractOrBody',
+] as const;
+
+export const ISSUE_TEXT_WORK_LIMIT = 20;
+export const ISSUE_TEXT_MAX_ATTEMPTS = 3;
+
+/** Contract worker-issue-text.md §2.1: pending, unset (pre-feature), or failed with attempts < 3. */
+export function issueTextWorkQuery(): URLSearchParams {
+  return new URLSearchParams({
+    depth: '0',
+    limit: String(ISSUE_TEXT_WORK_LIMIT),
+    sort: 'publishedAt',
+    'where[or][0][issueTextStatus][equals]': 'pending',
+    'where[or][1][issueTextStatus][exists]': 'false',
+    'where[or][2][and][0][issueTextStatus][equals]': 'failed',
+    'where[or][2][and][1][issueTextAttempts][less_than]': String(ISSUE_TEXT_MAX_ATTEMPTS),
+  });
+}
+
+function relationId(value: CmsId | { id: CmsId }): CmsId {
+  return typeof value === 'object' ? value.id : value;
+}
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -46,7 +121,10 @@ export class CmsClient {
     });
     if (!res.ok) {
       const text = await res.text();
-      throw new Error(`CMS ${init?.method || 'GET'} ${path} failed: ${res.status} ${text}`);
+      throw new CmsHttpError(
+        `CMS ${init?.method || 'GET'} ${path} failed: ${res.status} ${text}`,
+        res.status,
+      );
     }
     return res.json() as Promise<T>;
   }
@@ -79,6 +157,8 @@ export class CmsClient {
         slug: string;
         keywords?: Array<{ value?: string } | string>;
         schedule: Schedule;
+        publishWeekday?: PublishWeekday | null;
+        publishHourUtc?: number | null;
         monitoringStatus: MonitoringStatus;
         lastSuccessfulRunAt?: string | null;
         bootstrapLookbackDays?: number;
@@ -120,6 +200,10 @@ export class CmsClient {
           monitoringStatus: project.monitoringStatus,
           schedule: project.schedule,
           lastSuccessfulRunAt: project.lastSuccessfulRunAt,
+          anchor: {
+            publishWeekday: project.publishWeekday ?? null,
+            publishHourUtc: project.publishHourUtc ?? null,
+          },
         });
 
         if (!due || keywords.length === 0 || !projectSources.some((s) => s.enabled)) {
@@ -187,11 +271,73 @@ export class CmsClient {
     });
   }
 
-  async createDigest(data: Json) {
+  async createDigest(data: {
+    project: CmsId;
+    run: CmsId;
+    publishedAt: string;
+    publications: CmsId[];
+    issueTextStatus: 'pending';
+  }) {
     // depth=0 skips populating hasMany publications (and nested relations) on the
     // create response — default depth=2 was exceeding Vercel's function timeout.
     return this.request<{ doc: { id: string | number } }>(`/api/digests?depth=0`, {
       method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async listIssueTextWork(): Promise<IssueTextWorkDigest[]> {
+    const result = await this.request<{
+      docs: Array<{
+        id: CmsId;
+        project: CmsId | { id: CmsId };
+        publications?: Array<CmsId | { id: CmsId }> | null;
+        issueTextStatus?: IssueTextStatus | null;
+        issueTextAttempts?: number | null;
+        hiddenFromPublic?: boolean | null;
+      }>;
+    }>(`/api/digests?${issueTextWorkQuery().toString()}`);
+    return result.docs.map((doc) => ({
+      id: doc.id,
+      project: relationId(doc.project),
+      publications: (doc.publications ?? []).map(relationId),
+      issueTextStatus: doc.issueTextStatus ?? null,
+      issueTextAttempts: doc.issueTextAttempts ?? 0,
+      hiddenFromPublic: Boolean(doc.hiddenFromPublic),
+    }));
+  }
+
+  async getProject(id: CmsId): Promise<IssueProjectDoc> {
+    const doc = await this.request<{
+      id: CmsId;
+      name: string;
+      slug: string;
+      keywords?: KeywordInput[] | null;
+      audienceContext?: string | null;
+    }>(`/api/research-projects/${id}?depth=0`);
+    return {
+      id: doc.id,
+      name: doc.name,
+      slug: doc.slug,
+      keywords: (doc.keywords ?? []).map(keywordText).filter(Boolean),
+      audienceContext: doc.audienceContext ?? null,
+    };
+  }
+
+  async listPublicationsForIssue(ids: CmsId[]): Promise<IssuePublicationDoc[]> {
+    if (ids.length === 0) return [];
+    const qs = new URLSearchParams({ depth: '0', pagination: 'false' });
+    ids.forEach((id, index) => qs.set(`where[id][in][${index}]`, String(id)));
+    for (const field of ISSUE_PUBLICATION_FIELDS) qs.set(`select[${field}]`, 'true');
+    const result = await this.request<{ docs: IssuePublicationDoc[] }>(
+      `/api/publications?${qs.toString()}`,
+    );
+    return result.docs;
+  }
+
+  async patchDigest(id: CmsId, data: Json) {
+    return this.request(`/api/digests/${id}?depth=0`, {
+      method: 'PATCH',
       body: JSON.stringify(data),
     });
   }

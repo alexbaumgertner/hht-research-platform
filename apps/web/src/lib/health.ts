@@ -1,6 +1,11 @@
-import { isProjectStale, type MonitoringStatus, type Schedule } from '@hht/shared';
+import {
+  isProjectStale,
+  type MonitoringStatus,
+  type Schedule,
+  type ScheduleAnchor,
+} from '@hht/shared';
 
-export type ProjectHealthInput = {
+export type ProjectHealthRow = {
   slug: string;
   schedule: Schedule;
   monitoringStatus: MonitoringStatus;
@@ -8,10 +13,15 @@ export type ProjectHealthInput = {
   latestDigestPublishedAt: string | null;
 };
 
+/** The anchor feeds the staleness check only; it is not echoed in the report. */
+export type ProjectHealthInput = ProjectHealthRow & {
+  anchor?: ScheduleAnchor | null;
+};
+
 export type HealthReport = {
   ok: boolean;
   checkedAt: string;
-  projects: Array<ProjectHealthInput & { stale: boolean }>;
+  projects: Array<ProjectHealthRow & { stale: boolean }>;
 };
 
 /** `ok` is false when any active project has missed its schedule (see isProjectStale). */
@@ -19,9 +29,9 @@ export function buildHealthReport(
   projects: ProjectHealthInput[],
   now: Date = new Date(),
 ): HealthReport {
-  const rows = projects.map((project) => ({
+  const rows = projects.map(({ anchor, ...project }) => ({
     ...project,
-    stale: isProjectStale({ ...project, now }),
+    stale: isProjectStale({ ...project, anchor, now }),
   }));
   return {
     ok: rows.every((row) => !row.stale),

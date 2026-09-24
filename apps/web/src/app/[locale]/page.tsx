@@ -1,9 +1,27 @@
 import { getTranslations } from 'next-intl/server';
 import { Card, Stack, Text, Title } from '@mantine/core';
 import { TextLink } from '@/components/TextLink';
+import { buildPageMetadata, shareImagePath, toLocale } from '@/lib/metadata';
 import { getPublicSiteUrl } from '@/lib/siteUrl';
 
 type Props = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: Props) {
+  const locale = toLocale((await params).locale);
+  const [tHome, tSite] = await Promise.all([
+    getTranslations({ locale, namespace: 'Home' }),
+    getTranslations({ locale, namespace: 'Site' }),
+  ]);
+
+  return buildPageMetadata({
+    locale,
+    path: '',
+    title: tHome('metaTitle'),
+    description: tSite('description'),
+    type: 'website',
+    image: { url: shareImagePath.site(locale), alt: tSite('name') },
+  });
+}
 
 async function fetchProjects(baseUrl: string) {
   const res = await fetch(`${baseUrl}/api/public/projects`, {

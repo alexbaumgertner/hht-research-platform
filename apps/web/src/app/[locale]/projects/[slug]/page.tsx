@@ -1,17 +1,22 @@
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { Stack, Text, Title } from '@mantine/core';
-import { Suspense } from 'react';
+import { Suspense, cache } from 'react';
 
+import { LatestIssueCard } from '@/components/LatestIssueCard';
 import { MaterialsFeed } from '@/components/MaterialsFeed';
 import { TextLink } from '@/components/TextLink';
+import type { IssueSummaryListItem } from '@/lib/issues';
 import type { Material } from '@/lib/materials';
+import { buildPageMetadata, shareImagePath, toLocale } from '@/lib/metadata';
 import { getPublicSiteUrl } from '@/lib/siteUrl';
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>;
 };
 
-async function fetchProject(baseUrl: string, slug: string) {
+const fetchProject = cache(async (baseUrl: string, slug: string) => {
   const res = await fetch(`${baseUrl}/api/public/projects/${slug}`, { cache: 'no-store' });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error('Failed to load project');
@@ -21,7 +26,7 @@ async function fetchProject(baseUrl: string, slug: string) {
     slug: string;
     lastSuccessfulRunAt: string | null;
   }>;
-}
+});
 
 async function fetchMaterials(baseUrl: string, slug: string, locale: string) {
   const res = await fetch(
@@ -32,6 +37,43 @@ async function fetchMaterials(baseUrl: string, slug: string, locale: string) {
   return res.json() as Promise<{ docs: Material[] }>;
 }
 
+async function fetchLatestIssue(
+  baseUrl: string,
+  slug: string,
+  locale: string,
+): Promise<IssueSummaryListItem | null> {
+  const res = await fetch(
+    `${baseUrl}/api/public/projects/${slug}/issues?limit=1&locale=${encodeURIComponent(locale)}`,
+    { cache: 'no-store' },
+  );
+  if (!res.ok) return null;
+  const body = (await res.json()) as { docs: IssueSummaryListItem[] };
+  return body.docs[0] ?? null;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale: rawLocale, slug } = await params;
+  const locale = toLocale(rawLocale);
+  const project = await fetchProject(getPublicSiteUrl(), slug);
+  if (!project) {
+    const t = await getTranslations({ locale, namespace: 'Project' });
+    return { title: t('notFound') };
+  }
+
+  const t = await getTranslations({ locale, namespace: 'Project' });
+  return buildPageMetadata({
+    locale,
+    path: `/projects/${slug}`,
+    title: project.name,
+    description: t('metaDescription', { projectName: project.name }),
+    type: 'website',
+    image: {
+      url: shareImagePath.project(locale, slug),
+      alt: t('imageAlt', { projectName: project.name }),
+    },
+  });
+}
+
 export default async function ProjectFeedPage({ params }: Props) {
   const { locale, slug } = await params;
   const t = await getTranslations('Project');
@@ -39,10 +81,13 @@ export default async function ProjectFeedPage({ params }: Props) {
 
   const project = await fetchProject(baseUrl, slug);
   if (!project) {
-    return <Text>Not found</Text>;
+    notFound();
   }
 
-  const { docs } = await fetchMaterials(baseUrl, slug, locale);
+  const [{ docs }, latestIssue] = await Promise.all([
+    fetchMaterials(baseUrl, slug, locale),
+    fetchLatestIssue(baseUrl, slug, locale),
+  ]);
 
   return (
     <Stack gap="lg" maw={720} mx="auto" w="100%">
@@ -65,14 +110,20 @@ export default async function ProjectFeedPage({ params }: Props) {
             })}
           </Text>
         ) : null}
-        <Text mt="sm" fw={500}>
-          {t('feedTitle')}
-        </Text>
       </div>
 
-      <Suspense fallback={null}>
-        <MaterialsFeed materials={docs} locale={locale} slug={slug} />
-      </Suspense>
+      {latestIssue ? (
+        <LatestIssueCard issue={latestIssue} projectSlug={slug} locale={locale} />
+      ) : (
+        <Text>{t('noIssuesYet')}</Text>
+      )}
+
+      <div>
+        <Text fw={500}>{t('feedTitle')}</Text>
+        <Suspense fallback={null}>
+          <MaterialsFeed materials={docs} locale={locale} slug={slug} />
+        </Suspense>
+      </div>
     </Stack>
   );
 }

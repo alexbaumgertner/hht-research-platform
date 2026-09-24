@@ -1,5 +1,6 @@
 import { withPayload } from '@payloadcms/next/withPayload';
 import type { NextConfig } from 'next';
+import { HTML_LIMITED_BOT_UA_RE } from 'next/dist/shared/lib/router/utils/html-bots.js';
 import createNextIntlPlugin from 'next-intl/plugin';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -11,6 +12,11 @@ const dirname = path.dirname(__filename);
 
 const nextConfig: NextConfig = {
   transpilePackages: ['@hht/shared'],
+  // Setting htmlLimitedBots replaces Next's built-in list, so extend it rather than redefine it.
+  htmlLimitedBots: new RegExp(`${HTML_LIMITED_BOT_UA_RE.source}|TelegramBot|Viber`, 'i'),
+  outputFileTracingIncludes: {
+    '**/opengraph-image*': ['./assets/fonts/*.ttf'],
+  },
   // rootParams (next/root-params) is enabled by default since Next.js 16.3.
   images: {
     localPatterns: [

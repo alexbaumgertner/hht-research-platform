@@ -1,15 +1,29 @@
 {
+  "Site": {
+    "name": "Forschung verständlich",
+    "description": "Wöchentliche, leicht verständliche Updates zu neuer medizinischer Forschung – mit Link zu jeder Quelle.",
+    "tagline": "Neue Forschung, einfach erklärt"
+  },
   "Home": {
-    "title": "Forschungs-Digests",
-    "subtitle": "Öffentliche Monitoring-Digests für konfigurierte Forschungsprojekte.",
+    "title": "Forschungsupdates",
+    "subtitle": "Leicht verständliche Zusammenfassungen neuer medizinischer Forschung – mit Link zu jeder Quelle.",
     "empty": "Noch keine veröffentlichten Projekte.",
-    "latestDigest": "Neuester Digest"
+    "latestDigest": "Letztes Update",
+    "metaTitle": "Wöchentliche Forschungsupdates in einfacher Sprache"
   },
   "Project": {
     "feedTitle": "Materialien",
     "empty": "Für dieses Projekt wurde noch nichts veröffentlicht.",
     "backHome": "Alle Projekte",
-    "lastChecked": "Quellen zuletzt geprüft: {date}"
+    "lastChecked": "Quellen zuletzt geprüft: {date}",
+    "metaDescription": "Wöchentliche Forschungsupdates zu {projectName}, leicht verständlich erklärt und mit Link zu jeder Quelle.",
+    "imageTagline": "Wöchentliche Forschungsupdates in einfacher Sprache",
+    "imageAlt": "Vorschaubild für {projectName}",
+    "latestIssueHeading": "Neuestes Update",
+    "readIssue": "Dieses Update lesen",
+    "allIssues": "Alle Updates",
+    "noIssuesYet": "Noch keine Updates veröffentlicht.",
+    "notFound": "Dieses Projekt wurde nicht gefunden."
   },
   "Materials": {
     "badge": {
@@ -47,6 +61,32 @@
     "notFound": "Dieses Material wurde nicht gefunden.",
     "loadError": "Dieses Material konnte nicht geladen werden. Bitte erneut versuchen.",
     "retry": "Erneut versuchen"
+  },
+  "Issue": {
+    "heading": "{projectName}: Update vom {date}",
+    "metaTitle": "{projectName}: Update vom {date}",
+    "metaDescriptionFallback": "{count, plural, one {# neues Material} other {# neue Materialien}} zu {projectName}.",
+    "summaryHeading": "Was neu ist und warum es wichtig ist",
+    "summaryUnavailable": "Zusammenfassung noch nicht verfügbar.",
+    "basedOn": "Basierend auf:",
+    "itemsHeading": "Materialien in diesem Update",
+    "trialLabel": "Registrierte Studie, noch keine Ergebnisse",
+    "translationPending": "Die Übersetzung läuft noch. Vorerst wird Englisch angezeigt.",
+    "translationUnavailable": "Die Übersetzung ist vorübergehend nicht verfügbar. Englisch wird angezeigt.",
+    "archiveTitle": "Alle Updates für {projectName}",
+    "archiveMetaTitle": "Alle Updates · {projectName}",
+    "archiveEmpty": "Noch keine Updates veröffentlicht.",
+    "itemCount": "{count, plural, one {# Material} other {# Materialien}}",
+    "backToProject": "Zurück zum Projekt",
+    "imageCount": "{count, plural, one {# Material} other {# Materialien}}",
+    "imageAlt": "Update-Vorschau für {projectName}",
+    "notFound": "Dieses Update wurde nicht gefunden.",
+    "loadError": "Dieses Update konnte nicht geladen werden. Bitte erneut versuchen.",
+    "retry": "Erneut versuchen"
+  },
+  "Trust": {
+    "disclaimer": "Dies ist eine automatisierte Übersicht, keine medizinische Beratung. Sprechen Sie mit Ihrem Arzt, bevor Sie eine Behandlung ändern.",
+    "aiLabel": "Zusammenfassungen werden von KI aus den verlinkten Quellen erstellt."
   },
   "LocaleSwitcher": {
     "label": "Sprache"

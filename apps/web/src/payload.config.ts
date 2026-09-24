@@ -13,6 +13,7 @@ import { MonitoringRuns } from './collections/MonitoringRuns';
 import { Publications } from './collections/Publications';
 import { Digests } from './collections/Digests';
 import { ContentTranslations } from './collections/ContentTranslations';
+import { IssueTranslations } from './collections/IssueTranslations';
 import { AuthCodes } from './collections/AuthCodes';
 import { assertDevDatabaseIsLocal, shouldPushSchema } from './lib/databaseTarget';
 import { requiredEnv } from './lib/env';
@@ -44,6 +45,7 @@ export default buildConfig({
     Publications,
     Digests,
     ContentTranslations,
+    IssueTranslations,
     AuthCodes,
   ],
   editor: lexicalEditor(),

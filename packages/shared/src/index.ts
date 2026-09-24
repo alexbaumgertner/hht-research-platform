@@ -10,6 +10,23 @@ export type ContentTranslationLocale = (typeof CONTENT_TRANSLATION_LOCALES)[numb
 export const ScheduleSchema = z.enum(['daily', 'weekly', 'monthly']);
 export type Schedule = z.infer<typeof ScheduleSchema>;
 
+export const PublishWeekdaySchema = z.enum([
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+  'sunday',
+]);
+export type PublishWeekday = z.infer<typeof PublishWeekdaySchema>;
+
+export const IssueTextStatusSchema = z.enum(['pending', 'ready', 'failed']);
+export type IssueTextStatus = z.infer<typeof IssueTextStatusSchema>;
+
+export const IssueTranslationStatusSchema = z.enum(['pending', 'ready', 'failed']);
+export type IssueTranslationStatus = z.infer<typeof IssueTranslationStatusSchema>;
+
 export const MonitoringStatusSchema = z.enum(['active', 'paused']);
 export type MonitoringStatus = z.infer<typeof MonitoringStatusSchema>;
 
@@ -92,4 +109,5 @@ export function sanitizeHttpUrl(value: string | null | undefined): string | null
 }
 
 export * from './dedupe.js';
+export * from './issueOrder.js';
 export * from './schedule.js';
