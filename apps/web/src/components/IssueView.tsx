@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server';
 
 import { SourceBadge } from '@/components/SourceBadge';
 import { TextLink } from '@/components/TextLink';
+import { TrustNotice } from '@/components/TrustNotice';
 import type { IssueDetail } from '@/lib/issues';
 
 // Native lists: Mantine `List` overflows a 360 px viewport by a few pixels (FR-016), and
@@ -72,6 +73,8 @@ export async function IssueView({ issue, locale }: Props) {
           <Text>{t('summaryUnavailable')}</Text>
         )}
       </Stack>
+
+      <TrustNotice />
 
       <Stack gap="sm" component="section" aria-labelledby="issue-items-heading">
         <Title order={2} id="issue-items-heading">

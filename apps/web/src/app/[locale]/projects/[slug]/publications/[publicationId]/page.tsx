@@ -6,6 +6,7 @@ import { Stack } from '@mantine/core';
 
 import { MaterialDetailView } from '@/components/MaterialDetailView';
 import { TextLink } from '@/components/TextLink';
+import { TrustNotice } from '@/components/TrustNotice';
 import { truncateDescription } from '@/lib/issues';
 import type { MaterialDetail } from '@/lib/materials';
 import { buildPageMetadata, shareImagePath, toLocale } from '@/lib/metadata';
@@ -88,6 +89,7 @@ export default async function PublicationPage({ params }: Props) {
         {t('backToFeed')}
       </TextLink>
       <MaterialDetailView detail={detail} locale={locale} />
+      <TrustNotice />
     </Stack>
   );
 }

@@ -1,5 +1,16 @@
 import { test, expect } from '@playwright/test';
 
+import { expectTrustNotice, TRUST_LOCALES } from './trust-notice';
+
+const PROJECT_SLUG = 'hht-research';
+
+async function getMaterialId(page: import('@playwright/test').Page): Promise<string | null> {
+  const res = await page.request.get(`/api/public/projects/${PROJECT_SLUG}/materials?locale=en`);
+  if (!res.ok()) return null;
+  const body = (await res.json()) as { docs: Array<{ id: string }> };
+  return body.docs[0]?.id ?? null;
+}
+
 test.describe('public material detail', () => {
   test('order: header and summary before abstract; original link in new tab', async ({ page }) => {
     await page.goto('/en/projects/hht-research');
@@ -45,6 +56,31 @@ test.describe('public material detail', () => {
     await expect(page.getByText(/could not be loaded/i)).toHaveCount(0);
     await expect(page.getByRole('link', { name: /back to feed/i })).toBeVisible();
   });
+
+  for (const locale of TRUST_LOCALES) {
+    test(`trust notice renders in ${locale}`, async ({ page }) => {
+      await page.goto(`/${locale}/projects/${PROJECT_SLUG}`);
+      if (
+        await page
+          .getByText(/Not found/i)
+          .isVisible()
+          .catch(() => false)
+      ) {
+        test.skip(true, 'Seed data required');
+        return;
+      }
+
+      const materialId = await getMaterialId(page);
+      if (!materialId) {
+        test.skip(true, 'Material seed required');
+        return;
+      }
+
+      await page.goto(`/${locale}/projects/${PROJECT_SLUG}/publications/${materialId}`);
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+      await expectTrustNotice(page, locale);
+    });
+  }
 
   test('locale switch translates chrome and keeps abstract', async ({ page }) => {
     await page.goto('/en/projects/hht-research');

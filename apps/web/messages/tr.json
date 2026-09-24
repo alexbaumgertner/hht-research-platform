@@ -79,6 +79,10 @@
     "loadError": "Bu güncelleme yüklenemedi. Lütfen yeniden deneyin.",
     "retry": "Yeniden dene"
   },
+  "Trust": {
+    "disclaimer": "Bu otomatik bir özet, tıbbi tavsiye değildir. Tedavide herhangi bir değişiklik yapmadan önce doktorunuzla konuşun.",
+    "aiLabel": "Özetler, bağlantılı kaynaklardan yapay zeka ile oluşturulmuştur."
+  },
   "LocaleSwitcher": {
     "label": "Dil"
   }

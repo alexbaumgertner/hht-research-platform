@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 
+import { expectTrustNotice, TRUST_LOCALES } from './trust-notice';
+
 const PROJECT_SLUG = 'hht-research';
 
 async function skipWithoutSeed(page: import('@playwright/test').Page) {
@@ -86,6 +88,22 @@ test.describe('public issue page', () => {
     await expect(page.getByText(/could not be loaded/i)).toHaveCount(0);
     await expect(page.getByRole('link', { name: /back to project/i })).toBeVisible();
   });
+
+  for (const locale of TRUST_LOCALES) {
+    test(`trust notice renders in ${locale}`, async ({ page }) => {
+      if (!(await skipWithoutSeed(page))) return;
+
+      const issueId = await getReadyIssueId(page);
+      if (!issueId) {
+        test.skip(true, 'Ready issue seed required');
+        return;
+      }
+
+      await page.goto(`/${locale}/projects/${PROJECT_SLUG}/issues/${issueId}`);
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+      await expectTrustNotice(page, locale);
+    });
+  }
 });
 
 test.describe('public issue page accessibility', () => {

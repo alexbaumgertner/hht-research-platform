@@ -315,15 +315,15 @@ both display the disclaimer text and the AI-generated label, in the active local
 
 ### Implementation for User Story 3
 
-- [ ] T040 [P] [US3] Create `apps/web/src/components/TrustNotice.tsx`: a server component with
+- [x] T040 [P] [US3] Create `apps/web/src/components/TrustNotice.tsx`: a server component with
       no client JavaScript rendering `Trust.disclaimer` and `Trust.aiLabel` from next-intl messages,
       containing no disease names (contract issue-pages.md §4, FR-011).
-- [ ] T041 [US3] Render `TrustNotice` on the issue page (`IssueView.tsx`, below the summary and
+- [x] T041 [US3] Render `TrustNotice` on the issue page (`IssueView.tsx`, below the summary and
       at the end, per contract issue-pages.md §2 step 4) and on
       `apps/web/src/app/[locale]/projects/[slug]/publications/[publicationId]/page.tsx`.
-- [ ] T042 [P] [US3] Add the `Trust.disclaimer` and `Trust.aiLabel` keys to
+- [x] T042 [P] [US3] Add the `Trust.disclaimer` and `Trust.aiLabel` keys to
       `apps/web/messages/{en,de,tr,ru,uk}.json` (contract issue-pages.md §6).
-- [ ] T043 [P] [US3] Extend `apps/web/tests/e2e/public-issue.spec.ts` (or a shared assertion
+- [x] T043 [P] [US3] Extend `apps/web/tests/e2e/public-issue.spec.ts` (or a shared assertion
       used by it and the material-detail spec) to confirm the disclaimer and AI-generated label
       render on both the issue page and the material detail page, across all five locales
       (quickstart.md §1, §6).

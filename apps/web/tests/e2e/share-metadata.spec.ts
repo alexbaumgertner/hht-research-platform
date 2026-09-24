@@ -55,6 +55,7 @@ async function expectShareable(request: APIRequestContext, path: string) {
 }
 
 test.describe('share metadata for chat-app crawlers', () => {
+  test.describe.configure({ mode: 'serial' });
   test('issue page exposes localized og tags and a PNG image', async ({ request }) => {
     const issueId = await getReadyIssueId(request);
     test.skip(!issueId, 'Ready issue seed required');

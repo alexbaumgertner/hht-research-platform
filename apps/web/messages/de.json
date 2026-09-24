@@ -79,6 +79,10 @@
     "loadError": "Dieses Update konnte nicht geladen werden. Bitte erneut versuchen.",
     "retry": "Erneut versuchen"
   },
+  "Trust": {
+    "disclaimer": "Dies ist eine automatisierte Übersicht, keine medizinische Beratung. Sprechen Sie mit Ihrem Arzt, bevor Sie eine Behandlung ändern.",
+    "aiLabel": "Zusammenfassungen werden von KI aus den verlinkten Quellen erstellt."
+  },
   "LocaleSwitcher": {
     "label": "Sprache"
   }
