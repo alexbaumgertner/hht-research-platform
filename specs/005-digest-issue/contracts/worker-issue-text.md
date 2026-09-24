@@ -49,13 +49,13 @@ backfill of historical digests finishes within a tick or two. Hidden digests are
 
 ### 2.3 Generate and validate
 
-Two steps (research R3): sentences in batches of ≤ 20, then 3–5 summary points from the numbered
+Two steps (research R3): sentences in batches of ≤ 20, then 3–5 summary points (`min(3, n)`–5 for an issue with fewer than 3 items) from the numbered
 sentences. Then run `validateIssueText()`, which is pure and Jest-tested:
 
 | Check                                                        | On failure                   |
 | ------------------------------------------------------------ | ---------------------------- |
 | One sentence per item; ≤ 35 words each                       | retry the sentence step once |
-| 3–5 points; ≤ 120 words total                                | retry the summary step once  |
+| `min(3, n)`–5 points; ≤ 120 words total                      | retry the summary step once  |
 | Every point has ≥ 1 valid item number (invalid ones dropped) | retry the summary step once  |
 | No dose pattern in any text                                  | retry the failing step once  |
 | No outcome claim in a trial-registration sentence            | retry the sentence step once |
@@ -99,11 +99,12 @@ That line reaches Cloud Logging at ERROR, which fires the existing alert policy 
 
 ### 2.6 Selection query rejected (deploy window)
 
-If `GET /api/digests` in §2.1 returns **4xx**, the web app has not been upgraded yet (the old
+If `GET /api/digests` in §2.1 returns **400** ("path cannot be queried"), the web app has not been upgraded yet (the old
 schema has no `issueTextStatus`). The sweep logs WARN `sweep skipped: cms rejected query` and
 returns without PATCHing anything. It must not log ERROR here: ERROR fires the alert policy,
 and this state is expected for a few minutes when the worker deploys before the web app
-(research R15). 5xx and network errors stay ERROR `sweep list failed`.
+(research R15). 401/403 (a bad API key), other 4xx, 5xx and network errors stay ERROR
+`sweep list failed`.
 
 ### 2.7 Owner edits vs sweep
 
@@ -161,4 +162,4 @@ stays hourly and unchanged.
 | validation retry                    | INFO  | `digestId`, `step`, `reason`                 |
 | issue text generation failed        | ERROR | `digestId`, `projectSlug`, `attempt`, `err`  |
 | sweep list failed (CMS unreachable) | ERROR | `err`                                        |
-| sweep skipped: cms rejected query   | WARN  | `status` (4xx: web not upgraded yet, R15)    |
+| sweep skipped: cms rejected query   | WARN  | `status` (400: web not upgraded yet, R15)    |

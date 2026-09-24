@@ -28,7 +28,7 @@ digest id.
 1. Back link to the project page.
 2. `<h1>`: `Issue.heading` ("{projectName}: update of {date}"), with the date formatted per locale.
 3. **Summary** `<section aria-labelledby>` (heading `Issue.summaryHeading`, "What's new and why it matters"):
-   - `<ol>` of 3–5 points. Each point ends with "Based on:" and one anchor per item,
+   - `<ol>` of the summary points (3–5; fewer only for a 1–2 item issue). Each point ends with "Based on:" and one anchor per item,
      `<a href="#item-{id}">{n}</a>`, where `n` is the item's position in the list below (FR-007).
    - If `summary === null`: one line `Issue.summaryUnavailable` instead of the list (FR-015).
    - If `isFallback`: the note `Issue.translationPending` or `Issue.translationUnavailable`,

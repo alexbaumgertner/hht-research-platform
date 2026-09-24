@@ -30,7 +30,7 @@ A patient taps a link shared in a chat (VK, WhatsApp, Facebook, Telegram) on the
 
 **Acceptance Scenarios**:
 
-1. **Given** a published digest exists for a project, **When** a reader opens its issue page, **Then** they see the issue date and a plain-language summary of 3–5 points (not specialist Objective/Methods/Results wording) explaining what is new and why it matters.
+1. **Given** a published digest exists for a project, **When** a reader opens its issue page, **Then** they see the issue date and a plain-language summary of 3–5 points (one per item if the issue has fewer than 3 items; not specialist Objective/Methods/Results wording) explaining what is new and why it matters.
 2. **Given** the reader is on an issue page, **When** they scroll past the summary, **Then** they see every material included in that issue, each showing its title, source badge, date, and one plain-language sentence (not the specialist summary) describing what it is about.
 3. **Given** the reader is looking at a material listed in the issue, **When** they tap or activate its title, **Then** they are taken to that material's existing detail page.
 4. **Given** an issue contains both publications and trial registrations, **When** the reader views the material list, **Then** trial registrations are visibly distinguished from publications and the registration item does not claim any results or outcomes.
@@ -139,7 +139,7 @@ A patient browsing the site sees a header, page titles, and descriptions written
 
 - **FR-001**: The system MUST expose a stable, shareable, locale-prefixed URL for each published digest ("issue"), reachable without registration.
 - **FR-002**: Each project page MUST link to an archive listing every published issue for that project, newest first.
-- **FR-003**: Each issue MUST have a generated summary of 3–5 plain-language points (roughly a school-reading level, at most ~120 words) explaining what changed and why it matters, derived only from the items included in that issue.
+- **FR-003**: Each issue MUST have a generated summary of 3–5 plain-language points (fewer only when the issue has fewer than 3 items: one point per item, so a short issue is never padded with unsupported claims; roughly a school-reading level, at most ~120 words) explaining what changed and why it matters, derived only from the items included in that issue.
 - **FR-004**: Each material within an issue MUST have one generated plain-language sentence (at most ~30 words) describing what it is about, distinct from that material's existing specialist summary.
 - **FR-005**: All generated patient-facing text (issue summaries and per-item sentences) MUST NOT recommend doses, drugs, or treatment changes, and MUST NOT state findings beyond what the source material says.
 - **FR-006**: All generated patient-facing text MUST use cautious wording for early-stage or small studies and MUST describe trial registrations as planned or recruiting studies, never as having outcomes or results.

@@ -151,7 +151,7 @@ and that tapping a material's title opens its existing detail page.
 
 ### Worker: generate English issue text (also serves US4's data and US6's plain wording)
 
-- [ ] T017 [US1] Create `apps/worker/src/pipeline/issueText.ts`: prompt builders for (a) per-item
+- [x] T017 [US1] Create `apps/worker/src/pipeline/issueText.ts`: prompt builders for (a) per-item
       sentences (batches of ≤ 20 numbered items; structured output `{ items: [{ n, sentence }] }`)
       and (b) the summary (`{ points: [{ text, items: number[] }] }`, 3–5 points from the numbered,
       sentence-annotated items); system-prompt rules from FR-003–FR-006 (plain language, no doses/
@@ -162,7 +162,7 @@ and that tapping a material's title opens its existing detail page.
       existing English specialist summary, `abstractOrBody` cut to 1,500 chars), all wrapped in
       `escapeUntrusted` (research R3, R4). Use `packages/shared`'s `compareIssueItems` to number
       items 1..n.
-- [ ] T018 [US1] In `apps/worker/src/pipeline/issueText.ts`, implement `validateIssueText()` as a
+- [x] T018 [US1] In `apps/worker/src/pipeline/issueText.ts`, implement `validateIssueText()` as a
       pure function: exactly one sentence per item (≤ 35 words); 3–5 points (≤ 120 words total);
       every point references ≥ 1 valid item number (drop invalid numbers, fail if a point is left
       with none); reject on the dose-pattern guard
@@ -170,10 +170,10 @@ and that tapping a material's title opens its existing detail page.
       (`/\b(results? (show|showed|suggest)|showed|demonstrated|proved|was (effective|safe))\b/i`)
       anywhere in the generated text (research R3, contract worker-issue-text.md §2.3). Map
       validated item numbers back to publication ids.
-- [ ] T019 [P] [US1] Create `apps/worker/src/pipeline/issueText.test.ts` covering: mapping numbers
+- [x] T019 [P] [US1] Create `apps/worker/src/pipeline/issueText.test.ts` covering: mapping numbers
       to publication ids; each validation limit and its failure mode; both guard patterns; the
       single-retry behaviour per step (quickstart.md §6).
-- [ ] T020 [US1] Create `apps/worker/src/pipeline/issueSweep.ts`: `sweepIssueText()` — select
+- [x] T020 [US1] Create `apps/worker/src/pipeline/issueSweep.ts`: `sweepIssueText()` — select
       work via `GET /api/digests?depth=0&limit=20&sort=publishedAt` with the `or`/`and` where
       clauses from contract worker-issue-text.md §2.1 (pending, unset, or failed with attempts < 3);
       for each digest (isolated `try`), load the project (`name`, `keywords`, `audienceContext`) and
@@ -184,15 +184,15 @@ and that tapping a material's title opens its existing detail page.
       `logError('issue text generation failed', …)`); on a 4xx from the selection query, log WARN
       `sweep skipped: cms rejected query` and return without PATCHing; on 5xx/network errors, log
       ERROR `sweep list failed` (contract worker-issue-text.md §2.4–§2.6, §4 observability table).
-- [ ] T021 [US1] Add `listIssueTextWork`, `getProject`, `listPublicationsForIssue`, and
+- [x] T021 [US1] Add `listIssueTextWork`, `getProject`, `listPublicationsForIssue`, and
       `patchDigest` methods to `apps/worker/src/cms/client.ts` for the requests in T020, and update
       `createDigest` in the same file (and its call in `apps/worker/src/pipeline/runProject.ts`) to
       send `issueTextStatus: 'pending'` on every new digest (contract worker-issue-text.md §1, §2.4;
       research R2).
-- [ ] T022 [US1] Wire `sweepIssueText()` into `apps/worker/src/index.ts`'s `main()` so it always
+- [x] T022 [US1] Wire `sweepIssueText()` into `apps/worker/src/index.ts`'s `main()` so it always
       runs after the due-project loop, even when no project was due, without affecting run status or
       watermarks on a sweep failure (contract worker-issue-text.md §1).
-- [ ] T023 [P] [US1] Create `apps/worker/src/pipeline/issueSweep.test.ts` covering: selection
+- [x] T023 [P] [US1] Create `apps/worker/src/pipeline/issueSweep.test.ts` covering: selection
       filter (pending/unset/failed<3, excluding hidden-but-otherwise-eligible… hidden digests ARE
       included per R10), the `failed` attempt cap at 3, per-digest isolation (one failure doesn't
       stop the sweep), the 4xx-vs-5xx WARN/ERROR distinction, and the success/failure PATCH bodies
@@ -211,7 +211,8 @@ and that tapping a material's title opens its existing detail page.
       `isTrialRegistration`, `displayedLocale`, `isFallback`, `translation.status`,
       `meta.title`/`meta.description`), matching the field rules in contract
       public-issues-api.md §1–§2 (English-only for this task; translation fields default to
-      `not-needed`/English until T033).
+      `not-needed`/English until the translation phase). `summary` is shown whenever English
+      points exist, regardless of `issueTextStatus` (data-model §1 "Public rendering").
 - [ ] T026 [P] [US1] Create `apps/web/src/lib/issues.test.ts` covering DTO mapping, the
       `summary === null` / "not available yet" case, fallback flags, and `meta.description`
       truncation to ≤ 160 chars at a word boundary (quickstart.md §6).

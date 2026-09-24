@@ -40,13 +40,13 @@ with `limit=1` for the latest-issue card.
 }
 ```
 
-| Field             | Rule                                                                                                                                                                                        |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `date`            | The digest's `publishedAt` (ISO 8601). The client formats it per locale.                                                                                                                    |
-| `itemCount`       | The number of visible items in the issue.                                                                                                                                                   |
-| `excerpt`         | The first summary point. It is translated only if a `ready` `issue-translations` row with a matching `sourceRevision` exists; otherwise English. `null` when `issueTextStatus !== 'ready'`. |
-| `displayedLocale` | The locale of `excerpt`: `locale`, or `en` on fallback.                                                                                                                                     |
-| `isFallback`      | `true` when `locale !== 'en'` and `excerpt` is English.                                                                                                                                     |
+| Field             | Rule                                                                                                                                                                                                   |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `date`            | The digest's `publishedAt` (ISO 8601). The client formats it per locale.                                                                                                                               |
+| `itemCount`       | The number of visible items in the issue.                                                                                                                                                              |
+| `excerpt`         | The first summary point. It is translated only if a `ready` `issue-translations` row with a matching `sourceRevision` exists; otherwise English. `null` when the digest has no English summary points. |
+| `displayedLocale` | The locale of `excerpt`: `locale`, or `en` on fallback.                                                                                                                                                |
+| `isFallback`      | `true` when `locale !== 'en'` and `excerpt` is English.                                                                                                                                                |
 
 Sorted by `publishedAt` descending, then by `id` descending.
 
@@ -105,17 +105,17 @@ wait-then-fallback (FR-012, FR-013; research R7, R8). `export const maxDuration 
 
 ### Field rules
 
-| Field                          | Rule                                                                                                                                                                                                                                    |
-| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `summary`                      | `null` when `issueTextStatus !== 'ready'` or there are no points (FR-015). The page then shows the item list with a "summary not available yet" line.                                                                                   |
-| `summary.points[].itemIds`     | The English row's `items`, filtered to visible items. The page renders them as `#item-{id}` anchor links (FR-007).                                                                                                                      |
-| `items`                        | Ordered by `compareIssueItems` (raw importance, then newest, then id; FR-008). `title`, `source`, `importance` (display, 2-level), and `date` come from `toMaterial` (002/003), including localized titles from `content-translations`. |
-| `items[].isTrialRegistration`  | `sourceType === 'clinicaltrials'`.                                                                                                                                                                                                      |
-| `items[].sentence`             | The localized per-item sentence, or English on fallback. `null` if none exists for that item.                                                                                                                                           |
-| `displayedLocale`/`isFallback` | Describe the **issue text** (points and sentences). Item titles follow the existing material fallback rules independently.                                                                                                              |
-| `translation.status`           | `not-needed` (`en`), `ready`, `pending` (wait deadline passed, still running), `failed` (in cooldown), or `unavailable` (no English text to translate).                                                                                 |
-| `meta.title`                   | The localized template `Issue.metaTitle` with `{projectName}` and `{date}` (formatted for `locale`).                                                                                                                                    |
-| `meta.description`             | The first displayed summary point, cut at a word boundary to ≤ 160 characters. If there is no summary, the localized `Issue.metaDescriptionFallback` with `{count}` and `{projectName}`.                                                |
+| Field                          | Rule                                                                                                                                                                                                                                                      |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `summary`                      | `null` only when there are no English points (FR-015). Shown in any `issueTextStatus` when points exist, so a failed or pending regeneration keeps the last good text visible. The page then shows the item list with a "summary not available yet" line. |
+| `summary.points[].itemIds`     | The English row's `items`, filtered to visible items. The page renders them as `#item-{id}` anchor links (FR-007).                                                                                                                                        |
+| `items`                        | Ordered by `compareIssueItems` (raw importance, then newest, then id; FR-008). `title`, `source`, `importance` (display, 2-level), and `date` come from `toMaterial` (002/003), including localized titles from `content-translations`.                   |
+| `items[].isTrialRegistration`  | `sourceType === 'clinicaltrials'`.                                                                                                                                                                                                                        |
+| `items[].sentence`             | The localized per-item sentence, or English on fallback. `null` if none exists for that item.                                                                                                                                                             |
+| `displayedLocale`/`isFallback` | Describe the **issue text** (points and sentences). Item titles follow the existing material fallback rules independently.                                                                                                                                |
+| `translation.status`           | `not-needed` (`en`), `ready`, `pending` (wait deadline passed, still running), `failed` (in cooldown), or `unavailable` (no English text to translate).                                                                                                   |
+| `meta.title`                   | The localized template `Issue.metaTitle` with `{projectName}` and `{date}` (formatted for `locale`).                                                                                                                                                      |
+| `meta.description`             | The first displayed summary point, cut at a word boundary to ≤ 160 characters. If there is no summary, the localized `Issue.metaDescriptionFallback` with `{count}` and `{projectName}`.                                                                  |
 
 ### Translation timing (normative)
 

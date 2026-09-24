@@ -88,10 +88,11 @@ The one sweep covers four requirements with one code path:
 1. **Per-item sentences.** Items are sorted by the issue order (R14) and numbered `1..n`. They
    are sent in batches of ≤ 20 items per call. Structured output: `{ items: [{ n, sentence }] }`.
 2. **Summary.** One call receives the numbered items (title, kind, the sentence from step 1, and
-   importance). It returns `{ points: [{ text, items: number[] }] }` with 3–5 points.
+   importance). It returns `{ points: [{ text, items: number[] }] }` with 3–5 points (at least one per item
+   when there are fewer than 3 items: `minSummaryPoints = min(3, n)`).
 3. **Map and validate** (pure function, Jest-tested). Map `n` to publication ids. Then enforce:
    - every item has exactly one sentence of ≤ 35 words (the prompt asks for ≤ 30);
-   - 3–5 points, ≤ 120 words in total;
+   - `min(3, n)`–5 points, ≤ 120 words in total;
    - every point references ≥ 1 valid item number (invalid numbers are dropped, and a point left
      with no reference fails validation);
    - the guard patterns below find nothing.
@@ -469,8 +470,8 @@ comparator guarantees that "item 3" in the prompt is item 3 on the page.
 - **Deploy-order safety.** Vercel (schema push) and the worker image (`deploy-worker.yml`) both
   deploy on merge, in either order:
   - _New worker, old web_: the anchor fields read as `undefined` (legacy interval). The old
-    Payload rejects the sweep's `where[issueTextStatus]` query with a **4xx** (unknown query
-    path). The sweep treats a 4xx from its selection query as "web not upgraded yet": it logs
+    Payload rejects the sweep's `where[issueTextStatus]` query with **400** (unknown query
+    path). The sweep treats a 400 from its selection query as "web not upgraded yet": it logs
     **WARN** `sweep skipped: cms rejected query` and returns. It must not log ERROR, because
     ERROR fires the log-based alert and this state is expected for a few minutes during a
     deploy. 5xx and network errors stay ERROR (`sweep list failed`). No digest is PATCHed in

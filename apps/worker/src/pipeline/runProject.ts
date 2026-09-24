@@ -222,6 +222,7 @@ export async function runProject(
         run: runId,
         publishedAt: finishedAt,
         publications: qualifying.map((q) => q.id),
+        issueTextStatus: 'pending',
       });
       digestId = digest.doc.id;
       stats.published = qualifying.length;

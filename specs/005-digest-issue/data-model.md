@@ -39,7 +39,8 @@ goes in the sidebar.
 
 - Every `issueSummaryPoints[].items[]` and `issueItemSentences[].publication` must be in the
   digest's `publications` (field `validate`). References to other publications are rejected.
-- When `issueTextStatus` is `ready`: 3–5 summary points, and at most one sentence per
+- When `issueTextStatus` is `ready`: 3–5 summary points (1–5 for a 1-item issue, 2–5 for a 2-item
+  issue; FR-003), and at most one sentence per
   publication. The generator produces exactly one sentence per item. The owner may delete a
   sentence, and the page then shows the item without one.
 - Soft limits enforced by the **generator**, not by field validation, so the owner can still
@@ -92,8 +93,11 @@ happens.
  owner edits English text in any state ─► ready (source=edited, revision+1, attempts=0)
 ```
 
-Public rendering by state: `ready` → summary and sentences. Any other state → the item list and
-titles, with a "summary not available yet" line (FR-015). The page never blanks.
+Public rendering depends on whether English text **exists**, not on the status: if
+`issueSummaryPoints` is non-empty, the summary and sentences are shown in any state. This keeps
+the last good text visible when an owner-requested regeneration is `pending` or ends `failed`
+(the failure PATCH never clears the text). With no points → the item list and titles, with a
+"summary not available yet" line (FR-015). The page never blanks.
 
 ---
 
