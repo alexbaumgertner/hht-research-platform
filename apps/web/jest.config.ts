@@ -8,6 +8,7 @@ const config: Config = {
     '^(\\.{1,2}/.*)\\.js$': '$1',
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@hht/shared$': '<rootDir>/../../packages/shared/src/index.ts',
+    '^server-only$': '<rootDir>/src/test/server-only.ts',
   },
   transform: {
     '^.+\\.tsx?$': [

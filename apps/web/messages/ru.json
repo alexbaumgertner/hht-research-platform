@@ -48,6 +48,28 @@
     "loadError": "Не удалось загрузить этот материал. Попробуйте ещё раз.",
     "retry": "Повторить"
   },
+  "Issue": {
+    "heading": "{projectName}: обновление от {date}",
+    "metaTitle": "{projectName}: обновление от {date}",
+    "metaDescriptionFallback": "{count} новых материалов для {projectName}.",
+    "summaryHeading": "Что нового и почему это важно",
+    "summaryUnavailable": "Краткое описание пока недоступно.",
+    "basedOn": "На основе:",
+    "itemsHeading": "Материалы в этом обновлении",
+    "trialLabel": "Зарегистрированное исследование, результатов пока нет",
+    "translationPending": "Перевод ещё выполняется. Пока показан английский текст.",
+    "translationUnavailable": "Перевод временно недоступен. Показан английский текст.",
+    "archiveTitle": "Все обновления для {projectName}",
+    "archiveMetaTitle": "Все обновления · {projectName}",
+    "archiveEmpty": "Пока нет опубликованных обновлений.",
+    "itemCount": "{count, plural, one {# материал} few {# материала} many {# материалов} other {# материала}}",
+    "backToProject": "Назад к проекту",
+    "imageCount": "{count, plural, one {# материал} few {# материала} many {# материалов} other {# материала}}",
+    "imageAlt": "Превью обновления для {projectName}",
+    "notFound": "Это обновление не найдено.",
+    "loadError": "Не удалось загрузить это обновление. Попробуйте ещё раз.",
+    "retry": "Повторить"
+  },
   "LocaleSwitcher": {
     "label": "Язык"
   }

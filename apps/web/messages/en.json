@@ -48,6 +48,28 @@
     "loadError": "This material could not be loaded. Please try again.",
     "retry": "Retry"
   },
+  "Issue": {
+    "heading": "{projectName}: update of {date}",
+    "metaTitle": "{projectName}: update of {date}",
+    "metaDescriptionFallback": "{count} new materials for {projectName}.",
+    "summaryHeading": "What's new and why it matters",
+    "summaryUnavailable": "Summary not available yet.",
+    "basedOn": "Based on:",
+    "itemsHeading": "Materials in this update",
+    "trialLabel": "Registered study, no results yet",
+    "translationPending": "Translation is still in progress. Showing English for now.",
+    "translationUnavailable": "Translation is temporarily unavailable. Showing English.",
+    "archiveTitle": "All updates for {projectName}",
+    "archiveMetaTitle": "All updates · {projectName}",
+    "archiveEmpty": "No updates published yet.",
+    "itemCount": "{count, plural, one {# material} other {# materials}}",
+    "backToProject": "Back to project",
+    "imageCount": "{count, plural, one {# material} other {# materials}}",
+    "imageAlt": "Update preview for {projectName}",
+    "notFound": "This issue could not be found.",
+    "loadError": "This issue could not be loaded. Please try again.",
+    "retry": "Retry"
+  },
   "LocaleSwitcher": {
     "label": "Language"
   }

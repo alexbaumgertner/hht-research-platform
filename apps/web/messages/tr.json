@@ -48,6 +48,28 @@
     "loadError": "Bu materyal yüklenemedi. Lütfen yeniden deneyin.",
     "retry": "Yeniden dene"
   },
+  "Issue": {
+    "heading": "{projectName}: {date} güncellemesi",
+    "metaTitle": "{projectName}: {date} güncellemesi",
+    "metaDescriptionFallback": "{projectName} için {count} yeni materyal.",
+    "summaryHeading": "Yenilikler ve neden önemli",
+    "summaryUnavailable": "Özet henüz hazır değil.",
+    "basedOn": "Dayanak:",
+    "itemsHeading": "Bu güncellemedeki materyaller",
+    "trialLabel": "Kayıtlı çalışma, henüz sonuç yok",
+    "translationPending": "Çeviri devam ediyor. Şimdilik İngilizce gösteriliyor.",
+    "translationUnavailable": "Çeviri geçici olarak kullanılamıyor. İngilizce gösteriliyor.",
+    "archiveTitle": "{projectName} için tüm güncellemeler",
+    "archiveMetaTitle": "Tüm güncellemeler · {projectName}",
+    "archiveEmpty": "Henüz yayımlanmış güncelleme yok.",
+    "itemCount": "{count, plural, one {# materyal} other {# materyal}}",
+    "backToProject": "Projeye dön",
+    "imageCount": "{count, plural, one {# materyal} other {# materyal}}",
+    "imageAlt": "{projectName} için güncelleme önizlemesi",
+    "notFound": "Bu güncelleme bulunamadı.",
+    "loadError": "Bu güncelleme yüklenemedi. Lütfen yeniden deneyin.",
+    "retry": "Yeniden dene"
+  },
   "LocaleSwitcher": {
     "label": "Dil"
   }

@@ -48,6 +48,28 @@
     "loadError": "Dieses Material konnte nicht geladen werden. Bitte erneut versuchen.",
     "retry": "Erneut versuchen"
   },
+  "Issue": {
+    "heading": "{projectName}: Update vom {date}",
+    "metaTitle": "{projectName}: Update vom {date}",
+    "metaDescriptionFallback": "{count} neue Materialien für {projectName}.",
+    "summaryHeading": "Was neu ist und warum es wichtig ist",
+    "summaryUnavailable": "Zusammenfassung noch nicht verfügbar.",
+    "basedOn": "Basierend auf:",
+    "itemsHeading": "Materialien in diesem Update",
+    "trialLabel": "Registrierte Studie, noch keine Ergebnisse",
+    "translationPending": "Die Übersetzung läuft noch. Vorerst wird Englisch angezeigt.",
+    "translationUnavailable": "Die Übersetzung ist vorübergehend nicht verfügbar. Englisch wird angezeigt.",
+    "archiveTitle": "Alle Updates für {projectName}",
+    "archiveMetaTitle": "Alle Updates · {projectName}",
+    "archiveEmpty": "Noch keine Updates veröffentlicht.",
+    "itemCount": "{count, plural, one {# Material} other {# Materialien}}",
+    "backToProject": "Zurück zum Projekt",
+    "imageCount": "{count, plural, one {# Material} other {# Materialien}}",
+    "imageAlt": "Update-Vorschau für {projectName}",
+    "notFound": "Dieses Update wurde nicht gefunden.",
+    "loadError": "Dieses Update konnte nicht geladen werden. Bitte erneut versuchen.",
+    "retry": "Erneut versuchen"
+  },
   "LocaleSwitcher": {
     "label": "Sprache"
   }

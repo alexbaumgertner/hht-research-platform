@@ -200,12 +200,12 @@ and that tapping a material's title opens its existing detail page.
 
 ### Web: read path (English-only first)
 
-- [ ] T024 [US1] Create `apps/web/src/lib/issueQueries.ts` (server-only): loaders for a visible
+- [x] T024 [US1] Create `apps/web/src/lib/issueQueries.ts` (server-only): loaders for a visible
       digest by id (excluding `hiddenFromPublic`) with its ordered items (`compareIssueItems`), and
       for the archive list, reusing `toMaterial` (existing `materials.ts`) for item title/source/
       date/importance and `content-translations` fallback (data-model.md §5, contract
       public-issues-api.md).
-- [ ] T025 [US1] Create `apps/web/src/lib/issues.ts`: DTO mapping to `IssueSummaryListItem`
+- [x] T025 [US1] Create `apps/web/src/lib/issues.ts`: DTO mapping to `IssueSummaryListItem`
       (`id`, `date`, `itemCount`, `excerpt`, `displayedLocale`, `isFallback`) and `IssueDetail`
       (`id`, `date`, `project`, `summary`/`null`, `items` with `sentence` and
       `isTrialRegistration`, `displayedLocale`, `isFallback`, `translation.status`,
@@ -213,33 +213,33 @@ and that tapping a material's title opens its existing detail page.
       public-issues-api.md §1–§2 (English-only for this task; translation fields default to
       `not-needed`/English until the translation phase). `summary` is shown whenever English
       points exist, regardless of `issueTextStatus` (data-model §1 "Public rendering").
-- [ ] T026 [P] [US1] Create `apps/web/src/lib/issues.test.ts` covering DTO mapping, the
+- [x] T026 [P] [US1] Create `apps/web/src/lib/issues.test.ts` covering DTO mapping, the
       `summary === null` / "not available yet" case, fallback flags, and `meta.description`
       truncation to ≤ 160 chars at a word boundary (quickstart.md §6).
-- [ ] T027 [US1] Create `apps/web/src/app/api/public/projects/[slug]/issues/route.ts`: the
+- [x] T027 [US1] Create `apps/web/src/app/api/public/projects/[slug]/issues/route.ts`: the
       archive list endpoint (`?locale=`, `?limit=` 1–100 default 100), `Cache-Control: no-store`,
       404 body `{ "error": "Not found" }` for unknown project, sorted `publishedAt` desc then `id`
       desc, never triggering a translation (contract public-issues-api.md §1).
-- [ ] T028 [US1] Create `apps/web/src/app/api/public/projects/[slug]/issues/[id]/route.ts`: the
+- [x] T028 [US1] Create `apps/web/src/app/api/public/projects/[slug]/issues/[id]/route.ts`: the
       issue detail endpoint, `export const maxDuration = 60`, `?locale=` validated to
       `en|de|tr|ru|uk` (400 on anything else), 404 for unknown/wrong-project/hidden issue with the
       same body as unknown, `Cache-Control: no-store` (contract public-issues-api.md §2). For this
       task, always serve English (`translation.status: 'not-needed'` for any locale); the real
       translation wait/claim logic is added in T033.
-- [ ] T029 [US1] Create `apps/web/src/components/IssueView.tsx`: the issue page body — `<h1>`
+- [x] T029 [US1] Create `apps/web/src/components/IssueView.tsx`: the issue page body — `<h1>`
       heading, summary `<ol>` with "Based on:" anchors `#item-{id}` (or the "not available yet"
       line when `summary === null`), items `<ol>` with `id="item-{id}"`, number, title link to the
       material detail page, `SourceBadge`, trial-registration label, date, sentence — fully server-
       rendered with no client JavaScript (contract issue-pages.md §2).
-- [ ] T030 [P] [US1] Create `apps/web/src/components/IssueArchiveList.tsx` and
+- [x] T030 [P] [US1] Create `apps/web/src/components/IssueArchiveList.tsx` and
       `apps/web/src/components/LatestIssueCard.tsx` (used by US4, stubbed/wired here since they
       share the same DTOs) — deferred styling only; data plumbing lands with US4's T038–T039.
-- [ ] T031 [US1] Create the issue route tree in
+- [x] T031 [US1] Create the issue route tree in
       `apps/web/src/app/[locale]/projects/[slug]/issues/[issueId]/page.tsx`,
       `not-found.tsx`, and `error.tsx` (mirroring the 003 material-detail pattern), rendering
       `IssueView` from the detail endpoint via a `cache()`-wrapped fetch shared with
       `generateMetadata` (T041) (contract issue-pages.md §1–§2).
-- [ ] T032 [P] [US1] Create `apps/web/tests/e2e/public-issue.spec.ts` covering US1's flows:
+- [x] T032 [P] [US1] Create `apps/web/tests/e2e/public-issue.spec.ts` covering US1's flows:
       summary → anchors → items → material detail navigation, the "summary not available yet" path
       for a `pending` digest, a 360 px viewport with JavaScript disabled (no horizontal scroll,
       anchors work), against the seed fixtures added in T054 (quickstart.md §1, §6).
@@ -408,7 +408,7 @@ the cached translation is served instantly with no new delay.
       returns 404 unless `ISSUE_TRANSLATOR=stub` and `VERCEL_ENV !== 'production'`, used by the
       single-flight spec to clear rows for its dedicated digest and to read row count/`attempts`
       (research R16, quickstart.md §3).
-- [ ] T054 [US5] Extend `apps/web/src/scripts/seed-public-feed.ts` with: a digest with
+- [x] T054 [US5] Extend `apps/web/src/scripts/seed-public-feed.ts` with: a digest with
       `issueTextStatus: ready`, 3 summary points (with item refs) and one sentence per item
       including one ClinicalTrials.gov item; a digest with `issueTextStatus: pending` and no text; a
       digest with `hiddenFromPublic: true` whose materials stay in the feed; and a digest reserved

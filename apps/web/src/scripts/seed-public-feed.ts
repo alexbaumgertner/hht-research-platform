@@ -233,7 +233,7 @@ async function seed() {
     },
   ];
 
-  const publicationIds: Array<string | number> = [];
+  const publicationIdsByKey = new Map<string, string | number>();
 
   for (const sample of samples) {
     const existingPub = await payload.find({
@@ -285,7 +285,7 @@ async function seed() {
       });
       pubId = pub.id;
     }
-    publicationIds.push(pubId);
+    publicationIdsByKey.set(sample.key, pubId);
 
     if (sample.translateDe) {
       const existingTr = await payload.find({
@@ -318,15 +318,149 @@ async function seed() {
     }
   }
 
-  await payload.create({
-    collection: 'digests',
-    data: {
+  const pub = (key: string) => {
+    const id = publicationIdsByKey.get(key);
+    if (id == null) throw new Error(`Missing seed publication: ${key}`);
+    return id;
+  };
+
+  async function ensureDigest(input: {
+    publishedAt: string;
+    publicationKeys: string[];
+    issueTextStatus?: 'pending' | 'ready' | 'failed';
+    hiddenFromPublic?: boolean;
+    issueSummaryPoints?: Array<{ text: string; items: Array<string | number> }>;
+    issueItemSentences?: Array<{ publication: string | number; sentence: string }>;
+  }) {
+    const publications = input.publicationKeys.map(pub) as number[];
+    const existing = await payload.find({
+      collection: 'digests',
+      where: {
+        and: [{ project: { equals: projectId } }, { publishedAt: { equals: input.publishedAt } }],
+      },
+      limit: 1,
+      overrideAccess: true,
+    });
+
+    const data = {
       project: projectId,
       run: run.id,
-      publishedAt: new Date().toISOString(),
-      publications: publicationIds as number[],
-    },
-    overrideAccess: true,
+      publishedAt: input.publishedAt,
+      publications,
+      ...(input.hiddenFromPublic ? { hiddenFromPublic: true } : {}),
+      ...(input.issueTextStatus ? { issueTextStatus: input.issueTextStatus } : {}),
+      ...(input.issueSummaryPoints ? { issueSummaryPoints: input.issueSummaryPoints } : {}),
+      ...(input.issueItemSentences ? { issueItemSentences: input.issueItemSentences } : {}),
+    };
+
+    if (existing.docs[0]) {
+      await payload.update({
+        collection: 'digests',
+        id: existing.docs[0].id,
+        data,
+        overrideAccess: true,
+      });
+      return existing.docs[0].id;
+    }
+
+    const created = await payload.create({
+      collection: 'digests',
+      data,
+      overrideAccess: true,
+    });
+    return created.id;
+  }
+
+  const readyPubKeys = ['pubmed-high', 'trials', 'news', 'guideline'] as const;
+  const readyIssueId = await ensureDigest({
+    publishedAt: '2026-09-28T12:00:00.000Z',
+    publicationKeys: [...readyPubKeys],
+    issueTextStatus: 'ready',
+    issueSummaryPoints: [
+      {
+        text: 'Researchers are exploring new treatment options for severe nosebleeds.',
+        items: [pub('pubmed-high'), pub('news')],
+      },
+      {
+        text: 'A new clinical study is recruiting participants.',
+        items: [pub('trials')],
+      },
+      {
+        text: 'Updated care guidelines were published for families.',
+        items: [pub('guideline')],
+      },
+    ],
+    issueItemSentences: [
+      {
+        publication: pub('pubmed-high'),
+        sentence:
+          'A study looked at a medicine that may help with severe nosebleeds in people with HHT.',
+      },
+      {
+        publication: pub('trials'),
+        sentence:
+          'Researchers registered a phase II study; no results are available yet because the study is still recruiting.',
+      },
+      {
+        publication: pub('news'),
+        sentence: 'A new screening clinic opened to help families get checked earlier.',
+      },
+      {
+        publication: pub('guideline'),
+        sentence: 'Experts published updated recommendations for day-to-day care.',
+      },
+    ],
+  });
+
+  const pendingIssueId = await ensureDigest({
+    publishedAt: '2026-09-21T12:00:00.000Z',
+    publicationKeys: ['no-summary', 'no-abstract'],
+    issueTextStatus: 'pending',
+  });
+
+  const hiddenIssueId = await ensureDigest({
+    publishedAt: '2026-09-14T12:00:00.000Z',
+    publicationKeys: ['social', 'no-date'],
+    issueTextStatus: 'ready',
+    hiddenFromPublic: true,
+    issueSummaryPoints: [
+      {
+        text: 'This hidden issue should not appear in the public archive.',
+        items: [pub('social')],
+      },
+    ],
+    issueItemSentences: [
+      {
+        publication: pub('social'),
+        sentence: 'Patients shared practical tips for managing nosebleeds at home.',
+      },
+      {
+        publication: pub('no-date'),
+        sentence: 'A registry entry was added without a published date.',
+      },
+    ],
+  });
+
+  const singleFlightIssueId = await ensureDigest({
+    publishedAt: '2026-09-07T12:00:00.000Z',
+    publicationKeys: ['pubmed-high', 'trials'],
+    issueTextStatus: 'ready',
+    issueSummaryPoints: [
+      {
+        text: 'Reserved for translation single-flight tests.',
+        items: [pub('pubmed-high'), pub('trials')],
+      },
+    ],
+    issueItemSentences: [
+      {
+        publication: pub('pubmed-high'),
+        sentence: 'A medicine may help with severe nosebleeds.',
+      },
+      {
+        publication: pub('trials'),
+        sentence: 'A study is recruiting; no results are available yet.',
+      },
+    ],
   });
 
   const unpublishedExisting = await payload.find({
@@ -362,8 +496,12 @@ async function seed() {
     unpublishedId = unpublished.id;
   }
 
-  console.log(`Seeded project "${slug}" with ${publicationIds.length} materials.`);
+  console.log(`Seeded project "${slug}" with ${publicationIdsByKey.size} materials.`);
   console.log(`Unpublished id for not-found check: ${unpublishedId}`);
+  console.log(`Ready issue id: ${readyIssueId}`);
+  console.log(`Pending issue id: ${pendingIssueId}`);
+  console.log(`Hidden issue id: ${hiddenIssueId}`);
+  console.log(`Single-flight issue id: ${singleFlightIssueId}`);
   process.exit(0);
 }
 
