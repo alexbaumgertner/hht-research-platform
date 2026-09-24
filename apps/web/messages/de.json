@@ -5,10 +5,10 @@
     "tagline": "Neue Forschung, einfach erklärt"
   },
   "Home": {
-    "title": "Forschungs-Digests",
-    "subtitle": "Öffentliche Monitoring-Digests für konfigurierte Forschungsprojekte.",
+    "title": "Forschungsupdates",
+    "subtitle": "Leicht verständliche Zusammenfassungen neuer medizinischer Forschung – mit Link zu jeder Quelle.",
     "empty": "Noch keine veröffentlichten Projekte.",
-    "latestDigest": "Neuester Digest",
+    "latestDigest": "Letztes Update",
     "metaTitle": "Wöchentliche Forschungsupdates in einfacher Sprache"
   },
   "Project": {

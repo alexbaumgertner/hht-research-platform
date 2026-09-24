@@ -5,10 +5,10 @@
     "tagline": "Yeni araştırmalar, sade bir dille"
   },
   "Home": {
-    "title": "Araştırma özetleri",
-    "subtitle": "Yapılandırılmış araştırma projeleri için herkese açık izleme özetleri.",
+    "title": "Araştırma güncellemeleri",
+    "subtitle": "Yeni tıbbi araştırmalar hakkında sade dilde özetler; her kaynağa bağlantıyla.",
     "empty": "Henüz yayımlanmış proje yok.",
-    "latestDigest": "Son özet",
+    "latestDigest": "Son güncelleme",
     "metaTitle": "Sade dilde haftalık araştırma güncellemeleri"
   },
   "Project": {

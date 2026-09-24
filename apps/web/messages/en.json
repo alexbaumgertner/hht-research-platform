@@ -5,10 +5,10 @@
     "tagline": "New research, explained in plain language"
   },
   "Home": {
-    "title": "Research digests",
-    "subtitle": "Public monitoring digests for configured research projects.",
+    "title": "Research updates",
+    "subtitle": "Plain-language summaries of new medical research, with a link to every source.",
     "empty": "No published projects yet.",
-    "latestDigest": "Latest digest",
+    "latestDigest": "Latest update",
     "metaTitle": "Weekly research updates in plain language"
   },
   "Project": {

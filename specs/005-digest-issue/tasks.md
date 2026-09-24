@@ -449,18 +449,18 @@ addressed to a patient.
 
 ### Implementation for User Story 6
 
-- [ ] T057 [US6] Replace the hardcoded header string in
+- [x] T057 [US6] Replace the hardcoded header string in
       `apps/web/src/app/[locale]/layout.tsx` with `Site.name`, and rewrite `Home.*` /
       `Project.*` message strings in `apps/web/messages/{en,de,tr,ru,uk}.json` for a patient
       audience (no "Research Monitoring", no "configured research projects"), per the key list in
       contract issue-pages.md §6.
-- [ ] T058 [P] [US6] Add the remaining new message keys from contract issue-pages.md §6
+- [x] T058 [P] [US6] Add the remaining new message keys from contract issue-pages.md §6
       (`Site.description`/`tagline`, `Home.metaTitle`, `Project.metaDescription`/`imageTagline`/
       `imageAlt`/`latestIssueHeading`/`readIssue`/`allIssues`/`noIssuesYet`, and the full `Issue.*`
       set) to all five locale files, keeping wording plain and disease-name-free (FR-018).
       _Already added in T035: `Site.name`/`description`/`tagline`, `Home.metaTitle`,
       `Project.metaDescription`/`imageTagline`/`imageAlt`; review their copy here._
-- [ ] T059 [P] [US6] Add or extend an i18n coverage check (reusing the pattern in
+- [x] T059 [P] [US6] Add or extend an i18n coverage check (reusing the pattern in
       `apps/web/tests/e2e/i18n-locales.spec.ts`) confirming the header, homepage/project titles, and
       meta descriptions contain no leftover internal terminology across all five locales
       (quickstart.md's "Done when", FR-018 acceptance scenario).
