@@ -260,16 +260,16 @@ description, and an image.
 
 ### Implementation for User Story 2
 
-- [ ] T033 [US2] Set `htmlLimitedBots` in `apps/web/next.config.ts` to Next's built-in bot
+- [x] T033 [US2] Set `htmlLimitedBots` in `apps/web/next.config.ts` to Next's built-in bot
       pattern plus `TelegramBot|Viber`, and add `outputFileTracingIncludes` for the
       `opengraph-image` routes created in T036–T038 (research R11, R12; contract issue-pages.md
       §3, §5).
-- [ ] T034 [P] [US2] Create `apps/web/src/lib/metadata.ts`: a shared builder for
+- [x] T034 [P] [US2] Create `apps/web/src/lib/metadata.ts`: a shared builder for
       `openGraph`/`twitter` metadata that keeps the inherited `og:image` on pages that set their own
       `openGraph` object (either by leaving `openGraph.images` to the file convention and proving it
       survives, or by setting `images` explicitly to the project image URL) (research R12, contract
       issue-pages.md §3).
-- [ ] T035 [US2] Add `generateMetadata` to `apps/web/src/app/[locale]/layout.tsx`
+- [x] T035 [US2] Add `generateMetadata` to `apps/web/src/app/[locale]/layout.tsx`
       (`metadataBase`, `title.template`, default description, `openGraph.siteName`/`locale`,
       `alternates.languages` for all five locales) and to
       `apps/web/src/app/[locale]/page.tsx`, `apps/web/src/app/[locale]/projects/[slug]/page.tsx`,
@@ -277,22 +277,28 @@ description, and an image.
       `apps/web/src/app/[locale]/projects/[slug]/publications/[publicationId]/page.tsx`, per the
       route table in contract issue-pages.md §3, each also emitting
       `twitter.card = 'summary_large_image'`.
-- [ ] T036 [P] [US2] Add IBM Plex Sans Regular/SemiBold TTF fonts (with their OFL license) to
+      _Done for layout, home, project, issue, and material pages. The archive page does not exist
+      until T046, which must call `buildPageMetadata` with `shareImagePath.project(...)`.
+      `alternates.languages` is emitted per page by the builder, because a layout cannot know the
+      current path. The `Site.*`, `Home.metaTitle`, and `Project.metaDescription`/`imageTagline`/
+      `imageAlt` keys from T058 were added here because metadata and share cards need them._
+- [x] T036 [P] [US2] Add IBM Plex Sans Regular/SemiBold TTF fonts (with their OFL license) to
       `apps/web/assets/fonts/`.
-- [ ] T037 [P] [US2] Create `apps/web/src/app/[locale]/opengraph-image.tsx` (site card:
+- [x] T037 [P] [US2] Create `apps/web/src/app/[locale]/opengraph-image.tsx` (site card:
       `Site.name` + `Site.tagline`) using `next/og` `ImageResponse`, 1200×630 PNG, Node runtime,
       reading the committed fonts (contract issue-pages.md §5).
-- [ ] T038 [US2] Create `apps/web/src/app/[locale]/projects/[slug]/opengraph-image.tsx`
+- [x] T038 [US2] Create `apps/web/src/app/[locale]/projects/[slug]/opengraph-image.tsx`
       (project name + `Project.imageTagline`, falling back to the site card if the project fails to
       load) and
       `apps/web/src/app/[locale]/projects/[slug]/issues/[issueId]/opengraph-image.tsx`
       (project name + localized issue date + `Issue.imageCount`, falling back to the project card if
       the issue is hidden, unknown, or fails to load — FR-010), both via `issueQueries.ts` (T024),
       never triggering or waiting for translation (contract issue-pages.md §5).
-- [ ] T039 [P] [US2] Create `apps/web/tests/e2e/share-metadata.spec.ts`: a `TelegramBot` user
+- [x] T039 [P] [US2] Create `apps/web/tests/e2e/share-metadata.spec.ts`: a `TelegramBot` user
       agent request to the issue, archive, **and material detail** pages returns `<head>` containing
       `og:title`, `og:description`, and an absolute `og:image`; the image route returns
       `200 image/png` (quickstart.md §4, §6; research R11 inheritance risk).
+      _The archive case is `test.fixme` until T046 creates the archive page._
 
 **Checkpoint**: User Stories 1 AND 2 both work independently; shared previews are rich and
 localized.
@@ -349,7 +355,9 @@ published issue is listed newest first, each linking to its issue page.
       shown when there is no visible issue yet.
 - [ ] T046 [US4] Create `apps/web/src/app/[locale]/projects/[slug]/issues/page.tsx` (the
       archive) rendering `IssueArchiveList`, with `generateMetadata` per contract issue-pages.md §3
-      (`Issue.archiveMetaTitle`, inherited project image).
+      (`Issue.archiveMetaTitle`, inherited project image), built with `buildPageMetadata` and
+      `shareImagePath.project(...)` from `apps/web/src/lib/metadata.ts`. Remove the `test.fixme`
+      on the archive case in `apps/web/tests/e2e/share-metadata.spec.ts`.
 - [ ] T047 [P] [US4] Extend `apps/web/tests/e2e/public-issue.spec.ts` (or a new archive-focused
       spec) with: the latest-issue card on the project page, the archive listing newest first with
       working links, a hidden digest absent from both while its materials stay in the flat feed
@@ -447,6 +455,8 @@ addressed to a patient.
       (`Site.description`/`tagline`, `Home.metaTitle`, `Project.metaDescription`/`imageTagline`/
       `imageAlt`/`latestIssueHeading`/`readIssue`/`allIssues`/`noIssuesYet`, and the full `Issue.*`
       set) to all five locale files, keeping wording plain and disease-name-free (FR-018).
+      _Already added in T035: `Site.name`/`description`/`tagline`, `Home.metaTitle`,
+      `Project.metaDescription`/`imageTagline`/`imageAlt`; review their copy here._
 - [ ] T059 [P] [US6] Add or extend an i18n coverage check (reusing the pattern in
       `apps/web/tests/e2e/i18n-locales.spec.ts`) confirming the header, homepage/project titles, and
       meta descriptions contain no leftover internal terminology across all five locales

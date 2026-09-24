@@ -7,6 +7,7 @@ import { Providers } from '../providers';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher';
 import { MantineColorSchemeInit } from '@/components/MantineColorSchemeInit';
 import { routing } from '@/i18n/routing';
+import { buildRootMetadata, toLocale } from '@/lib/metadata';
 
 const ibmPlexSans = IBM_Plex_Sans({
   subsets: ['latin', 'cyrillic'],
@@ -20,6 +21,11 @@ type Props = {
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  return buildRootMetadata(toLocale(locale));
 }
 
 export default async function LocaleLayout({ children }: Props) {

@@ -1,3 +1,8 @@
+import { readFileSync } from 'node:fs';
+
+import type { Locale } from '@hht/shared';
+import { createTranslator } from 'next-intl';
+
 import type { IssueDigestDoc, IssueProjectDoc, IssuePublicationDoc } from '@/lib/issueTypes';
 import {
   buildIssueMetaDescription,
@@ -5,7 +10,18 @@ import {
   toIssueDetail,
   toIssueSummaryListItem,
   truncateDescription,
+  type IssueMetaTranslator,
 } from '@/lib/issues';
+
+function issueTranslator(locale: Locale): IssueMetaTranslator {
+  const messages = JSON.parse(
+    readFileSync(new URL(`../../messages/${locale}.json`, import.meta.url), 'utf8'),
+  ) as Record<string, Record<string, string>>;
+  return createTranslator({ locale, messages, namespace: 'Issue' });
+}
+
+const tEn = issueTranslator('en');
+const tRu = issueTranslator('ru');
 
 const project: IssueProjectDoc = {
   id: 1,
@@ -95,6 +111,7 @@ describe('toIssueDetail', () => {
         translationByPubId: new Map(),
       },
       'en',
+      tEn,
     );
 
     expect(detail.summary?.points).toHaveLength(3);
@@ -109,7 +126,7 @@ describe('toIssueDetail', () => {
       isTrialRegistration: true,
     });
     expect(detail.translation.status).toBe('not-needed');
-    expect(detail.meta.title).toContain('HHT Research');
+    expect(detail.meta.title).toBe('HHT Research: update of September 28, 2026');
     expect(detail.meta.description).toBe('First summary point about new findings.');
     expect(detail.meta.description.length).toBeLessThanOrEqual(160);
   });
@@ -123,13 +140,14 @@ describe('toIssueDetail', () => {
         translationByPubId: new Map(),
       },
       'en',
+      tEn,
     );
 
     expect(detail.summary).toBeNull();
-    expect(detail.meta.description).toContain('HHT Research');
+    expect(detail.meta.description).toBe('1 new material for HHT Research.');
   });
 
-  it('uses fallback meta description when summary is unavailable', () => {
+  it('uses the localized fallback meta description when summary is unavailable', () => {
     const detail = toIssueDetail(
       {
         digest: pendingDigest,
@@ -138,20 +156,65 @@ describe('toIssueDetail', () => {
         translationByPubId: new Map(),
       },
       'ru',
+      tRu,
     );
 
     expect(detail.summary).toBeNull();
-    expect(detail.meta.description).toContain('HHT Research');
-    expect(buildIssueMetaTitle(project.name, pendingDigest.publishedAt, 'ru')).toContain(
-      'обновление',
-    );
+    expect(detail.meta.description).toBe('1 новый материал для HHT Research.');
+    expect(detail.meta.title).toBe('HHT Research: обновление от 21 сентября 2026 г.');
+  });
+});
+
+describe('issue meta messages', () => {
+  it.each([
+    [1, '1 new material for HHT Research.'],
+    [2, '2 new materials for HHT Research.'],
+  ])('pluralizes the English fallback for %i', (itemCount, expected) => {
     expect(
       buildIssueMetaDescription({
-        locale: 'ru',
+        t: tEn,
         projectName: project.name,
-        itemCount: 1,
+        itemCount,
         firstSummaryPoint: null,
       }),
-    ).toContain('материал');
+    ).toBe(expected);
+  });
+
+  it.each([
+    [1, '1 новый материал для HHT Research.'],
+    [3, '3 новых материала для HHT Research.'],
+    [5, '5 новых материалов для HHT Research.'],
+    [21, '21 новый материал для HHT Research.'],
+  ])('pluralizes the Russian fallback for %i', (itemCount, expected) => {
+    expect(
+      buildIssueMetaDescription({
+        t: tRu,
+        projectName: project.name,
+        itemCount,
+        firstSummaryPoint: null,
+      }),
+    ).toBe(expected);
+  });
+
+  it('prefers the first summary point over the fallback', () => {
+    expect(
+      buildIssueMetaDescription({
+        t: tEn,
+        projectName: project.name,
+        itemCount: 3,
+        firstSummaryPoint: '  First point.  ',
+      }),
+    ).toBe('First point.');
+  });
+
+  it('formats the title date for the locale', () => {
+    expect(
+      buildIssueMetaTitle({
+        t: tEn,
+        locale: 'en',
+        projectName: project.name,
+        date: '2026-09-28T12:00:00.000Z',
+      }),
+    ).toBe('HHT Research: update of September 28, 2026');
   });
 });

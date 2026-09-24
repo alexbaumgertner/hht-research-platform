@@ -42,21 +42,11 @@ export type IssueDetail = {
   meta: { title: string; description: string };
 };
 
-const META_TITLE: Record<Locale, string> = {
-  en: '{projectName}: update of {date}',
-  de: '{projectName}: Update vom {date}',
-  tr: '{projectName}: {date} güncellemesi',
-  ru: '{projectName}: обновление от {date}',
-  uk: '{projectName}: оновлення від {date}',
-};
-
-const META_DESCRIPTION_FALLBACK: Record<Locale, string> = {
-  en: '{count} new materials for {projectName}.',
-  de: '{count} neue Materialien für {projectName}.',
-  tr: '{projectName} için {count} yeni materyal.',
-  ru: '{count} новых материалов для {projectName}.',
-  uk: '{count} нових матеріалів для {projectName}.',
-};
+/** The `Issue` namespace translator (next-intl), bound to the response locale. */
+export type IssueMetaTranslator = (
+  key: 'metaTitle' | 'metaDescriptionFallback',
+  values: Record<string, string | number>,
+) => string;
 
 export function formatIssueDate(date: string, locale: Locale): string {
   return new Date(date).toLocaleDateString(locale, {
@@ -78,19 +68,20 @@ export function truncateDescription(text: string, maxLen = 160): string {
   return trimmed.slice(0, maxLen).trimEnd();
 }
 
-function applyTemplate(template: string, values: Record<string, string | number>): string {
-  return template.replace(/\{(\w+)\}/g, (_, key: string) => String(values[key] ?? ''));
-}
-
-export function buildIssueMetaTitle(projectName: string, date: string, locale: Locale): string {
-  return applyTemplate(META_TITLE[locale], {
-    projectName,
-    date: formatIssueDate(date, locale),
+export function buildIssueMetaTitle(input: {
+  t: IssueMetaTranslator;
+  locale: Locale;
+  projectName: string;
+  date: string;
+}): string {
+  return input.t('metaTitle', {
+    projectName: input.projectName,
+    date: formatIssueDate(input.date, input.locale),
   });
 }
 
 export function buildIssueMetaDescription(input: {
-  locale: Locale;
+  t: IssueMetaTranslator;
   projectName: string;
   itemCount: number;
   firstSummaryPoint: string | null;
@@ -98,7 +89,7 @@ export function buildIssueMetaDescription(input: {
   if (input.firstSummaryPoint) {
     return truncateDescription(input.firstSummaryPoint);
   }
-  return applyTemplate(META_DESCRIPTION_FALLBACK[input.locale], {
+  return input.t('metaDescriptionFallback', {
     count: input.itemCount,
     projectName: input.projectName,
   });
@@ -152,6 +143,7 @@ export function toIssueSummaryListItem(
 export function toIssueDetail(
   loaded: LoadedIssue,
   locale: Locale,
+  t: IssueMetaTranslator,
   translationStatus: IssueTranslationStatus = 'not-needed',
 ): IssueDetail {
   const visibleIds = new Set(loaded.publications.map((publication) => String(publication.id)));
@@ -172,9 +164,14 @@ export function toIssueDetail(
     isFallback: locale !== 'en',
     translation: { status: translationStatus },
     meta: {
-      title: buildIssueMetaTitle(loaded.project.name, loaded.digest.publishedAt, locale),
-      description: buildIssueMetaDescription({
+      title: buildIssueMetaTitle({
+        t,
         locale,
+        projectName: loaded.project.name,
+        date: loaded.digest.publishedAt,
+      }),
+      description: buildIssueMetaDescription({
+        t,
         projectName: loaded.project.name,
         itemCount: items.length,
         firstSummaryPoint,

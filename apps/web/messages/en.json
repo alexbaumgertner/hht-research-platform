@@ -1,15 +1,24 @@
 {
+  "Site": {
+    "name": "Research Updates",
+    "description": "Weekly plain-language updates on new medical research, with a link to every source.",
+    "tagline": "New research, explained in plain language"
+  },
   "Home": {
     "title": "Research digests",
     "subtitle": "Public monitoring digests for configured research projects.",
     "empty": "No published projects yet.",
-    "latestDigest": "Latest digest"
+    "latestDigest": "Latest digest",
+    "metaTitle": "Weekly research updates in plain language"
   },
   "Project": {
     "feedTitle": "Materials",
     "empty": "Nothing published yet for this project.",
     "backHome": "All projects",
-    "lastChecked": "Sources last checked: {date}"
+    "lastChecked": "Sources last checked: {date}",
+    "metaDescription": "Weekly research updates for {projectName}, explained in plain language with a link to every source.",
+    "imageTagline": "Weekly research updates in plain language",
+    "imageAlt": "Preview card for {projectName}"
   },
   "Materials": {
     "badge": {
@@ -51,7 +60,7 @@
   "Issue": {
     "heading": "{projectName}: update of {date}",
     "metaTitle": "{projectName}: update of {date}",
-    "metaDescriptionFallback": "{count} new materials for {projectName}.",
+    "metaDescriptionFallback": "{count, plural, one {# new material} other {# new materials}} for {projectName}.",
     "summaryHeading": "What's new and why it matters",
     "summaryUnavailable": "Summary not available yet.",
     "basedOn": "Based on:",

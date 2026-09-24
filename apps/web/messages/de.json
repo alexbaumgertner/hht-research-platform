@@ -1,15 +1,24 @@
 {
+  "Site": {
+    "name": "Forschung verständlich",
+    "description": "Wöchentliche, leicht verständliche Updates zu neuer medizinischer Forschung – mit Link zu jeder Quelle.",
+    "tagline": "Neue Forschung, einfach erklärt"
+  },
   "Home": {
     "title": "Forschungs-Digests",
     "subtitle": "Öffentliche Monitoring-Digests für konfigurierte Forschungsprojekte.",
     "empty": "Noch keine veröffentlichten Projekte.",
-    "latestDigest": "Neuester Digest"
+    "latestDigest": "Neuester Digest",
+    "metaTitle": "Wöchentliche Forschungsupdates in einfacher Sprache"
   },
   "Project": {
     "feedTitle": "Materialien",
     "empty": "Für dieses Projekt wurde noch nichts veröffentlicht.",
     "backHome": "Alle Projekte",
-    "lastChecked": "Quellen zuletzt geprüft: {date}"
+    "lastChecked": "Quellen zuletzt geprüft: {date}",
+    "metaDescription": "Wöchentliche Forschungsupdates zu {projectName}, leicht verständlich erklärt und mit Link zu jeder Quelle.",
+    "imageTagline": "Wöchentliche Forschungsupdates in einfacher Sprache",
+    "imageAlt": "Vorschaubild für {projectName}"
   },
   "Materials": {
     "badge": {
@@ -51,7 +60,7 @@
   "Issue": {
     "heading": "{projectName}: Update vom {date}",
     "metaTitle": "{projectName}: Update vom {date}",
-    "metaDescriptionFallback": "{count} neue Materialien für {projectName}.",
+    "metaDescriptionFallback": "{count, plural, one {# neues Material} other {# neue Materialien}} zu {projectName}.",
     "summaryHeading": "Was neu ist und warum es wichtig ist",
     "summaryUnavailable": "Zusammenfassung noch nicht verfügbar.",
     "basedOn": "Basierend auf:",

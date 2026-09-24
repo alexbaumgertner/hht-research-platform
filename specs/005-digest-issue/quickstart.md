@@ -45,11 +45,11 @@ Open `http://localhost:3000/en/projects/hht-research` → "Read this issue".
 
 ## 2. Archive and project page (US4)
 
-| Check         | Expected                                                                                                                     |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Project page  | Latest issue card (date + excerpt) above the unchanged flat feed (FR-019)                                                    |
-| `…/issues`    | Every visible issue, newest first, each linking to its page (FR-002)                                                         |
-| Hidden digest | Absent from the archive; its URL and `opengraph-image` → 404; its materials still in the feed and detail pages (FR-021, R10) |
+| Check         | Expected                                                                                                                                                                            |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Project page  | Latest issue card (date + excerpt) above the unchanged flat feed (FR-019)                                                                                                           |
+| `…/issues`    | Every visible issue, newest first, each linking to its page (FR-002)                                                                                                                |
+| Hidden digest | Absent from the archive; its URL → 404 and its `opengraph-image` serves the generic project card (no issue details); its materials still in the feed and detail pages (FR-021, R10) |
 
 ## 3. Translation: wait, fallback, single-flight, invalidation (US5)
 

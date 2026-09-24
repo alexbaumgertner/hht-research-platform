@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { cache } from 'react';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
@@ -6,6 +7,7 @@ import { Stack } from '@mantine/core';
 import { IssueView } from '@/components/IssueView';
 import { TextLink } from '@/components/TextLink';
 import type { IssueDetail } from '@/lib/issues';
+import { buildPageMetadata, shareImagePath, toLocale } from '@/lib/metadata';
 import { getPublicSiteUrl } from '@/lib/siteUrl';
 
 type Props = {
@@ -51,28 +53,27 @@ export default async function IssuePage({ params }: Props) {
   );
 }
 
-export async function generateMetadata({ params }: Props) {
-  const { locale, slug, issueId } = await params;
-  const baseUrl = getPublicSiteUrl();
-  const issue = await fetchIssueDetail(baseUrl, slug, issueId, locale);
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale: rawLocale, slug, issueId } = await params;
+  const locale = toLocale(rawLocale);
+  const [issue, t] = await Promise.all([
+    fetchIssueDetail(getPublicSiteUrl(), slug, issueId, locale),
+    getTranslations({ locale, namespace: 'Issue' }),
+  ]);
 
   if (issue === 'not-found') {
-    const t = await getTranslations({ locale, namespace: 'Issue' });
     return { title: t('notFound') };
   }
 
-  return {
+  return buildPageMetadata({
+    locale,
+    path: `/projects/${slug}/issues/${issueId}`,
     title: issue.meta.title,
     description: issue.meta.description,
-    openGraph: {
-      title: issue.meta.title,
-      description: issue.meta.description,
-      type: 'article',
+    type: 'article',
+    image: {
+      url: shareImagePath.issue(locale, slug, issueId),
+      alt: t('imageAlt', { projectName: issue.project.name }),
     },
-    twitter: {
-      card: 'summary_large_image',
-      title: issue.meta.title,
-      description: issue.meta.description,
-    },
-  };
+  });
 }

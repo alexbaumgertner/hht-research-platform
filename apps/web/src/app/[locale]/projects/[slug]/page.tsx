@@ -1,17 +1,19 @@
+import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Stack, Text, Title } from '@mantine/core';
-import { Suspense } from 'react';
+import { Suspense, cache } from 'react';
 
 import { MaterialsFeed } from '@/components/MaterialsFeed';
 import { TextLink } from '@/components/TextLink';
 import type { Material } from '@/lib/materials';
+import { buildPageMetadata, shareImagePath, toLocale } from '@/lib/metadata';
 import { getPublicSiteUrl } from '@/lib/siteUrl';
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>;
 };
 
-async function fetchProject(baseUrl: string, slug: string) {
+const fetchProject = cache(async (baseUrl: string, slug: string) => {
   const res = await fetch(`${baseUrl}/api/public/projects/${slug}`, { cache: 'no-store' });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error('Failed to load project');
@@ -21,7 +23,7 @@ async function fetchProject(baseUrl: string, slug: string) {
     slug: string;
     lastSuccessfulRunAt: string | null;
   }>;
-}
+});
 
 async function fetchMaterials(baseUrl: string, slug: string, locale: string) {
   const res = await fetch(
@@ -30,6 +32,26 @@ async function fetchMaterials(baseUrl: string, slug: string, locale: string) {
   );
   if (!res.ok) throw new Error('Failed to load materials');
   return res.json() as Promise<{ docs: Material[] }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale: rawLocale, slug } = await params;
+  const locale = toLocale(rawLocale);
+  const project = await fetchProject(getPublicSiteUrl(), slug);
+  if (!project) return {};
+
+  const t = await getTranslations({ locale, namespace: 'Project' });
+  return buildPageMetadata({
+    locale,
+    path: `/projects/${slug}`,
+    title: project.name,
+    description: t('metaDescription', { projectName: project.name }),
+    type: 'website',
+    image: {
+      url: shareImagePath.project(locale, slug),
+      alt: t('imageAlt', { projectName: project.name }),
+    },
+  });
 }
 
 export default async function ProjectFeedPage({ params }: Props) {

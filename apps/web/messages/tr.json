@@ -1,15 +1,24 @@
 {
+  "Site": {
+    "name": "Araştırma Güncellemeleri",
+    "description": "Yeni tıbbi araştırmalar hakkında haftalık, sade dilde güncellemeler; her kaynağa bağlantıyla.",
+    "tagline": "Yeni araştırmalar, sade bir dille"
+  },
   "Home": {
     "title": "Araştırma özetleri",
     "subtitle": "Yapılandırılmış araştırma projeleri için herkese açık izleme özetleri.",
     "empty": "Henüz yayımlanmış proje yok.",
-    "latestDigest": "Son özet"
+    "latestDigest": "Son özet",
+    "metaTitle": "Sade dilde haftalık araştırma güncellemeleri"
   },
   "Project": {
     "feedTitle": "Materyaller",
     "empty": "Bu proje için henüz yayımlanmış materyal yok.",
     "backHome": "Tüm projeler",
-    "lastChecked": "Kaynaklar en son kontrol edildi: {date}"
+    "lastChecked": "Kaynaklar en son kontrol edildi: {date}",
+    "metaDescription": "{projectName} için haftalık araştırma güncellemeleri; sade bir dille ve her kaynağa bağlantıyla.",
+    "imageTagline": "Sade dilde haftalık araştırma güncellemeleri",
+    "imageAlt": "{projectName} için önizleme görseli"
   },
   "Materials": {
     "badge": {
@@ -51,7 +60,7 @@
   "Issue": {
     "heading": "{projectName}: {date} güncellemesi",
     "metaTitle": "{projectName}: {date} güncellemesi",
-    "metaDescriptionFallback": "{projectName} için {count} yeni materyal.",
+    "metaDescriptionFallback": "{projectName} için {count, plural, one {# yeni materyal} other {# yeni materyal}}.",
     "summaryHeading": "Yenilikler ve neden önemli",
     "summaryUnavailable": "Özet henüz hazır değil.",
     "basedOn": "Dayanak:",

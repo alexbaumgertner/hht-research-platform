@@ -342,7 +342,8 @@ revision, and stale rows pile up.
 
 **Decision**: New `hiddenFromPublic` checkbox on `digests` (default `false`). When it is `true`,
 the issue detail endpoint returns 404 (the same body as unknown, as in 003 R3), the archive and
-latest-issue queries exclude it, and its page and OG image 404. `feedPublishedAt` on its
+latest-issue queries exclude it, and its page 404s. Its OG image URL serves the generic project
+card (contract issue-pages §5), which reveals nothing about the hidden issue. `feedPublishedAt` on its
 publications is **not** touched, so its materials stay in the flat feed and their detail pages
 keep working (planning notes). The worker still generates text for hidden digests, so unhiding
 shows a complete page.

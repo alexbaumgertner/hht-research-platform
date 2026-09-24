@@ -1,5 +1,6 @@
 import { LocaleSchema, type Locale } from '@hht/shared';
 import { NextResponse } from 'next/server';
+import { getTranslations } from 'next-intl/server';
 
 import { findProjectBySlug, getVisibleIssue, loadIssueSummary } from '@/lib/issueQueries';
 import { toIssueDetail } from '@/lib/issues';
@@ -30,8 +31,11 @@ export async function GET(req: Request, { params }: Params) {
     return NextResponse.json({ error: 'Not found' }, { status: 404, headers: NO_STORE });
   }
 
-  const loaded = await loadIssueSummary(digest, project, locale);
-  const detail = toIssueDetail(loaded, locale, 'not-needed');
+  const [loaded, t] = await Promise.all([
+    loadIssueSummary(digest, project, locale),
+    getTranslations({ locale, namespace: 'Issue' }),
+  ]);
+  const detail = toIssueDetail(loaded, locale, t, 'not-needed');
 
   return NextResponse.json(detail, { headers: NO_STORE });
 }
