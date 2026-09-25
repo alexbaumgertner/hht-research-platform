@@ -1,13 +1,12 @@
 <!--
 Sync Impact Report
-- Version change: 1.0.0 → 1.0.1
-- Modified principles:
-  - IX. Automated, Enforced Quality Gates — agent Layer 1 retargeted from
-    Claude Code (`.claude/settings.json`, PostToolUse/Stop) to Cursor agent
-    (`.cursor/hooks.json`, afterFileEdit/stop)
-- Added sections: none
+- Version change: 1.0.1 → 1.1.0
+- Modified principles: none
+- Added sections:
+  - Spec & Delivery Workflow — English-language requirement for repository
+    and GitHub artifacts (code, comments, commits, PRs, specs, plans, ADRs,
+    docs); owner conversation exempt
 - Removed sections: none
-- Technical Baseline: "Agent enforcement" row updated likewise
 - Follow-up TODOs: none
 -->
 
@@ -159,6 +158,9 @@ The following stack choices MUST NOT be revisited without a new ADR:
   merge authority (Principle IX).
 - Domain and code remain topic-agnostic even when branding or the first
   deployed project is HHT-specific (Principle V).
+- Repository and GitHub artifacts — code, comments, commit messages, PR
+  titles and descriptions, specs, plans, ADRs and docs — MUST be written
+  in English. Conversation with the owner may use any language.
 
 ## Governance
 
@@ -186,4 +188,4 @@ Compliance review expectations:
 - Required CI status checks MUST remain enabled; weakening Layer 3
   without a documented amendment is a governance violation.
 
-**Version**: 1.0.1 | **Ratified**: 2026-08-26 | **Last Amended**: 2026-08-26
+**Version**: 1.1.0 | **Ratified**: 2026-08-26 | **Last Amended**: 2026-09-25
