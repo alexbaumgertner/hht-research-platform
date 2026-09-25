@@ -1,10 +1,10 @@
 /**
- * Login code email via the Resend HTTP API (no SDK dependency in apps/web).
+ * Login code email via Resend (`lib/email.ts`).
  * Without RESEND_API_KEY outside production the code is printed to the server
  * console so local login works; in production a missing key is an error.
  */
 
-const SENDER_NAME = 'HHT News';
+import { SENDER_NAME, sendEmail } from '@/lib/email';
 
 export function codeEmail(code: string): { subject: string; text: string; html: string } {
   const text = [
@@ -37,21 +37,5 @@ export async function sendCodeEmail(to: string, code: string): Promise<void> {
     return;
   }
 
-  const from =
-    process.env.AUTH_EMAIL_FROM?.trim() ||
-    `${SENDER_NAME} <${process.env.RESEND_FROM_EMAIL?.trim() || 'onboarding@resend.dev'}>`;
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      from,
-      to,
-      subject: message.subject,
-      text: message.text,
-      html: message.html,
-    }),
-  });
-  if (!res.ok) {
-    throw new Error(`Resend rejected the email: ${res.status} ${await res.text()}`);
-  }
+  await sendEmail({ to, ...message });
 }

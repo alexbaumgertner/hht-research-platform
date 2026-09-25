@@ -1,5 +1,11 @@
 {
   "buildCommand": "pnpm --filter @hht/shared build && pnpm --filter @hht/web ensure-schema && pnpm --filter @hht/web build",
   "installCommand": "pnpm install --frozen-lockfile",
-  "regions": ["fra1"]
+  "regions": ["fra1"],
+  "crons": [
+    {
+      "path": "/api/cron/backup",
+      "schedule": "0 3 * * *"
+    }
+  ]
 }

@@ -17,7 +17,9 @@
     "seed:public-feed": "tsx src/scripts/seed-public-feed.ts",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.ts --passWithNoTests",
     "test:e2e": "playwright test --config=playwright.config.ts",
-    "create-admin": "tsx src/scripts/create-admin.ts"
+    "create-admin": "tsx src/scripts/create-admin.ts",
+    "backup:verify": "tsx src/scripts/backup-verify.ts",
+    "backup:restore": "tsx src/scripts/backup-restore.ts"
   },
   "dependencies": {
     "@ai-sdk/gateway": "^4.0.64",
