@@ -8,6 +8,16 @@ cd "$(dirname "$0")/.."
 source .cursor/node-env.sh
 echo "Using node $(node -v), pnpm $(pnpm -v)"
 
+# Provision PostgreSQL 16 when the base image doesn't already ship it. A
+# committed .cursor/environment.json takes precedence over any snapshot-based
+# dashboard environment, so this install must be self-sufficient on the default
+# base image. Runs at Build time and is captured in the resulting snapshot.
+if ! command -v pg_ctlcluster >/dev/null 2>&1; then
+  echo "Installing PostgreSQL 16..."
+  sudo apt-get update -qq
+  sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq postgresql-16 postgresql-client-16
+fi
+
 # Install workspace dependencies.
 pnpm install --frozen-lockfile
 
