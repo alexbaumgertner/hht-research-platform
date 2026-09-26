@@ -7,9 +7,9 @@ ones for any agent bootstrapping the project manually.
 ## Bootstrap
 
 ```bash
-bash .cursor/node-env.sh   # Node 24 via nvm
-bash .cursor/install.sh    # PostgreSQL 16 + pnpm install + .env.local + shared build
-bash .cursor/start.sh      # start Postgres, ensure payload role/db, push Payload schema
+source .cursor/node-env.sh   # Node 24 via nvm (source, so PATH persists)
+bash .cursor/install.sh      # PostgreSQL 16 + pnpm install + .env.local + shared build
+bash .cursor/start.sh        # start Postgres, ensure payload role/db, push Payload schema
 ```
 
 ## Verify
@@ -17,8 +17,8 @@ bash .cursor/start.sh      # start Postgres, ensure payload role/db, push Payloa
 ```bash
 pnpm lint && pnpm format:check && pnpm typecheck
 pnpm --filter @hht/web build
-pnpm test          # 305 Jest tests
-pnpm test:e2e      # 55 Playwright tests
+pnpm test          # Jest unit/integration tests
+pnpm test:e2e      # Playwright end-to-end tests
 ```
 
 ## Secrets (add via Cursor dashboard, not committed)
