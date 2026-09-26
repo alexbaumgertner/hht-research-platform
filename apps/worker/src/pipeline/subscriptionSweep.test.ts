@@ -367,6 +367,26 @@ describe('sweepSubscriptions', () => {
     expect(errors).toHaveLength(1);
   });
 
+  it('does nothing and logs when PAYLOAD_SECRET is missing', async () => {
+    const errors: string[] = [];
+    const sent: string[] = [];
+    const cms = createCms({ digests: [digest()], subscribers: [subscriber()] });
+    await sweepSubscriptions({
+      cms,
+      env: { ...openEnv, PAYLOAD_SECRET: ' ' },
+      now: () => new Date('2026-09-26T18:00:00.000Z'),
+      logError: (message) => errors.push(message),
+      send: async (message) => {
+        sent.push(message.to);
+        return { ok: true, id: 're_no' };
+      },
+    });
+    expect(cms.deliveries).toHaveLength(0);
+    expect(cms.digests[0]?.subscriberFanoutAt).toBeFalsy();
+    expect(sent).toHaveLength(0);
+    expect(errors).toEqual(['subscription sweep skipped: PAYLOAD_SECRET is not set']);
+  });
+
   it('mails only the owner from a resend.dev address and warns once', async () => {
     const warnings: string[] = [];
     const cms = createCms({

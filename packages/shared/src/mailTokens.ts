@@ -13,11 +13,13 @@ export function hashSubscriptionToken(token: string): string {
 /**
  * Rebuildable link secret. The database stores only the SHA-256 of the token.
  * Rotating the server secret invalidates outstanding links.
+ * An empty secret would make every link guessable from a row id, so it throws.
  */
 export function derivedSubscriptionToken(
   purpose: string,
   secret: string,
 ): { token: string; hash: string } {
+  if (!secret.trim()) throw new Error('PAYLOAD_SECRET is not set; refusing to derive mail tokens');
   const token = createHash('sha256').update(`${secret}\0${purpose}`).digest('base64url');
   return { token, hash: hashSubscriptionToken(token) };
 }

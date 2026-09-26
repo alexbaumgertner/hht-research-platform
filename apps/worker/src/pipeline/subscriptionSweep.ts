@@ -215,7 +215,12 @@ export async function sweepSubscriptions(deps: SubscriptionSweepDeps): Promise<v
   const sleep = deps.sleep ?? ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
   const reportError = deps.logError ?? logError;
   const reportWarning = deps.logWarning ?? logWarning;
-  const secret = env.PAYLOAD_SECRET ?? '';
+  const secret = env.PAYLOAD_SECRET?.trim() ?? '';
+  if (!secret) {
+    // Links must match the ones the web app derives with the same secret.
+    reportError('subscription sweep skipped: PAYLOAD_SECRET is not set');
+    return;
+  }
   const site = (env.PUBLIC_SITE_URL ?? '').replace(/\/$/, '');
   const gateOpen = mailEnabled(env);
   let sandboxWarned = false;
