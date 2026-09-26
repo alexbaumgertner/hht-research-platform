@@ -65,4 +65,8 @@ fi
 # typecheck + tests need its .d.ts, so build it during install.
 pnpm --filter @hht/shared build
 
+# Playwright browser for `pnpm test:e2e`. Idempotent (skips already-installed
+# browsers); baked into the Build so e2e works without a per-boot download.
+pnpm --filter @hht/web exec playwright install --with-deps chromium
+
 echo "install.sh complete"
