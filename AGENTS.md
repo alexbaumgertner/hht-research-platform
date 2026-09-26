@@ -17,8 +17,9 @@ bash .cursor/start.sh        # start Postgres, ensure payload role/db, push Payl
 ```bash
 pnpm lint && pnpm format:check && pnpm typecheck
 pnpm --filter @hht/web build
-pnpm test          # Jest unit/integration tests
-pnpm test:e2e      # Playwright end-to-end tests
+pnpm test                                # Jest unit/integration tests
+pnpm --filter @hht/web seed:public-feed  # demo data for e2e / public feed (mirrors CI)
+pnpm test:e2e                            # Playwright end-to-end tests
 ```
 
 ## Secrets (add via Cursor dashboard, not committed)
