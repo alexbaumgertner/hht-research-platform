@@ -22,6 +22,38 @@ export const ResearchProjects: CollectionConfig = {
     delete: isAuthenticated,
   },
   hooks: {
+    beforeDelete: [
+      async ({ id, req }) => {
+        const subscribers = await req.payload.find({
+          collection: 'subscribers',
+          where: { project: { equals: id } },
+          depth: 0,
+          pagination: false,
+          overrideAccess: true,
+          req,
+        });
+        for (const subscriber of subscribers.docs) {
+          await req.payload.delete({
+            collection: 'subscribers',
+            id: subscriber.id,
+            overrideAccess: true,
+            req,
+          });
+        }
+        await req.payload.delete({
+          collection: 'vk-posts',
+          where: { project: { equals: id } },
+          overrideAccess: true,
+          req,
+        });
+        await req.payload.delete({
+          collection: 'analytics-counts',
+          where: { project: { equals: id } },
+          overrideAccess: true,
+          req,
+        });
+      },
+    ],
     beforeValidate: [
       ({ data, operation }) => {
         if (!data) return data;
@@ -174,6 +206,40 @@ export const ResearchProjects: CollectionConfig = {
       defaultValue: false,
       admin: {
         description: 'Send a short link-only email when a digest is published',
+      },
+    },
+    {
+      name: 'emailFromName',
+      type: 'text',
+      admin: {
+        description:
+          'Name shown as the sender of subscriber email. Falls back to the project name.',
+      },
+    },
+    {
+      name: 'vkCommunityId',
+      type: 'text',
+      admin: {
+        description:
+          'Numeric VK community id, without a minus sign. Empty means VK posting is off.',
+      },
+    },
+    {
+      name: 'subscriberCounts',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '/components/admin/SubscriberCounts#SubscriberCounts',
+        },
+      },
+    },
+    {
+      name: 'subscriberMetrics',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '/components/admin/SubscriberMetrics#SubscriberMetrics',
+        },
       },
     },
     {

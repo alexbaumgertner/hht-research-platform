@@ -15,6 +15,11 @@ import { Digests } from './collections/Digests';
 import { ContentTranslations } from './collections/ContentTranslations';
 import { IssueTranslations } from './collections/IssueTranslations';
 import { AuthCodes } from './collections/AuthCodes';
+import { Subscribers } from './collections/Subscribers';
+import { IssueDeliveries } from './collections/IssueDeliveries';
+import { VkPosts } from './collections/VkPosts';
+import { AnalyticsCounts } from './collections/AnalyticsCounts';
+import { SubscribeRateLimits } from './collections/SubscribeRateLimits';
 import { assertDevDatabaseIsLocal, shouldPushSchema } from './lib/databaseTarget';
 import { requiredEnv } from './lib/env';
 import { loadLocalEnv } from './lib/loadLocalEnv';
@@ -47,6 +52,11 @@ export default buildConfig({
     ContentTranslations,
     IssueTranslations,
     AuthCodes,
+    Subscribers,
+    IssueDeliveries,
+    VkPosts,
+    AnalyticsCounts,
+    SubscribeRateLimits,
   ],
   editor: lexicalEditor(),
   secret: requiredEnv('PAYLOAD_SECRET', 'dev-secret-change-me'),
