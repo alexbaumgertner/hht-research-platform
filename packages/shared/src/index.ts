@@ -111,3 +111,9 @@ export function sanitizeHttpUrl(value: string | null | undefined): string | null
 export * from './dedupe.js';
 export * from './issueOrder.js';
 export * from './schedule.js';
+export * from './subscriberEmail.js';
+export * from './chatSource.js';
+export * from './deliveryDecision.js';
+export * from './issueEmailBody.js';
+export * from './chatPost.js';
+export * from './mailTokens.js';

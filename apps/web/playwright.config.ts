@@ -29,7 +29,13 @@ const config: Config = defineConfig({
     url: `${baseURL}/en`,
     // Issue-text translation never reaches the LLM gateway from e2e; the stub also
     // enables `/api/test/issue-translations` for the single-flight spec.
-    env: { ISSUE_TRANSLATOR: 'stub', ISSUE_TRANSLATOR_STUB_DELAY_MS: '0' },
+    env: {
+      ISSUE_TRANSLATOR: 'stub',
+      ISSUE_TRANSLATOR_STUB_DELAY_MS: '0',
+      EMAIL_DELIVERY: 'stub',
+      RESEND_API_KEY: 'test-key',
+      RESEND_FROM_EMAIL: 'news@example.com',
+    },
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
     stdout: 'pipe',

@@ -6,6 +6,7 @@ import { Suspense, cache } from 'react';
 
 import { LatestIssueCard } from '@/components/LatestIssueCard';
 import { MaterialsFeed } from '@/components/MaterialsFeed';
+import { SubscribeForm } from '@/components/SubscribeForm';
 import { TextLink } from '@/components/TextLink';
 import type { IssueSummaryListItem } from '@/lib/issues';
 import type { Material } from '@/lib/materials';
@@ -14,6 +15,7 @@ import { getPublicSiteUrl } from '@/lib/siteUrl';
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
 const fetchProject = cache(async (baseUrl: string, slug: string) => {
@@ -74,8 +76,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 }
 
-export default async function ProjectFeedPage({ params }: Props) {
+export default async function ProjectFeedPage({ params, searchParams }: Props) {
   const { locale, slug } = await params;
+  const query = await searchParams;
+  const notice = typeof query.notice === 'string' ? query.notice : null;
   const t = await getTranslations('Project');
   const baseUrl = getPublicSiteUrl();
 
@@ -124,6 +128,13 @@ export default async function ProjectFeedPage({ params }: Props) {
           <MaterialsFeed materials={docs} locale={locale} slug={slug} />
         </Suspense>
       </div>
+
+      <SubscribeForm
+        projectName={project.name}
+        projectSlug={slug}
+        locale={locale}
+        notice={notice}
+      />
     </Stack>
   );
 }
