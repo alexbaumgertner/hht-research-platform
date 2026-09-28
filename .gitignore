@@ -23,7 +23,9 @@ coverage/
 Thumbs.db
 
 # IDE
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 .idea/
 
 # Test artifacts
@@ -41,3 +43,6 @@ media/
 # Misc
 .turbo/
 .vercel/
+
+# Claude Code (personal overrides)
+.claude/settings.local.json

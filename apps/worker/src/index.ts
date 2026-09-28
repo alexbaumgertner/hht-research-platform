@@ -3,6 +3,8 @@ import { logError, logInfo } from './log.js';
 import { sweepIssueText } from './pipeline/issueSweep.js';
 import { isStaleRun } from './pipeline/publish.js';
 import { runProject } from './pipeline/runProject.js';
+import { subscriptionCms } from './pipeline/subscriptionCms.js';
+import { sweepSubscriptions } from './pipeline/subscriptionSweep.js';
 
 /** Mark runs left `running` by a killed/crashed job as failed so history stays truthful. */
 async function reapStaleRuns(cms: CmsClient): Promise<void> {
@@ -53,6 +55,11 @@ async function main(): Promise<void> {
   } finally {
     // Separate from runs: a sweep failure never touches run status or watermarks.
     await sweepIssueText(cms);
+    try {
+      await sweepSubscriptions({ cms: subscriptionCms(cms) });
+    } catch (err) {
+      logError('subscription sweep failed', err);
+    }
   }
 
   logInfo('complete');

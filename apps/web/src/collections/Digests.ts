@@ -11,6 +11,7 @@ import {
   isAuthenticatedOrWorker,
   isWorkerFieldLevel,
   isWorkerOrAdmin,
+  isWorkerOrAdminFieldLevel,
 } from '../access';
 import {
   applyIssueTextRules,
@@ -60,7 +61,10 @@ export const Digests: CollectionConfig = {
     beforeOperation: [({ args, operation }) => capCreateDepth(args, operation)],
     beforeChange: [
       ({ data, originalDoc, operation, req }) => {
-        if (operation !== 'update') return data;
+        if (operation !== 'update' || !data) return data;
+        const previousFanout = (originalDoc as { subscriberFanoutAt?: string | null } | undefined)
+          ?.subscriberFanoutAt;
+        if (previousFanout) data.subscriberFanoutAt = previousFanout;
         return applyIssueTextRules({ data, originalDoc, req });
       },
     ],
@@ -236,6 +240,33 @@ export const Digests: CollectionConfig = {
           admin: { readOnly: true },
         },
         {
+          name: 'subscriberFanoutAt',
+          type: 'date',
+          access: workerOnlyWrite,
+          admin: {
+            readOnly: true,
+            position: 'sidebar',
+            description:
+              'Set when subscriber emails were first created. An edit does not clear it.',
+          },
+        },
+        {
+          name: 'subscriberSendBlockedAt',
+          type: 'date',
+          access: { create: isWorkerOrAdminFieldLevel, update: isWorkerOrAdminFieldLevel },
+          admin: {
+            readOnly: true,
+            position: 'sidebar',
+            description: 'Set when issue text failed. "Send to subscribers" clears it.',
+          },
+        },
+        {
+          name: 'ownerKitSentAt',
+          type: 'date',
+          access: workerOnlyWrite,
+          admin: { readOnly: true, position: 'sidebar' },
+        },
+        {
           name: 'issueTextRevision',
           type: 'number',
           defaultValue: 0,
@@ -247,6 +278,24 @@ export const Digests: CollectionConfig = {
           },
         },
       ],
+    },
+    {
+      name: 'issuePostKit',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '/components/admin/IssuePostKit#IssuePostKit',
+        },
+      },
+    },
+    {
+      name: 'issueDeliveryStatus',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '/components/admin/IssueDeliveryStatus#IssueDeliveryStatus',
+        },
+      },
     },
   ],
 };

@@ -426,6 +426,85 @@ export class CmsClient {
     }));
   }
 
+  async listConfirmedSubscribers(projectId: CmsId) {
+    const qs = new URLSearchParams({
+      depth: '0',
+      limit: '200',
+      'where[and][0][project][equals]': String(projectId),
+      'where[and][1][status][equals]': 'confirmed',
+    });
+    return this.request<{
+      docs: Array<{
+        id: CmsId;
+        email: string;
+        language: 'en' | 'ru';
+        status: 'confirmed';
+        source?: string;
+      }>;
+    }>(`/api/subscribers?${qs.toString()}`);
+  }
+
+  async listIssueDeliveries(digestId: CmsId) {
+    const qs = new URLSearchParams({
+      depth: '1',
+      limit: '200',
+      'where[digest][equals]': String(digestId),
+    });
+    return this.request<{ docs: Array<Record<string, unknown>> }>(
+      `/api/issue-deliveries?${qs.toString()}`,
+    );
+  }
+
+  async createIssueDelivery(data: Json) {
+    return this.request<{ doc: { id: CmsId } }>(`/api/issue-deliveries?depth=0`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async patchIssueDelivery(id: CmsId, data: Json) {
+    return this.request(`/api/issue-deliveries/${id}?depth=0`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async listVkPostsForDigest(digestId: CmsId) {
+    const qs = new URLSearchParams({
+      depth: '0',
+      limit: '20',
+      'where[digest][equals]': String(digestId),
+    });
+    return this.request<{ docs: Array<Record<string, unknown>> }>(`/api/vk-posts?${qs.toString()}`);
+  }
+
+  async createVkPost(data: Json) {
+    return this.request<{ doc: { id: CmsId } }>(`/api/vk-posts?depth=0`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async patchVkPost(id: CmsId, data: Json) {
+    return this.request(`/api/vk-posts/${id}?depth=0`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async listSubscriptionDigests() {
+    const qs = new URLSearchParams({
+      depth: '1',
+      limit: '30',
+      sort: '-publishedAt',
+    });
+    return this.request<{ docs: Array<Record<string, unknown>> }>(`/api/digests?${qs.toString()}`);
+  }
+
+  async deleteWhere(collection: string, query: URLSearchParams) {
+    return this.request(`/api/${collection}?${query.toString()}`, { method: 'DELETE' });
+  }
+
   get batchSize(): number {
     return Number(process.env.BATCH_SIZE_PER_SOURCE || DEFAULT_BATCH_SIZE_PER_SOURCE);
   }

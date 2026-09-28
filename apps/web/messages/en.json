@@ -90,5 +90,50 @@
   },
   "LocaleSwitcher": {
     "label": "Language"
+  },
+  "Subscribe": {
+    "emailLabel": "Email",
+    "languageLabel": "Email language",
+    "languageRu": "Russian",
+    "languageEn": "English",
+    "consentBefore": "I agree to receive email updates from",
+    "consentAfter": "",
+    "privacyLink": "Privacy",
+    "honeypot": "Company",
+    "submit": "Subscribe",
+    "need_consent": "Please tick the consent box before subscribing.",
+    "bad_email": "Enter a valid email address.",
+    "try_later": "Please try again later.",
+    "check_inbox": "Check your inbox."
+  },
+  "Confirm": {
+    "successTitle": "You are subscribed",
+    "success": "Your email is confirmed. You will receive issues for this project.",
+    "latestIssue": "Latest issue",
+    "invalidTitle": "Link not valid",
+    "invalid": "This link is no longer valid. You can subscribe again."
+  },
+  "Unsubscribe": {
+    "title": "Unsubscribe",
+    "prompt": "Use the button to stop email updates.",
+    "button": "Unsubscribe",
+    "doneTitle": "You are unsubscribed",
+    "done": "You are unsubscribed.",
+    "notSubscribedTitle": "Not subscribed",
+    "notSubscribed": "You are not subscribed."
+  },
+  "Privacy": {
+    "title": "Privacy",
+    "back": "All projects",
+    "controller": "The person who runs this project is the controller of the email subscription.",
+    "lawfulBasis": "We store your subscription only with your explicit consent (GDPR Article 9(2)(a)).",
+    "stored": "We store the email address, the language you chose, when you consented, the chat you arrived from, and the status of the subscription.",
+    "storage": "Subscription records are stored in the European Union.",
+    "retention": "An unconfirmed address is deleted one day after the confirmation link expires. An unsubscribed address is deleted 30 days after you unsubscribe.",
+    "clickFlag": "Each issue email may record a single flag that a link back to this site was opened. It does not record which link, when, or how often.",
+    "unsubscribe": "You can unsubscribe with the button in the email, the link in the email, or by replying to the email and asking to be removed. The project owner then unsubscribes that address.",
+    "deletion": "To ask for deletion, reply to any email from this project or use the unsubscribe link.",
+    "sourceCookie": "The chat you arrived from is remembered for this browser session so the subscription can be attributed. It is not an analytics cookie.",
+    "rateLimit": "A short-lived hashed record of the network address is kept for a day to limit repeated submissions. It is not attached to the subscription."
   }
 }

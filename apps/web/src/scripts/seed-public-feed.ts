@@ -8,6 +8,7 @@
  */
 import { getPayload } from 'payload';
 import config from '@payload-config';
+import { unsubscribeTokenFor } from '@hht/shared';
 
 import { assertLocalDatabaseForScript } from '../lib/databaseTarget';
 
@@ -495,6 +496,42 @@ async function seed() {
       overrideAccess: true,
     });
     unpublishedId = unpublished.id;
+  }
+
+  const secret = process.env.PAYLOAD_SECRET || 'dev-secret-change-me';
+  for (const subscriber of [
+    { email: 'subscriber-en@example.com', language: 'en' as const },
+    { email: 'subscriber-ru@example.com', language: 'ru' as const },
+  ]) {
+    const existingSubscriber = await payload.find({
+      collection: 'subscribers',
+      where: {
+        and: [{ project: { equals: projectId } }, { email: { equals: subscriber.email } }],
+      },
+      limit: 1,
+      overrideAccess: true,
+    });
+    if (existingSubscriber.docs[0]) continue;
+    const created = await payload.create({
+      collection: 'subscribers',
+      data: {
+        project: projectId,
+        email: subscriber.email,
+        language: subscriber.language,
+        source: 'other',
+        status: 'confirmed',
+        consentAt: new Date().toISOString(),
+        unsubscribeTokenHash: `seed-${subscriber.language}`,
+      },
+      overrideAccess: true,
+    });
+    const token = unsubscribeTokenFor(created.id, secret);
+    await payload.update({
+      collection: 'subscribers',
+      id: created.id,
+      data: { unsubscribeTokenHash: token.hash },
+      overrideAccess: true,
+    });
   }
 
   console.log(`Seeded project "${slug}" with ${publicationIdsByKey.size} materials.`);

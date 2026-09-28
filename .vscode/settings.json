@@ -1,0 +1,60 @@
+{
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "eslint.workingDirectories": [
+    {
+      "mode": "auto"
+    }
+  ],
+  "files.watcherExclude": {
+    "**/.next/**": true,
+    "**/node_modules/**": true,
+    "**/.pnpm-store/**": true,
+    "**/dist/**": true,
+    "**/test-results/**": true,
+    "**/playwright-report/**": true
+  },
+  "search.exclude": {
+    "**/.next": true,
+    "**/node_modules": true,
+    "**/.pnpm-store": true,
+    "**/dist": true,
+    "**/payload-types.ts": true,
+    "**/importMap.js": true,
+    "pnpm-lock.yaml": true
+  },
+  "jest.runMode": "on-demand",
+  "cSpell.words": [
+    "behaviour",
+    "clinicaltrials",
+    "collab",
+    "deployables",
+    "distroless",
+    "edat",
+    "efetch",
+    "esearch",
+    "esearchresult",
+    "idlist",
+    "importmap",
+    "Lookback",
+    "lookbacks",
+    "maxdate",
+    "mgmt",
+    "mindate",
+    "NCBI",
+    "neutralise",
+    "payloadcms",
+    "PMID",
+    "Pubmed",
+    "retmax",
+    "retmode",
+    "sanitise",
+    "TTFB",
+    "unvalidated"
+  ]
+}

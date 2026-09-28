@@ -1,0 +1,18 @@
+{
+  "model": "sonnet",
+  "permissions": {
+    "deny": [
+      "Read(./.env*)",
+      "Read(**/.env*)",
+      "Read(./.next/**)",
+      "Read(**/.next/**)",
+      "Read(./node_modules/**)",
+      "Bash(rm -rf:*)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git push origin main:*)",
+      "Bash(vercel --prod:*)"
+    ],
+    "ask": ["Bash(*drizzle-kit push*)", "Bash(*payload migrate*)", "Bash(pnpm db:migrate*)"]
+  }
+}
