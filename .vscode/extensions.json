@@ -1,0 +1,21 @@
+{
+  "recommendations": [
+    "anthropic.claude-code",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "orta.vscode-jest",
+    "ms-playwright.playwright",
+    "eamodio.gitlens",
+    "github.vscode-pull-request-github",
+    "github.vscode-github-actions",
+    "streetsidesoftware.code-spell-checker",
+    "davidanson.vscode-markdownlint"
+  ],
+  "unwantedRecommendations": [
+    "google.geminicodeassist",
+    "rvest.vs-code-prettier-eslint",
+    "ms-azuretools.vscode-docker",
+    "vitest.explorer",
+    "bradlc.vscode-tailwindcss"
+  ]
+}

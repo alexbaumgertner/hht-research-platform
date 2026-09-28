@@ -123,6 +123,9 @@ importers:
       eslint-config-next:
         specifier: 16.3.3
         version: 16.3.3(@typescript-eslint/parser@8.68.0(eslint@9.39.5)(typescript@5.9.3))(eslint@9.39.5)(typescript@5.9.3)
+      eslint-config-prettier:
+        specifier: ^10.1.8
+        version: 10.1.8(eslint@9.39.5)
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@22.20.1)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.47(@swc/helpers@0.5.23))(@types/node@22.20.1)(typescript@5.9.3))
