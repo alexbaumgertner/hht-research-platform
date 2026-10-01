@@ -12,8 +12,12 @@ export async function GET() {
     messages: readEmailStub().map((message) => ({
       id: message.id,
       to: message.to,
+      from: message.from,
+      replyTo: message.replyTo ?? null,
       subject: message.subject,
       text: message.text,
+      html: message.html ?? null,
+      headers: message.headers ?? {},
     })),
   });
 }

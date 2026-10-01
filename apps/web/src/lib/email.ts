@@ -20,7 +20,7 @@ export type EmailMessage = {
   fromName?: string;
 };
 
-export type RecordedEmail = EmailMessage & { id: string };
+export type RecordedEmail = EmailMessage & { id: string; from: string };
 
 const STUB_KEY = Symbol.for('hht.emailStub');
 
@@ -74,17 +74,17 @@ export class ResendRequestError extends Error {
 
 /** Throws when Resend is not configured or rejects the message. Returns the Resend email id. */
 export async function sendEmail(message: EmailMessage): Promise<{ id: string }> {
+  const from = message.fromName ? subscriberSender(message.fromName) : emailSender();
   if (isEmailStubEnabled()) {
     const inbox = stubInbox();
     const id = `stub_${inbox.length + 1}`;
-    inbox.push({ ...message, id });
+    inbox.push({ ...message, id, from });
     return { id };
   }
 
   const apiKey = process.env.RESEND_API_KEY?.trim();
   if (!apiKey) throw new Error('RESEND_API_KEY is not set');
 
-  const from = message.fromName ? subscriberSender(message.fromName) : emailSender();
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {

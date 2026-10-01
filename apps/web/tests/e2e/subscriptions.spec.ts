@@ -73,6 +73,7 @@ test.describe('subscriptions', () => {
     await expect(page).toHaveURL(/\/de\/privacy/);
     await expect(page.getByRole('heading', { name: 'Datenschutz' })).toBeVisible();
     await expect(page.getByText('GDPR Article 9(2)(a)')).toBeVisible();
+    await expect(page.getByText(/come only from news@example\.com/)).toBeVisible();
   });
 
   test('source from the issue page is kept on the project form', async ({ page }) => {
@@ -145,5 +146,77 @@ test.describe('subscriptions', () => {
     await expect(page.getByText('You are unsubscribed.')).toBeVisible();
     await page.goto(unsubscribe!);
     await expect(page.getByText('You are not subscribed.')).toBeVisible();
+  });
+
+  test('mail links stay on PUBLIC_SITE_URL and issue mail supports one-click unsubscribe', async ({
+    page,
+    baseURL,
+  }) => {
+    const site = new URL(process.env.PUBLIC_SITE_URL || baseURL!).origin;
+    const issue = await page.request.get(
+      `/api/public/projects/${PROJECT}/issues?limit=10&locale=en`,
+    );
+    const body = issue.ok()
+      ? ((await issue.json()) as { docs: Array<{ id: string; excerpt: string | null }> })
+      : { docs: [] };
+    const issueId = body.docs.find((row) => row.excerpt)?.id;
+    test.skip(!issueId, 'Ready issue seed required');
+
+    type Stubbed = {
+      to: string;
+      from: string;
+      subject: string;
+      text: string;
+      html: string | null;
+      headers: Record<string, string>;
+    };
+    const inbox = async (to: string) =>
+      (
+        (await (await page.request.get('/api/test/emails')).json()) as { messages: Stubbed[] }
+      ).messages.filter((message) => message.to === to);
+    const hosts = (message: Stubbed) =>
+      new Set(
+        [
+          ...JSON.stringify([message.text, message.html, message.headers]).matchAll(
+            /https?:\/\/[^/"\\\s<>]+/g,
+          ),
+        ].map((m) => m[0]),
+      );
+
+    const email = `oneclick.${Date.now()}@example.com`;
+    await page.goto(`/en/projects/${PROJECT}/issues/${issueId}`);
+    await page.getByLabel('Email', { exact: true }).fill(email);
+    await page.getByRole('checkbox').check();
+    await page.getByRole('button', { name: 'Subscribe' }).click();
+    await expect(page.getByText('Check your inbox.')).toBeVisible();
+
+    const [confirmation] = await inbox(email);
+    expect(confirmation).toBeDefined();
+    expect(confirmation.from).toMatch(/<news@example\.com>$/);
+    expect(confirmation.headers['List-Unsubscribe']).toBeUndefined();
+    expect([...hosts(confirmation)]).toEqual([site]);
+
+    const link = confirmation.text.match(/https?:\/\/\S+\/en\/subscribe\/confirm\/\S+/)?.[0];
+    await page.goto(link!);
+    const welcome = (await inbox(email)).find(
+      (message) => message !== confirmation && message.headers['List-Unsubscribe'],
+    );
+    test.skip(!welcome, 'Welcome issue needs a ready issue from the last 14 days');
+
+    expect(welcome!.from).toMatch(/<news@example\.com>$/);
+    expect(welcome!.headers['List-Unsubscribe-Post']).toBe('List-Unsubscribe=One-Click');
+    expect(welcome!.text).toMatch(/\/en\/unsubscribe\//);
+    expect(welcome!.html).toMatch(/\/en\/unsubscribe\//);
+    expect([...hosts(welcome!)]).toEqual([site]);
+
+    // RFC 8058: mailbox providers POST `List-Unsubscribe=One-Click` with no cookies or page.
+    const oneClick = new URL(welcome!.headers['List-Unsubscribe'].replace(/^<|>$/g, ''));
+    const res = await page.request.post(oneClick.pathname, {
+      form: { 'List-Unsubscribe': 'One-Click' },
+    });
+    expect(res.status()).toBe(200);
+    const listed = await page.request.get(`/api/test/subscribers?slug=${PROJECT}`);
+    const rows = (await listed.json()) as { docs: Array<{ email: string; status: string }> };
+    expect(rows.docs.find((row) => row.email === email)?.status).toBe('unsubscribed');
   });
 });
