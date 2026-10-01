@@ -95,6 +95,49 @@ test.describe('share metadata for chat-app crawlers', () => {
     expect(home.image).toContain('/tr/opengraph-image');
   });
 
+  test('canonical, hreflang and og:image use only PUBLIC_SITE_URL', async ({
+    request,
+    baseURL,
+  }) => {
+    const site = new URL(process.env.PUBLIC_SITE_URL || baseURL!).origin;
+    const issueId = await getReadyIssueId(request);
+    const materialId = await getMaterialId(request);
+    const paths = [
+      '/ru',
+      `/en/projects/${PROJECT_SLUG}`,
+      `/en/projects/${PROJECT_SLUG}/issues`,
+      ...(issueId ? [`/ru/projects/${PROJECT_SLUG}/issues/${issueId}`] : []),
+      ...(materialId ? [`/en/projects/${PROJECT_SLUG}/publications/${materialId}`] : []),
+    ];
+    for (const path of paths) {
+      const res = await request.get(path, { headers: { 'User-Agent': TELEGRAM_UA } });
+      if (res.status() === 404) continue;
+      const html = await res.text();
+      const head = html.slice(0, html.indexOf('</head>'));
+      const canonical = head.match(/<link rel="canonical" href="([^"]+)"/)?.[1];
+      expect(canonical, `${path} canonical`).toBe(`${site}${path}`);
+      const alternates = [
+        ...head.matchAll(/<link rel="alternate" hrefLang="([^"]+)" href="([^"]+)"/g),
+      ];
+      expect(
+        alternates.map((m) => m[1]),
+        `${path} hreflang`,
+      ).toContain('x-default');
+      const urls = [
+        ...alternates.map((m) => m[2]),
+        metaContent(head, 'og:url'),
+        metaContent(head, 'og:image'),
+      ];
+      for (const url of urls) expect(new URL(url!).origin, `${path} ${url}`).toBe(site);
+    }
+
+    const sitemap = await (await request.get('/sitemap.xml')).text();
+    const hosts = new Set([...sitemap.matchAll(/https?:\/\/[^/<"]+/g)].map((m) => m[0]));
+    hosts.delete('http://www.sitemaps.org');
+    hosts.delete('http://www.w3.org');
+    expect([...hosts]).toEqual([site]);
+  });
+
   test('unknown issue image falls back to a PNG card', async ({ request }) => {
     const res = await request.get(
       `/uk/projects/${PROJECT_SLUG}/issues/000000000000000000000000/opengraph-image`,
