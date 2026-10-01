@@ -583,4 +583,96 @@ describe('sweepSubscriptions', () => {
     });
     expect(cms.vk[0]?.vkPostId).toBe('77');
   });
+
+  describe('links stay on PUBLIC_SITE_URL', () => {
+    const hosts = (value: unknown) =>
+      new Set([...JSON.stringify(value).matchAll(/https?:\/\/[^/"\\\s<>]+/g)].map((m) => m[0]));
+
+    type Sent = {
+      to: string;
+      text: string;
+      html: string;
+      headers?: Record<string, string>;
+      idempotencyKey: string;
+    };
+
+    async function runSweep(env: Record<string, string | undefined> | undefined) {
+      const cms = createCms({
+        digests: [digest({ vkCommunityId: '123' })],
+        subscribers: [
+          subscriber({ id: 1, language: 'en', email: 'en@example.org' }),
+          subscriber({ id: 2, language: 'ru', email: 'ru@example.org' }),
+        ],
+      });
+      const sent: Sent[] = [];
+      const posts: URLSearchParams[] = [];
+      await sweepSubscriptions({
+        cms,
+        env,
+        now: () => new Date('2026-09-26T18:00:00.000Z'),
+        send: async (message) => {
+          sent.push(message);
+          return { ok: true, id: `re_${sent.length}` };
+        },
+        postVk: async (body) => {
+          posts.push(body);
+          return { postId: '1' };
+        },
+      });
+      return { sent, posts };
+    }
+
+    it('issue mail, one-click headers, VK post and owner kit use only the site host', async () => {
+      const { sent, posts } = await runSweep({ ...openEnv, VK_COMMUNITY_TOKEN: 'vk' });
+      const issues = sent.filter((m) => m.idempotencyKey.startsWith('issue/'));
+      const kit = sent.find((m) => m.idempotencyKey.startsWith('owner-kit/'));
+      expect(issues).toHaveLength(2);
+      expect(kit).toBeDefined();
+      expect(posts).toHaveLength(1);
+
+      for (const message of issues) {
+        expect(message.headers?.['List-Unsubscribe']).toMatch(
+          new RegExp(`^<${SITE}/api/unsubscribe/[A-Za-z0-9_-]+>$`),
+        );
+        expect(message.headers?.['List-Unsubscribe-Post']).toBe('List-Unsubscribe=One-Click');
+        expect(message.html).toContain(`${SITE}/`);
+        expect(message.text).toMatch(new RegExp(`${SITE}/(en|ru)/unsubscribe/`));
+      }
+      expect(kit?.headers).toBeUndefined();
+      expect(kit?.text).toContain(`${SITE}/en/projects/demo/issues/1?src=tg`);
+      expect(posts[0]?.get('message')).toContain(`${SITE}/ru/projects/demo/issues/1?src=vk`);
+      expect([...hosts([sent, posts[0]?.get('message')])]).toEqual([SITE]);
+    });
+
+    it('reads PUBLIC_SITE_URL from process.env when deps.env is not passed', async () => {
+      const saved = { ...process.env };
+      Object.assign(process.env, openEnv, { VK_COMMUNITY_TOKEN: 'vk', EMAIL_DELIVERY: '' });
+      try {
+        const { sent, posts } = await runSweep(undefined);
+        expect(posts[0]?.get('message')).toContain(`${SITE}/ru/projects/demo/issues/1?src=vk`);
+        expect([...hosts([sent, posts[0]?.get('message')])]).toEqual([SITE]);
+      } finally {
+        process.env = saved;
+      }
+    });
+
+    it('sends nothing and logs when PUBLIC_SITE_URL is missing', async () => {
+      const errors: string[] = [];
+      const cms = createCms({ digests: [digest()], subscribers: [subscriber()] });
+      const sent: string[] = [];
+      await sweepSubscriptions({
+        cms,
+        env: { ...openEnv, PUBLIC_SITE_URL: '' },
+        now: () => new Date('2026-09-26T18:00:00.000Z'),
+        logError: (message) => errors.push(message),
+        send: async (message) => {
+          sent.push(message.to);
+          return { ok: true, id: 're_no' };
+        },
+      });
+      expect(sent).toHaveLength(0);
+      expect(cms.deliveries).toHaveLength(0);
+      expect(errors).toEqual(['subscription sweep skipped: PUBLIC_SITE_URL is not set']);
+    });
+  });
 });

@@ -122,6 +122,25 @@ function mailEnabled(env: Record<string, string | undefined>): boolean {
   return key.length > 0 && from.length > 0 && !from.toLowerCase().endsWith('@resend.dev');
 }
 
+/** Every link in mail and posts is absolute on `PUBLIC_SITE_URL`; empty means links cannot be built. */
+function siteUrl(env: Record<string, string | undefined>): string {
+  return (env.PUBLIC_SITE_URL ?? '').trim().replace(/\/$/, '');
+}
+
+/** Same links as the admin post kit (`/api/admin/digests/{id}/posts`). */
+function chatLinks(
+  site: string,
+  digest: Pick<SweepDigest, 'id' | 'slug'>,
+  language: EmailLanguage,
+) {
+  return {
+    issueUrl: (src: string) =>
+      `${site}/${language}/projects/${digest.slug}/issues/${digest.id}?src=${src}`,
+    subscribeUrl: (src: string) =>
+      `${site}/${language}/projects/${digest.slug}?src=${src}#subscribe`,
+  };
+}
+
 function sameEmail(a: string, b: string): boolean {
   return a.trim().toLowerCase() === b.trim().toLowerCase();
 }
@@ -221,7 +240,11 @@ export async function sweepSubscriptions(deps: SubscriptionSweepDeps): Promise<v
     reportError('subscription sweep skipped: PAYLOAD_SECRET is not set');
     return;
   }
-  const site = (env.PUBLIC_SITE_URL ?? '').replace(/\/$/, '');
+  const site = siteUrl(env);
+  if (!site) {
+    reportError('subscription sweep skipped: PUBLIC_SITE_URL is not set');
+    return;
+  }
   const gateOpen = mailEnabled(env);
   let sandboxWarned = false;
   const fallbackLogged = new Set<string>();
@@ -444,10 +467,7 @@ async function postDueVk(
       english: fresh.english,
       russian: body,
       russianFallback: decision.russianFallback,
-      issueUrl: (src) =>
-        `${(deps.env?.PUBLIC_SITE_URL ?? '').replace(/\/$/, '')}/${decision.bodyLanguage}/projects/${fresh.slug}/issues/${fresh.id}?src=${src}`,
-      subscribeUrl: (src) =>
-        `${(deps.env?.PUBLIC_SITE_URL ?? '').replace(/\/$/, '')}/${decision.bodyLanguage}/projects/${fresh.slug}?src=${src}#subscribe`,
+      ...chatLinks(siteUrl(deps.env ?? process.env), fresh, decision.bodyLanguage),
     }).find(
       (item) =>
         item.channel === 'vk' &&
@@ -502,8 +522,7 @@ async function sendOwnerKit(
     english: digest.english,
     russian: digest.russian ?? digest.english,
     russianFallback: decision.russianFallback,
-    issueUrl: (src) => `?src=${src}`,
-    subscribeUrl: (src) => `?src=${src}`,
+    ...chatLinks(siteUrl(deps.env ?? process.env), digest, 'en'),
   });
   const kit = formatOwnerKit(posts);
   const result = await send({
