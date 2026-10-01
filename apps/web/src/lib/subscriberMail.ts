@@ -23,6 +23,8 @@ import {
   unsubscribeTokenFor,
 } from '@/lib/subscriptionTokens';
 
+export { isSandboxFromAddress, subscriberMailEnabled } from '@/lib/mailGate';
+
 const WELCOME_MAX_AGE_MS = 14 * 24 * 60 * 60 * 1000;
 const CONFIRM_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -36,21 +38,6 @@ const SOURCE_LABEL: Record<string, string> = {
   social: 'Social',
   unknown: 'Source',
 };
-
-export function subscriberMailEnabled(
-  env: Record<string, string | undefined> = process.env,
-): boolean {
-  const key = env.RESEND_API_KEY?.trim() ?? '';
-  const from = env.RESEND_FROM_EMAIL?.trim() ?? '';
-  return key.length > 0 && from.length > 0 && !from.toLowerCase().endsWith('@resend.dev');
-}
-
-export function isSandboxFromAddress(
-  env: Record<string, string | undefined> = process.env,
-): boolean {
-  const from = env.RESEND_FROM_EMAIL?.trim() ?? '';
-  return from.toLowerCase().endsWith('@resend.dev');
-}
 
 const CONFIRM_COPY: Record<
   EmailLanguage,
