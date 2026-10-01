@@ -40,7 +40,8 @@ Important:
 - [ ] Vercel Production env already set:
   - `PUBLIC_SITE_URL` (stable production URL, no trailing slash)
   - `PAYLOAD_API_KEY` (worker will use the **same** value)
-  - `PAYLOAD_SECRET` / `DATABASE_URL` (web only; not needed on the worker)
+  - `PAYLOAD_SECRET` (the worker needs the **same** value to derive mail tokens)
+  - `DATABASE_URL` (web only)
   - `AI_GATEWAY_API_KEY` (required on **Production and Preview** for on-demand issue-text
     translation in the web app; see § Environment variables)
 - [ ] [Vercel AI Gateway](https://vercel.com/docs/ai-gateway) API key for classify/summarize (worker)
@@ -72,10 +73,12 @@ gcloud services enable \
 
 ### Shared with Vercel (must match Production exactly)
 
-| Variable          | Required | Notes                                                                      |
-| ----------------- | -------- | -------------------------------------------------------------------------- |
-| `PUBLIC_SITE_URL` | Yes      | Same as Vercel. Example: `https://your-app.vercel.app`. No trailing slash. |
-| `PAYLOAD_API_KEY` | Yes      | Same secret as Vercel. Worker sends it as `X-Payload-API-Key`.             |
+| Variable            | Required            | Notes                                                                                                                                             |
+| ------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PUBLIC_SITE_URL`   | Yes                 | Same as Vercel. Production: `https://hht.rarediseasedigest.org`. No trailing slash. CMS API base **and** base of every link in mail and VK posts. |
+| `PAYLOAD_API_KEY`   | Yes                 | Same secret as Vercel. Worker sends it as `X-Payload-API-Key`.                                                                                    |
+| `PAYLOAD_SECRET`    | Yes (subscriptions) | Same secret as Vercel. Derives the click and unsubscribe tokens in issue mail; without it the subscription sweep is skipped.                      |
+| `RESEND_FROM_EMAIL` | Yes (subscriptions) | Same as Vercel. Production: `HHT Digest <news@hht.rarediseasedigest.org>`. A `@resend.dev` address mails the owner only.                          |
 
 ### Vercel-only (`apps/web`)
 
@@ -87,13 +90,13 @@ gcloud services enable \
 
 ### Worker-only (set on the Cloud Run Job)
 
-| Variable                | Required | Notes                                                      |
-| ----------------------- | -------- | ---------------------------------------------------------- |
-| `AI_GATEWAY_API_KEY`    | Yes      | Vercel AI Gateway key. Classify/summarize fail without it. |
-| `AI_GATEWAY_MODEL`      | No       | Default `openai/gpt-4o-mini`.                              |
-| `RESEND_API_KEY`        | No       | If unset, digest email is skipped.                         |
-| `RESEND_FROM_EMAIL`     | No       | Default `onboarding@resend.dev`.                           |
-| `BATCH_SIZE_PER_SOURCE` | No       | Default `50`.                                              |
+| Variable                | Required            | Notes                                                                |
+| ----------------------- | ------------------- | -------------------------------------------------------------------- |
+| `AI_GATEWAY_API_KEY`    | Yes                 | Vercel AI Gateway key. Classify/summarize fail without it.           |
+| `AI_GATEWAY_MODEL`      | No                  | Default `openai/gpt-4o-mini`.                                        |
+| `RESEND_API_KEY`        | Yes (subscriptions) | Without it no issue mail, owner kit or digest notice is sent.        |
+| `VK_COMMUNITY_TOKEN`    | No                  | Only if a project has `vkCommunityId`. Worker only, never on Vercel. |
+| `BATCH_SIZE_PER_SOURCE` | No                  | Default `50`.                                                        |
 
 `BOOTSTRAP_LOOKBACK_DAYS` in `.env.example` is **not** read by the worker process; lookback comes from each project's `bootstrapLookbackDays` field (default 30).
 
@@ -298,10 +301,10 @@ A green job is not proof of a working pipeline (see
 [`docs/incidents/2026-09-pipeline-silent-failure.md`](incidents/2026-09-pipeline-silent-failure.md)).
 Two independent signals email the owner:
 
-| Signal                        | What it catches                                         | Where                                                                                                                        |
-| ----------------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Log alert `hht-worker-errors` | Any source/project/digest/translation failure in a run  | Cloud Monitoring alert policy on `severity>=ERROR` for `cloud_run_job/hht-monitor-worker`                                    |
-| Uptime check `hht-health`     | Dead-man switch: no successful run within schedule + 6h | Cloud Monitoring uptime check on `GET https://hhtnews.growtomiddle.dev/api/health` (returns `503` when a project is overdue) |
+| Signal                        | What it catches                                         | Where                                                                                                                         |
+| ----------------------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Log alert `hht-worker-errors` | Any source/project/digest/translation failure in a run  | Cloud Monitoring alert policy on `severity>=ERROR` for `cloud_run_job/hht-monitor-worker`                                     |
+| Uptime check `hht-health`     | Dead-man switch: no successful run within schedule + 6h | Cloud Monitoring uptime check on `GET https://hht.rarediseasedigest.org/api/health` (returns `503` when a project is overdue) |
 
 The worker writes structured JSON lines (`severity`, `message`, context fields); in Logs Explorer
 filter with `jsonPayload.message:"[worker]"`.

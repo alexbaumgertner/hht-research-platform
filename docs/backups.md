@@ -29,7 +29,7 @@ send an unencrypted copy and emails the failure instead.
 Run one backup by hand after setting the variables:
 
 ```bash
-curl -H "Authorization: Bearer $CRON_SECRET" https://hhtnews.growtomiddle.dev/api/cron/backup
+curl -H "Authorization: Bearer $CRON_SECRET" https://hht.rarediseasedigest.org/api/cron/backup
 ```
 
 ## Check a copy (every few months)
