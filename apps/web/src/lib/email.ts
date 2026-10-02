@@ -3,6 +3,8 @@
  * Subscriber issue mail passes its own sender name and must not use `SENDER_NAME`.
  */
 
+import { fromAddress } from './mailGate';
+
 export const SENDER_NAME = 'HHT News';
 
 export type EmailAttachment = { filename: string; content: Buffer };
@@ -48,8 +50,7 @@ export function resetEmailStub(): void {
 
 export function emailSender(env: Record<string, string | undefined> = process.env): string {
   return (
-    env.AUTH_EMAIL_FROM?.trim() ||
-    `${SENDER_NAME} <${env.RESEND_FROM_EMAIL?.trim() || 'onboarding@resend.dev'}>`
+    env.AUTH_EMAIL_FROM?.trim() || `${SENDER_NAME} <${fromAddress(env) || 'onboarding@resend.dev'}>`
   );
 }
 
@@ -57,7 +58,7 @@ export function subscriberSender(
   fromName: string,
   env: Record<string, string | undefined> = process.env,
 ): string {
-  const address = env.RESEND_FROM_EMAIL?.trim() || 'onboarding@resend.dev';
+  const address = fromAddress(env) || 'onboarding@resend.dev';
   return `${fromName} <${address}>`;
 }
 

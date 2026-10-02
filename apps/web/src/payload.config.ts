@@ -23,6 +23,7 @@ import { SubscribeRateLimits } from './collections/SubscribeRateLimits';
 import { assertDevDatabaseIsLocal, shouldPushSchema } from './lib/databaseTarget';
 import { requiredEnv } from './lib/env';
 import { loadLocalEnv } from './lib/loadLocalEnv';
+import { fromAddress } from './lib/mailGate';
 import { getPublicSiteUrl } from './lib/siteUrl';
 
 loadLocalEnv();
@@ -71,7 +72,7 @@ export default buildConfig({
     push: shouldPushSchema(),
   }),
   email: resendAdapter({
-    defaultFromAddress: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
+    defaultFromAddress: fromAddress() || 'onboarding@resend.dev',
     defaultFromName: process.env.RESEND_FROM_NAME || 'Research Monitoring',
     apiKey: process.env.RESEND_API_KEY || '',
   }),
