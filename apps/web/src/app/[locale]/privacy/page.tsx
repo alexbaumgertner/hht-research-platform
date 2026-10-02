@@ -9,6 +9,9 @@ import { getPublicSiteUrl } from '@/lib/siteUrl';
 
 type Props = { params: Promise<{ locale: string }> };
 
+/** The sender address and site host come from runtime env, not from build time. */
+export const dynamic = 'force-dynamic';
+
 const LOCALES = new Set<string>(routing.locales);
 
 /** The bare address from `RESEND_FROM_EMAIL` (`Name <a@b>` or `a@b`); none while on the sandbox. */
