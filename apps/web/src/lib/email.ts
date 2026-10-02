@@ -3,6 +3,8 @@
  * Subscriber issue mail passes its own sender name and must not use `SENDER_NAME`.
  */
 
+import { fromAddress } from './mailGate';
+
 export const SENDER_NAME = 'HHT News';
 
 export type EmailAttachment = { filename: string; content: Buffer };
@@ -20,7 +22,7 @@ export type EmailMessage = {
   fromName?: string;
 };
 
-export type RecordedEmail = EmailMessage & { id: string };
+export type RecordedEmail = EmailMessage & { id: string; from: string };
 
 const STUB_KEY = Symbol.for('hht.emailStub');
 
@@ -48,8 +50,7 @@ export function resetEmailStub(): void {
 
 export function emailSender(env: Record<string, string | undefined> = process.env): string {
   return (
-    env.AUTH_EMAIL_FROM?.trim() ||
-    `${SENDER_NAME} <${env.RESEND_FROM_EMAIL?.trim() || 'onboarding@resend.dev'}>`
+    env.AUTH_EMAIL_FROM?.trim() || `${SENDER_NAME} <${fromAddress(env) || 'onboarding@resend.dev'}>`
   );
 }
 
@@ -57,7 +58,7 @@ export function subscriberSender(
   fromName: string,
   env: Record<string, string | undefined> = process.env,
 ): string {
-  const address = env.RESEND_FROM_EMAIL?.trim() || 'onboarding@resend.dev';
+  const address = fromAddress(env) || 'onboarding@resend.dev';
   return `${fromName} <${address}>`;
 }
 
@@ -74,17 +75,17 @@ export class ResendRequestError extends Error {
 
 /** Throws when Resend is not configured or rejects the message. Returns the Resend email id. */
 export async function sendEmail(message: EmailMessage): Promise<{ id: string }> {
+  const from = message.fromName ? subscriberSender(message.fromName) : emailSender();
   if (isEmailStubEnabled()) {
     const inbox = stubInbox();
     const id = `stub_${inbox.length + 1}`;
-    inbox.push({ ...message, id });
+    inbox.push({ ...message, id, from });
     return { id };
   }
 
   const apiKey = process.env.RESEND_API_KEY?.trim();
   if (!apiKey) throw new Error('RESEND_API_KEY is not set');
 
-  const from = message.fromName ? subscriberSender(message.fromName) : emailSender();
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {

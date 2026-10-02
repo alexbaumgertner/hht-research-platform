@@ -212,6 +212,16 @@ can begin until this phase is complete.
 - [x] T058 [P] Walk `apps/web/messages/en.json`, `de.json`, `tr.json`, `ru.json`, and `uk.json` and confirm the subscribe form, confirmation page, unsubscribe page, and privacy chrome exist in all five locales, while email bodies and chat posts stay `ru` and `en` only (FR-041, Principle VI).
 - [x] T059 Run the automated commands in quickstart.md §7 and fix failures in the files those commands cover: `pnpm --filter @hht/shared test`, `pnpm --filter @hht/web test`, `pnpm --filter @hht/worker test`, and `pnpm --filter @hht/web exec playwright test tests/e2e/subscriptions.spec.ts`.
 - [ ] T060 Walk the launch checklist in quickstart.md §8 before `RESEND_FROM_EMAIL` leaves `@resend.dev`: SPF/DKIM/DMARC, Resend open and click tracking off, webhook registered for `email.bounced` and `email.complained` only, `VK_COMMUNITY_TOKEN` on the worker only, and one phone read in Gmail, Mail.ru, Yandex Mail, and Apple Mail with links disabled (SC-005). This task is manual and is not CI.
+      Status 2026-10-01 (evidence in [docs/launch/2026-10-domain-migration.md](../../docs/launch/2026-10-domain-migration.md) §4):
+  - [x] SPF and DKIM published for `hht.rarediseasedigest.org` (DNS lookup)
+  - [ ] DMARC published
+  - [x] `RESEND_FROM_EMAIL` on the verified domain in Vercel Production
+  - [ ] `RESEND_FROM_EMAIL` on the worker
+  - [ ] Resend open and click tracking off, no Contacts audience (manual)
+  - [ ] Webhook for `email.bounced` and `email.complained` only, `RESEND_WEBHOOK_SECRET` on the web app
+  - [x] `VK_COMMUNITY_TOKEN` absent from every Vercel environment
+  - [ ] Phone read in Gmail, Mail.ru, Yandex Mail, Apple Mail (SC-005, manual)
+  - [ ] Mail client unsubscribe button sets `unsubscribed` (manual; one-click POST covered by e2e)
 
 ---
 

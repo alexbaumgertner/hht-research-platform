@@ -491,6 +491,16 @@ ready for cross-cutting polish.
       deploy, historical-digest backfill review per SC-004, setting `hht` to weekly with
       `audienceContext`, confirming `/api/health` stays 200, confirming the first unattended Monday
       publish) and record the outcome for SC-003/SC-004.
+      Status 2026-10-01 (evidence in [docs/launch/2026-10-domain-migration.md](../../docs/launch/2026-10-domain-migration.md) §4):
+  - [x] Step 1: `AI_GATEWAY_API_KEY` on Production and Preview
+  - [x] Step 2: schema live, production serves issue text
+  - [x] Step 3: issues of 2026-08-31 and 2026-09-22 are `ready`
+  - [ ] Step 3: hand review of their text (SC-004)
+  - [x] Step 4: `hht` weekly, Monday 04:00 UTC
+  - [ ] Step 4: `audienceContext` filled in
+  - [ ] Step 5: `/api/health` 200 through the week (200 on 2026-10-01)
+  - [x] Step 6: first unattended Monday publish (2026-09-28 04:01 UTC, scheduled execution)
+  - [ ] Step 6: second Monday, 2026-10-05 (SC-003)
 
 ---
 

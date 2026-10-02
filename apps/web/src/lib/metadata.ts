@@ -2,9 +2,10 @@ import type { Metadata } from 'next';
 import { hasLocale } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 
-import { PUBLIC_LOCALES, type Locale } from '@hht/shared';
+import { type Locale } from '@hht/shared';
 
 import { routing } from '@/i18n/routing';
+import { localeAlternates } from '@/lib/seo';
 import { getPublicSiteUrl } from '@/lib/siteUrl';
 
 export const SHARE_IMAGE_SIZE = { width: 1200, height: 630 } as const;
@@ -69,9 +70,7 @@ export async function buildPageMetadata(input: PageMetadataInput): Promise<Metad
     description: input.description,
     alternates: {
       canonical: url,
-      languages: Object.fromEntries(
-        PUBLIC_LOCALES.map((locale) => [locale, `/${locale}${input.path}`]),
-      ),
+      languages: localeAlternates(input.path),
     },
     openGraph: {
       type: input.type,

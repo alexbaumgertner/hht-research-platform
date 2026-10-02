@@ -4,10 +4,22 @@ import { Stack, Text, Title } from '@mantine/core';
 
 import { TextLink } from '@/components/TextLink';
 import { routing } from '@/i18n/routing';
+import { fromAddress } from '@/lib/mailGate';
+import { getPublicSiteUrl } from '@/lib/siteUrl';
 
 type Props = { params: Promise<{ locale: string }> };
 
+/** The sender address and site host come from runtime env, not from build time. */
+export const dynamic = 'force-dynamic';
+
 const LOCALES = new Set<string>(routing.locales);
+
+/** The bare address from `RESEND_FROM_EMAIL` (`Name <a@b>` or `a@b`); none while on the sandbox. */
+function senderAddressFromEnv(): string | null {
+  const address = fromAddress();
+  if (!address.includes('@') || address.toLowerCase().endsWith('@resend.dev')) return null;
+  return address;
+}
 
 export default async function PrivacyPage({ params }: Props) {
   const { locale } = await params;
@@ -16,6 +28,7 @@ export default async function PrivacyPage({ params }: Props) {
   const chrome = await getTranslations({ locale, namespace: 'Privacy' });
   const bodyLocale = locale === 'ru' || locale === 'en' ? locale : 'en';
   const body = await getTranslations({ locale: bodyLocale, namespace: 'Privacy' });
+  const senderAddress = senderAddressFromEnv();
 
   return (
     <Stack gap="md" maw={720} mx="auto" w="100%">
@@ -26,6 +39,11 @@ export default async function PrivacyPage({ params }: Props) {
       <Text>{body('controller')}</Text>
       <Text>{body('lawfulBasis')}</Text>
       <Text>{body('stored')}</Text>
+      {senderAddress && (
+        <Text>
+          {body('sender', { address: senderAddress, site: new URL(getPublicSiteUrl()).host })}
+        </Text>
+      )}
       <Text>{body('storage')}</Text>
       <Text>{body('retention')}</Text>
       <Text>{body('clickFlag')}</Text>

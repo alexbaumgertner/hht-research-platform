@@ -4,7 +4,7 @@ import type {
   CollectionConfig,
 } from 'payload';
 
-import { isAuthenticated, isAuthenticatedOrWorker, isWorkerOrAdmin } from '../access';
+import { isAuthenticatedOrWorker, isWorkerOrAdmin } from '../access';
 
 const chatSourceOptions = [
   { label: 'VK', value: 'vk' },
@@ -62,7 +62,7 @@ export const Subscribers: CollectionConfig = {
     read: isAuthenticatedOrWorker,
     create: isWorkerOrAdmin,
     update: isAuthenticatedOrWorker,
-    delete: isAuthenticated,
+    delete: isAuthenticatedOrWorker,
   },
   indexes: [{ fields: ['project', 'email'], unique: true }],
   hooks: {
