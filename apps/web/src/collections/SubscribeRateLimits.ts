@@ -7,7 +7,7 @@ export const SubscribeRateLimits: CollectionConfig = {
   slug: 'subscribe-rate-limits',
   admin: { hidden: true },
   access: {
-    read: () => false,
+    read: isWorkerOrAdmin,
     create: isWorkerOrAdmin,
     update: () => false,
     delete: isWorkerOrAdmin,
