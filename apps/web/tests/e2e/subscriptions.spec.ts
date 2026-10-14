@@ -1,12 +1,29 @@
-import { expect, test } from '@playwright/test';
+import { createHash } from 'node:crypto';
+import { expect, test, type TestInfo } from '@playwright/test';
 
 const PROJECT = 'hht-research';
 
+function rateLimitTestIp(testInfo: TestInfo): string {
+  const key = createHash('sha256').update(`${testInfo.testId}:${testInfo.retry}`).digest('hex');
+  return `2001:db8:${key.slice(0, 4)}:${key.slice(4, 8)}:${key.slice(8, 12)}:${key.slice(12, 16)}`;
+}
+
 test.describe('subscriptions', () => {
-  test('subscribe without JavaScript, then confirm from the stub', async ({ browser }) => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    // The production limiter groups form posts by IP for an hour. Give each
+    // scenario and retry its own reserved address so they cannot exhaust it.
+    await page.setExtraHTTPHeaders({
+      'x-forwarded-for': rateLimitTestIp(testInfo),
+    });
+  });
+
+  test('subscribe without JavaScript, then confirm from the stub', async ({
+    browser,
+  }, testInfo) => {
     const context = await browser.newContext({
       viewport: { width: 360, height: 800 },
       javaScriptEnabled: false,
+      extraHTTPHeaders: { 'x-forwarded-for': rateLimitTestIp(testInfo) },
     });
     const page = await context.newPage();
     const issue = await page.request.get(

@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$(git rev-parse --show-toplevel)\" && pnpm typecheck >&2 && pnpm --filter @hht/web build >&2 && pnpm test >&2"
+          }
+        ]
+      }
+    ]
+  }
+}

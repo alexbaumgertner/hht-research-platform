@@ -329,6 +329,7 @@ async function seed() {
   async function ensureDigest(input: {
     publishedAt: string;
     publicationKeys: string[];
+    matchPublicationKeys?: boolean;
     issueTextStatus?: 'pending' | 'ready' | 'failed';
     hiddenFromPublic?: boolean;
     issueSummaryPoints?: Array<{ text: string; items: number[] }>;
@@ -343,6 +344,38 @@ async function seed() {
       limit: 1,
       overrideAccess: true,
     });
+    let existingDigest: (typeof existing.docs)[number] | undefined = existing.docs[0];
+    if (!existingDigest && input.matchPublicationKeys) {
+      // Keep the rolling demo issue idempotent across days, preserving its
+      // translations and avoiding a new issue on every seed run.
+      const candidates = await payload.find({
+        collection: 'digests',
+        where: {
+          and: [
+            { project: { equals: projectId } },
+            { issueTextStatus: { equals: 'ready' } },
+            { hiddenFromPublic: { not_equals: true } },
+          ],
+        },
+        limit: 100,
+        depth: 0,
+        overrideAccess: true,
+      });
+      const expected = publications.map(String).sort().join(',');
+      existingDigest = candidates.docs.find(
+        (digest) =>
+          (digest.publications ?? [])
+            .map((publication: unknown) =>
+              String(
+                typeof publication === 'object' && publication !== null && 'id' in publication
+                  ? publication.id
+                  : publication,
+              ),
+            )
+            .sort()
+            .join(',') === expected,
+      );
+    }
 
     const data = {
       project: projectId,
@@ -355,14 +388,14 @@ async function seed() {
       ...(input.issueItemSentences ? { issueItemSentences: input.issueItemSentences } : {}),
     };
 
-    if (existing.docs[0]) {
+    if (existingDigest) {
       await payload.update({
         collection: 'digests',
-        id: existing.docs[0].id,
+        id: existingDigest.id,
         data,
         overrideAccess: true,
       });
-      return existing.docs[0].id;
+      return existingDigest.id;
     }
 
     const created = await payload.create({
@@ -374,9 +407,13 @@ async function seed() {
   }
 
   const readyPubKeys = ['pubmed-high', 'trials', 'news', 'guideline'] as const;
+  const recentIssueDate = new Date();
+  recentIssueDate.setUTCDate(recentIssueDate.getUTCDate() - 1);
+  recentIssueDate.setUTCHours(12, 0, 0, 0);
   const readyIssueId = await ensureDigest({
-    publishedAt: '2026-09-28T12:00:00.000Z',
+    publishedAt: recentIssueDate.toISOString(),
     publicationKeys: [...readyPubKeys],
+    matchPublicationKeys: true,
     issueTextStatus: 'ready',
     issueSummaryPoints: [
       {
