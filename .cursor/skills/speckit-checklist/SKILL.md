@@ -1,11 +1,12 @@
 ---
-name: 'speckit-checklist'
-description: 'Generate a custom checklist for the current feature based on user requirements.'
-compatibility: 'Requires spec-kit project structure with .specify/ directory'
+name: "speckit-checklist"
+description: "Generate a custom checklist for the current feature based on user requirements."
+compatibility: "Requires spec-kit project structure with .specify/ directory"
 metadata:
-  author: 'github-spec-kit'
-  source: 'templates/commands/checklist.md'
+  author: "github-spec-kit"
+  source: "templates/commands/checklist.md"
 ---
+
 
 ## Checklist Purpose: "Unit Tests for English"
 
@@ -48,10 +49,9 @@ You **MUST** consider the user input before proceeding (if not empty).
 ## Pre-Execution Checks
 
 **Check for extension hooks (before checklist generation)**:
-
 - Check if `.specify/extensions.yml` exists in the project root.
 - If it exists, read it and look for entries under the `hooks.before_checklist` key
-- If the YAML cannot be parsed or is invalid, skip hook checking silently and continue normally
+- If the YAML cannot be parsed or is invalid, do not skip silently: tell the user that `.specify/extensions.yml` could not be read (include the parser error) and that no hooks were checked, including any mandatory (`optional: false`) hooks registered there, then continue normally
 - Filter out hooks where `enabled` is explicitly `false`. Treat hooks without an `enabled` field as enabled by default.
 - For each remaining hook, do **not** attempt to interpret or evaluate hook `condition` expressions:
   - If the hook has no `condition` field, or it is null/empty, treat the hook as executable
@@ -352,9 +352,8 @@ Sample items:
 
 **Check for extension hooks (after checklist generation)**:
 Check if `.specify/extensions.yml` exists in the project root.
-
 - If it exists, read it and look for entries under the `hooks.after_checklist` key
-- If the YAML cannot be parsed or is invalid, skip hook checking silently and continue normally
+- If the YAML cannot be parsed or is invalid, do not skip silently: tell the user that `.specify/extensions.yml` could not be read (include the parser error) and that no hooks were checked, including any mandatory (`optional: false`) hooks registered there, then continue normally
 - Filter out hooks where `enabled` is explicitly `false`. Treat hooks without an `enabled` field as enabled by default.
 - For each remaining hook, do **not** attempt to interpret or evaluate hook `condition` expressions:
   - If the hook has no `condition` field, or it is null/empty, treat the hook as executable
