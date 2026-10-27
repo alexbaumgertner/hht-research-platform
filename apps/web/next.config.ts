@@ -12,6 +12,20 @@ const dirname = path.dirname(__filename);
 
 const nextConfig: NextConfig = {
   transpilePackages: ['@hht/shared'],
+  // Keep this outside proxy.ts: its matcher excludes Payload admin and APIs.
+  // Spec 014 must exclude only its concrete widget routes here when it adds
+  // their per-project frame-ancestors allow-list. Until then, deny framing everywhere.
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'Content-Security-Policy', value: "frame-ancestors 'none'" },
+          { key: 'X-Frame-Options', value: 'DENY' },
+        ],
+      },
+    ];
+  },
   // Setting htmlLimitedBots replaces Next's built-in list, so extend it rather than redefine it.
   htmlLimitedBots: new RegExp(`${HTML_LIMITED_BOT_UA_RE.source}|TelegramBot|Viber`, 'i'),
   outputFileTracingIncludes: {
