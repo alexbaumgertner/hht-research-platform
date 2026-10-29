@@ -111,8 +111,12 @@ test.describe('subscriptions', () => {
     await page.getByRole('link', { name: 'Back to project' }).click();
     const email = `plus.${Date.now()}+hht@example.com`;
     await page.getByLabel('Email', { exact: true }).fill(email);
-    await page.getByRole('checkbox').check();
+    await page.locator('input[name="consent"]').check();
+    const submitted = page.waitForResponse(
+      (response) => response.request().method() === 'POST' && response.url().includes('/subscribe'),
+    );
     await page.getByRole('button', { name: 'Subscribe' }).click();
+    await submitted;
     await expect(page.getByText('Check your inbox.')).toBeVisible();
     const listed = await page.request.get(`/api/test/subscribers?slug=${PROJECT}`);
     const subscribers = (await listed.json()) as { docs: Array<{ email: string; source: string }> };
