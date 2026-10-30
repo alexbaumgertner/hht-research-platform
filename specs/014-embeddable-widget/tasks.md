@@ -49,14 +49,14 @@ implemented and verified on its own.
 - [x] T003 [P] Add the `Widget` namespace to `apps/web/messages/en.json`, `de.json`, `tr.json`, `ru.json` and `uk.json`, with these keys: `frameTitle`, `heading`, `summaryHeading`, `moreItems` (ICU plural on `count`), `allIssues`, `firstIssueComing`, `subscribeHeading`, `subscribeButton`, `fallbackSentence`, `fallbackCommunity`, `fallbackSubscribe`.
   - Plain, patient-facing wording (spec 005 FR-018). No disease names. Use `{projectName}` and `{date}` placeholders.
   - Reuse the existing `Issue.*`, `Subscribe.*` and `Trust.*` keys instead of duplicating them (contract `embed-page.md` "Messages").
-- [ ] T004 [P] Create the two-origin fixture `apps/web/tests/fixtures/partner-host.html` (quickstart §2). It contains:
+- [x] T004 [P] Create the two-origin fixture `apps/web/tests/fixtures/partner-host.html` (quickstart §2). It contains:
   - a `data-digest-widget` container with `data-project="hht-research"`, `data-partner="e2e-partner"`, `data-locale="ru"` and a fallback `<p>` with two links;
   - `<script async src="http://localhost:3000/embed/v1.js">`;
   - some text above and below, so resizing is visible.
 
   Also create `apps/web/tests/fixtures/partner-host-iframe.html` with the plain frame snippet from contract `embed-snippet.md`, using `height="900"`.
 
-- [ ] T005 [P] Create the Playwright helper `apps/web/tests/e2e/embed-helpers.ts`. It exports:
+- [x] T005 [P] Create the Playwright helper `apps/web/tests/e2e/embed-helpers.ts`. It exports:
   - `servePartnerHost(page, origin, html)`, which uses `page.route(origin + '/**')` to fulfil the given HTML for `http://partner.test` (allowed) and `http://blocked.test` (not allowed);
   - `snippetHtml({ partner, locale, items, theme, subscribe })`, which renders the script snippet pointing at the test `baseURL`;
   - `widgetFrame(page)`, which returns the frame locator.
@@ -147,6 +147,7 @@ implemented and verified on its own.
   - it always sets `X-Robots-Tag: noindex, nofollow`, `Referrer-Policy: strict-origin-when-cross-origin` and `Content-Type: text/html; charset=utf-8`;
   - it never sets `X-Frame-Options` or `Set-Cookie`.
 - [ ] T020 [P] [US1] Write failing Playwright tests in `apps/web/tests/e2e/embed-content.spec.ts`, using `embed-helpers.ts` and `partner-host-iframe.html` content:
+  - _Status: the content, `items`, FR-009, routing, FR-016 and hide/unhide cases are written and passing. The translation-fallback (US1 #3, #4) and "no issue" (US1 #7) cases are still to add._
   - **US1 #1, #5**: via `http://partner.test`, the frame shows the issue date heading, every summary point, the first 3 items in issue-page order (compare with `GET /api/public/projects/hht-research/issues/{id}?locale=ru`), the "more items" link, "All issues", the disclaimer and the AI label.
   - **US1 #2**: options `auto-5-form` shows 5 items, or all of them if there are fewer.
   - **US1 #3, #4**: `ru` text when the translation is ready; the English text plus the note when it isn't (use `/api/test/issue-translations` as `issue-translation.spec.ts` does).
