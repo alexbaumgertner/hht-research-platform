@@ -193,3 +193,23 @@ export async function invalidateIssueTranslations(
     req,
   });
 }
+
+const EMBED_FIELDS = [
+  'hiddenFromPublic',
+  'issueTextStatus',
+  'issueTextRevision',
+  'issueSummaryPoints',
+  'issueItemSentences',
+  'publications',
+] as const;
+
+/** True when a digest update changes what the embed widget shows (spec 014 FR-004). */
+export function embedRelevantChange(
+  doc: Record<string, unknown>,
+  previousDoc: Record<string, unknown> | null | undefined,
+): boolean {
+  if (!previousDoc) return true;
+  return EMBED_FIELDS.some(
+    (f) => JSON.stringify(doc[f] ?? null) !== JSON.stringify(previousDoc[f] ?? null),
+  );
+}

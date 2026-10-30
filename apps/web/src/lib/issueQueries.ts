@@ -11,7 +11,7 @@ import {
   type LoadedIssue,
   relationId,
 } from '@/lib/issueTypes';
-import { partnerKeysOf } from '@/lib/embed/partners';
+import { embedPartnersOf, partnerKeysOf } from '@/lib/embed/partners';
 import { type PublicationForMaterial, type TranslationForMaterial } from '@/lib/materials';
 
 export type {
@@ -37,6 +37,7 @@ export async function findProjectBySlug(slug: string): Promise<IssueProjectDoc |
     slug: String(project.slug),
     name: String(project.name),
     partnerKeys: partnerKeysOf(project),
+    embedPartners: embedPartnersOf(project),
   };
 }
 

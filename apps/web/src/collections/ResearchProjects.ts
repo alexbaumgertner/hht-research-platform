@@ -12,6 +12,7 @@ import {
   isAuthenticatedOrWorker,
   isWorkerOrAdminFieldLevel,
 } from '../access';
+import { revalidateEmbed } from '../lib/embed/revalidateEmbed';
 
 export const ResearchProjects: CollectionConfig = {
   slug: 'research-projects',
@@ -27,6 +28,18 @@ export const ResearchProjects: CollectionConfig = {
     delete: isAuthenticated,
   },
   hooks: {
+    afterChange: [
+      ({ doc, previousDoc }) => {
+        const watched = ['embedPartners', 'name', 'slug'] as const;
+        const changed =
+          !previousDoc ||
+          watched.some(
+            (f) => JSON.stringify(doc[f] ?? null) !== JSON.stringify(previousDoc[f] ?? null),
+          );
+        if (changed) revalidateEmbed(doc.id);
+        return doc;
+      },
+    ],
     beforeDelete: [
       async ({ id, req }) => {
         const subscribers = await req.payload.find({

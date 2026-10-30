@@ -1,3 +1,4 @@
+import type { EmbedPartner } from '@/lib/embed/partners';
 import type { TranslationForMaterial, PublicationForMaterial } from '@/lib/materials';
 
 export type IssueDigestDoc = {
@@ -22,6 +23,7 @@ export type IssueProjectDoc = {
   slug: string;
   name: string;
   partnerKeys: string[];
+  embedPartners: EmbedPartner[];
 };
 
 export type IssuePublicationDoc = PublicationForMaterial & {

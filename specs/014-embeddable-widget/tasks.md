@@ -46,7 +46,7 @@ implemented and verified on its own.
   Record the outcome under "To verify in implementation" in `specs/014-embeddable-widget/research.md` R3. If any check fails, switch the plan to R3's fallback (dynamic handler + `Cache-Control: public, s-maxage=300`) and note it there before T020.
 
 - [ ] T002 [P] Add the dev dependency `@axe-core/playwright` with `pnpm --filter @hht/web add -D @axe-core/playwright`, and commit the lockfile. It is justified in plan.md Complexity Tracking. Don't add any runtime dependency.
-- [ ] T003 [P] Add the `Widget` namespace to `apps/web/messages/en.json`, `de.json`, `tr.json`, `ru.json` and `uk.json`, with these keys: `frameTitle`, `heading`, `summaryHeading`, `moreItems` (ICU plural on `count`), `allIssues`, `firstIssueComing`, `subscribeHeading`, `subscribeButton`, `fallbackSentence`, `fallbackCommunity`, `fallbackSubscribe`.
+- [x] T003 [P] Add the `Widget` namespace to `apps/web/messages/en.json`, `de.json`, `tr.json`, `ru.json` and `uk.json`, with these keys: `frameTitle`, `heading`, `summaryHeading`, `moreItems` (ICU plural on `count`), `allIssues`, `firstIssueComing`, `subscribeHeading`, `subscribeButton`, `fallbackSentence`, `fallbackCommunity`, `fallbackSubscribe`.
   - Plain, patient-facing wording (spec 005 FR-018). No disease names. Use `{projectName}` and `{date}` placeholders.
   - Reuse the existing `Issue.*`, `Subscribe.*` and `Trust.*` keys instead of duplicating them (contract `embed-page.md` "Messages").
 - [ ] T004 [P] Create the two-origin fixture `apps/web/tests/fixtures/partner-host.html` (quickstart §2). It contains:
@@ -132,7 +132,7 @@ implemented and verified on its own.
 
 ### Tests for User Story 1 ⚠️
 
-- [ ] T018 [P] [US1] Write failing tests in `apps/web/src/lib/embed/renderEmbed.test.ts`, using a pure `EmbedModel` fixture:
+- [x] T018 [P] [US1] Write failing tests in `apps/web/src/lib/embed/renderEmbed.test.ts`, using a pure `EmbedModel` fixture:
   - titles, sentences and the project name contain `<script>`, `"`, `'`, `&` and a `javascript:` item URL, and none survive unescaped;
   - the disclaimer and AI label (`Trust.*`) are present in the issue state **and** in the "no issue" state (FR-003);
   - with 7 items and `items=3`, exactly 3 `<li>` items render plus a `moreItems` link with count 4. With `items=5` and 2 items, 2 render and there is no "more" link;
@@ -141,7 +141,7 @@ implemented and verified on its own.
   - every outbound link is absolute on the site URL, has `target="_blank" rel="noopener"`, and carries `?src=site:<key>`, except privacy;
   - `periodReview: null` renders no review link and no placeholder (FR-007);
   - `<html lang>` equals the locale.
-- [ ] T019 [P] [US1] Write failing tests in `apps/web/src/lib/embed/embedHeaders.test.ts`:
+- [x] T019 [P] [US1] Write failing tests in `apps/web/src/lib/embed/embedHeaders.test.ts`:
   - `buildEmbedHeaders({ origins })` returns `Content-Security-Policy: frame-ancestors <origins space-separated>`;
   - empty or missing origins give `frame-ancestors 'none'`;
   - it always sets `X-Robots-Tag: noindex, nofollow`, `Referrer-Policy: strict-origin-when-cross-origin` and `Content-Type: text/html; charset=utf-8`;
@@ -158,21 +158,21 @@ implemented and verified on its own.
 
 ### Implementation for User Story 1
 
-- [ ] T021 [US1] Extract `translateIssueText(loaded, locale, deadline)` from `apps/web/src/app/api/public/projects/[slug]/issues/[id]/route.ts` into the new `apps/web/src/lib/issueTextTranslation.ts`, and use it from both the issue API route and the embed loader. Behavior must be identical: the ≈8 s wait, then fallback, with background completion via `after()` (spec 005 FR-012/013). The existing tests and `issue-translation.spec.ts` must still pass.
-- [ ] T022 [US1] Implement `loadEmbedModel({ slug, partnerKey, locale, options })` in `apps/web/src/lib/embed/loadEmbedModel.ts`. Use `unstable_cache`, tagged `embed:project:<projectId>`, with `revalidate: 3600`.
+- [x] T021 [US1] Extract `translateIssueText(loaded, locale, deadline)` from `apps/web/src/app/api/public/projects/[slug]/issues/[id]/route.ts` into the new `apps/web/src/lib/issueTextTranslation.ts`, and use it from both the issue API route and the embed loader. Behavior must be identical: the ≈8 s wait, then fallback, with background completion via `after()` (spec 005 FR-012/013). The existing tests and `issue-translation.spec.ts` must still pass.
+- [x] T022 [US1] Implement `loadEmbedModel({ slug, partnerKey, locale, options })` in `apps/web/src/lib/embed/loadEmbedModel.ts`. Use `unstable_cache`, tagged `embed:project:<projectId>`, with `revalidate: 3600`.
   - Project and partner come from `findProjectBySlug` and `findEmbedPartner`; return `null` if either is missing.
   - The issue is `listVisibleIssues(projectId, 1)[0]`, then `loadIssueSummary`, `translateIssueText` and `toIssueDetail`.
   - `items = issue.items.slice(0, options.items)` and `moreCount = issue.items.length - items.length`.
   - `periodReview: null` (research R13). `source = partnerSource(key)`.
   - Build links with `embedLinks()` on `getPublicSiteUrl()`, per data-model.md "Widget View model".
-- [ ] T023 [P] [US1] Implement `buildEmbedHeaders` in `apps/web/src/lib/embed/embedHeaders.ts` until T019 passes.
-- [ ] T024 [US1] Implement `renderEmbed(model, t)` in `apps/web/src/lib/embed/renderEmbed.ts` until T018 passes:
+- [x] T023 [P] [US1] Implement `buildEmbedHeaders` in `apps/web/src/lib/embed/embedHeaders.ts` until T019 passes.
+- [x] T024 [US1] Implement `renderEmbed(model, t)` in `apps/web/src/lib/embed/renderEmbed.ts` until T018 passes:
   - an `html` tagged template that escapes every interpolation through `escapeHtml`, and `safeUrl` (an `https?:` allow-list, then `escapeAttr`) for `href`;
   - the document structure from contract `embed-page.md` (head, `<main>`, `<article>`, the summary `<ol>`, the items `<ul>`, the "more" link, "All issues", footer with the `Trust` disclaimer and AI label);
   - the "first issue is coming" state;
   - inline CSS of 4 KB or less, light palette only for now, system font stack, no horizontal scrolling at 320 px (`overflow-wrap: anywhere`);
   - `renderEmbedNotFound()`: a minimal 404 document with no project content and no script.
-- [ ] T025 [US1] Implement the ISR route handler `apps/web/src/app/embed/[locale]/[slug]/[partner]/[options]/route.ts` (contract `embed-page.md`):
+- [x] T025 [US1] Implement the ISR route handler `apps/web/src/app/embed/[locale]/[slug]/[partner]/[options]/route.ts` (contract `embed-page.md`):
   - `dynamic = 'force-static'`, `revalidate = 3600`, `dynamicParams = true`, `generateStaticParams = () => []` (or R3's fallback per T001);
   - a 308 to `en` for an unsupported locale;
   - a 308 to the canonical options when `parseEmbedOptions(...).changed`;
@@ -182,16 +182,16 @@ implemented and verified on its own.
 
   Never read cookies or the query string.
 
-- [ ] T026 [P] [US1] Add a test-only endpoint `apps/web/src/app/api/test/issues/[id]/visibility/route.ts` (`POST {"hidden":true|false}`). It uses the same guard as `apps/web/src/app/api/test/subscribers/route.ts` (`isEmailStubEnabled()`, so it's 404 in production), and calls `payload.update({ collection: 'digests', … hiddenFromPublic })`, so the real hooks run.
-- [ ] T027 [US1] Implement `revalidateEmbed(projectId)` in `apps/web/src/lib/embed/revalidateEmbed.ts`. It calls `revalidateTag('embed:project:' + projectId, { expire: 0 })` (or the T001 outcome), wrapped in `try/catch` that logs with `console.error('[embed] revalidate failed', …)` and never throws (contract `embed-endpoints.md` "Revalidation hooks").
-- [ ] T028 [US1] Call `revalidateEmbed` in `apps/web/src/collections/Digests.ts` `afterChange`:
+- [x] T026 [P] [US1] Add a test-only endpoint `apps/web/src/app/api/test/issues/[id]/visibility/route.ts` (`POST {"hidden":true|false}`). It uses the same guard as `apps/web/src/app/api/test/subscribers/route.ts` (`isEmailStubEnabled()`, so it's 404 in production), and calls `payload.update({ collection: 'digests', … hiddenFromPublic })`, so the real hooks run.
+- [x] T027 [US1] Implement `revalidateEmbed(projectId)` in `apps/web/src/lib/embed/revalidateEmbed.ts`. It calls `revalidateTag('embed:project:' + projectId, { expire: 0 })` (or the T001 outcome), wrapped in `try/catch` that logs with `console.error('[embed] revalidate failed', …)` and never throws (contract `embed-endpoints.md` "Revalidation hooks").
+- [x] T028 [US1] Call `revalidateEmbed` in `apps/web/src/collections/Digests.ts` `afterChange`:
   - on `create`;
   - on `update` when any of `hiddenFromPublic`, `issueTextStatus`, `issueTextRevision`, `issueSummaryPoints`, `issueItemSentences` or `publications` changed compared with `previousDoc`.
 
   Keep the existing `invalidateIssueTranslations` and `stampFeedPublishedAt` behavior and their shared-`req` rule. Add cases to `apps/web/src/collections/digestHooks.test.ts`.
 
-- [ ] T029 [P] [US1] In `apps/web/src/lib/issueTranslationStore.ts`, after `finish(id, { status: 'ready' })` updates the row, resolve the digest's project id and call `revalidateEmbed(projectId)` (FR-004, research R3).
-- [ ] T030 [P] [US1] In `apps/web/src/collections/ResearchProjects.ts`, add an `afterChange` that calls `revalidateEmbed(doc.id)` when `embedPartners`, `name` or `slug` changed. Removing an origin must take effect on the next request (research R2).
+- [x] T029 [P] [US1] In `apps/web/src/lib/issueTranslationStore.ts`, after `finish(id, { status: 'ready' })` updates the row, resolve the digest's project id and call `revalidateEmbed(projectId)` (FR-004, research R3).
+- [x] T030 [P] [US1] In `apps/web/src/collections/ResearchProjects.ts`, add an `afterChange` that calls `revalidateEmbed(doc.id)` when `embedPartners`, `name` or `slug` changed. Removing an origin must take effect on the next request (research R2).
 - [ ] T031 [US1] Make T018–T020 pass. Then verify with Playwright MCP against `pnpm --filter @hht/web build && pnpm --filter @hht/web start`:
   - on an allowed origin, the widget renders at 320 px with no horizontal scroll;
   - a blocked origin renders nothing;

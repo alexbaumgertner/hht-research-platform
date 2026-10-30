@@ -2,6 +2,7 @@ import {
   applyIssueTextRules,
   assertDigestHasPublications,
   capCreateDepth,
+  embedRelevantChange,
   invalidateIssueTranslations,
   issueTextFingerprint,
   resolveRelationshipId,
@@ -376,5 +377,20 @@ describe('invalidateIssueTranslations', () => {
       req,
     );
     expect(calls).toHaveLength(0);
+  });
+});
+
+describe('embedRelevantChange', () => {
+  const base = { hiddenFromPublic: false, issueTextRevision: 1, publications: [1, 2] };
+  it('is false when only unrelated fields changed', () => {
+    expect(embedRelevantChange({ ...base, subscriberFanoutAt: 'x' }, base)).toBe(false);
+  });
+  it('is true when hiding, text or publications change', () => {
+    expect(embedRelevantChange({ ...base, hiddenFromPublic: true }, base)).toBe(true);
+    expect(embedRelevantChange({ ...base, issueTextRevision: 2 }, base)).toBe(true);
+    expect(embedRelevantChange({ ...base, publications: [1] }, base)).toBe(true);
+  });
+  it('is true without a previous doc', () => {
+    expect(embedRelevantChange(base, null)).toBe(true);
   });
 });
