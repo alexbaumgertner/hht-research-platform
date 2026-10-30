@@ -1,8 +1,13 @@
-import { normalizeSubscriberEmail, parseChatSource, type EmailLanguage } from '@hht/shared';
+import {
+  normalizeSubscriberEmail,
+  resolveSubscriptionSource,
+  type EmailLanguage,
+} from '@hht/shared';
 import { NextResponse } from 'next/server';
 import { getPayload } from 'payload';
 import config from '@payload-config';
 
+import { partnerKeysOf } from '@/lib/embed/partners';
 import { incrementAnalyticsCount } from '@/lib/analyticsCounts';
 import { getPublicSiteUrl } from '@/lib/siteUrl';
 import { consumeSubscribeRateLimit } from '@/lib/subscribeRateLimit';
@@ -52,7 +57,7 @@ export async function POST(req: Request, { params }: Params) {
   const emailRaw = String(form.get('email') ?? '');
   const languageRaw = String(form.get('language') ?? '');
   const honeypot = String(form.get('company') ?? '').trim();
-  const src = parseChatSource(String(form.get('src') ?? ''));
+  const srcRaw = String(form.get('src') ?? '');
   const issueKey = String(form.get('issue') ?? '').trim() || 'none';
   const language: EmailLanguage = languageRaw === 'ru' ? 'ru' : 'en';
 
@@ -69,6 +74,7 @@ export async function POST(req: Request, { params }: Params) {
   });
   const project = projects.docs[0];
   if (!project) return redirectNotice(req, slug, 'try_later');
+  const src = resolveSubscriptionSource(srcRaw, partnerKeysOf(project));
 
   const email = normalizeSubscriberEmail(emailRaw);
   if (honeypot.length === 0) {

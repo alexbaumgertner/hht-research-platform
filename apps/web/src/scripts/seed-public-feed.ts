@@ -65,6 +65,22 @@ async function seed() {
     projectId = project.id;
   }
 
+  // Embed partner for e2e (spec 014). Idempotent: always overwrites the same single row.
+  await payload.update({
+    collection: 'research-projects',
+    id: projectId,
+    data: {
+      embedPartners: [
+        {
+          name: 'E2E partner',
+          key: 'e2e-partner',
+          origins: [{ origin: 'http://127.0.0.1:4310' }, { origin: 'http://partner.test' }],
+        },
+      ],
+    },
+    overrideAccess: true,
+  });
+
   async function ensureSource(input: {
     type: 'pubmed' | 'clinicaltrials' | 'rss';
     label: string;

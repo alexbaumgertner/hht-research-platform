@@ -94,7 +94,7 @@ implemented and verified on its own.
 
 - [x] T008 Implement `parseSourceToken`, `resolveSubscriptionSource` and `partnerSource`, plus the `PARTNER_SOURCE_PREFIX = 'site:'` constant and the `SubscriptionSource` type, in `packages/shared/src/chatSource.ts` until T006 passes. Leave `CHAT_SOURCES` and `parseChatSource` unchanged.
 - [x] T009 Implement `PartnerKeySchema`, `normalizeEmbedOrigin`, `EmbedTheme`/`EmbedMode` types, `parseEmbedOptions`, `formatEmbedOptions`, `EMBED_NOTICES` and `noticeToSegment`/`segmentToNotice` in the new `packages/shared/src/embed.ts`, until T007 passes. Re-export them from `packages/shared/src/index.ts` and build with `pnpm --filter @hht/shared build`.
-- [ ] T010 Add the `embedPartners` array field to `apps/web/src/collections/ResearchProjects.ts`, in a new "Embedding" collapsible, with the same write access as the other project settings. Rows:
+- [x] T010 Add the `embedPartners` array field to `apps/web/src/collections/ResearchProjects.ts`, in a new "Embedding" collapsible, with the same write access as the other project settings. Rows:
   - `name`: text, required. "Max 80 chars."
   - `key`: text, required, validated with `PartnerKeySchema`. "Unique within the project", enforced by a `beforeValidate` hook across rows.
   - `origins`: array of `{ origin: text }`, `minRows: 1`. Each value goes through `normalizeEmbedOrigin` in `beforeValidate`, invalid values are rejected with a readable error, and "Duplicates are rejected".
@@ -102,12 +102,12 @@ implemented and verified on its own.
 
   Confirm the public project API (`apps/web/src/app/api/public/projects/[slug]/route.ts` and `.../projects/route.ts`) doesn't expose `embedPartners`.
 
-- [ ] T011 [P] Change `source` in `apps/web/src/collections/Subscribers.ts` from `select` (`chatSourceOptions`) to `type: 'text'`, `required: true`, `defaultValue: 'other'`, with a `validate` that requires `^(vk|wa|fb|tg|other|site:[a-z0-9][a-z0-9-]{1,31})$`. Keep `defaultColumns` as they are. Data model: "Nothing else is stored".
-- [ ] T012 [P] In `apps/web/src/collections/AnalyticsCounts.ts`:
+- [x] T011 [P] Change `source` in `apps/web/src/collections/Subscribers.ts` from `select` (`chatSourceOptions`) to `type: 'text'`, `required: true`, `defaultValue: 'other'`, with a `validate` that requires `^(vk|wa|fb|tg|other|site:[a-z0-9][a-z0-9-]{1,31})$`. Keep `defaultColumns` as they are. Data model: "Nothing else is stored".
+- [x] T012 [P] In `apps/web/src/collections/AnalyticsCounts.ts`:
   - change `source` from `select` to `text` with the same `validate` as T011, and keep the unique index on `(project, issueKey, source, metric)` unchanged;
   - add the `metric` options `{ label: 'Widget view', value: 'widget_view' }` and `{ label: 'Outbound click', value: 'outbound_click' }`.
-- [ ] T013 Add `partnerKeysOf(project)` and `findEmbedPartner(project, key)` to the new `apps/web/src/lib/embed/partners.ts`. They read `embedPartners` defensively, because generated types may lag.
-- [ ] T014 Change `apps/web/src/lib/analyticsCounts.ts`:
+- [x] T013 Add `partnerKeysOf(project)` and `findEmbedPartner(project, key)` to the new `apps/web/src/lib/embed/partners.ts`. They read `embedPartners` defensively, because generated types may lag.
+- [x] T014 Change `apps/web/src/lib/analyticsCounts.ts`:
   - add `widget_view | outbound_click` to `AnalyticsMetric`;
   - take an already-resolved `source: SubscriptionSource` instead of calling `parseChatSource`.
 
@@ -116,9 +116,9 @@ implemented and verified on its own.
   - `apps/web/src/app/[locale]/projects/[slug]/issues/[issueId]/page.tsx` (`page_view`), where `findProjectBySlug` must now also return `embedPartners`, in `apps/web/src/lib/issueQueries.ts`;
   - `apps/web/src/app/[locale]/subscribe/confirm/[token]/page.tsx` (`confirmation`, using the subscriber's stored `source` as is).
 
-- [ ] T015 Exclude `embed` from the `matcher` in `apps/web/src/proxy.ts`, alongside `api`, `admin`, `_next` and `_vercel`. This keeps next-intl from redirecting `/embed/ru/...` to `/en/embed/...`, and means the proxy never sets the `src` cookie on embed responses (FR-016). Keep the existing patterns for locale pages.
+- [x] T015 Exclude `embed` from the `matcher` in `apps/web/src/proxy.ts`, alongside `api`, `admin`, `_next` and `_vercel`. This keeps next-intl from redirecting `/embed/ru/...` to `/en/embed/...`, and means the proxy never sets the `src` cookie on embed responses (FR-016). Keep the existing patterns for locale pages.
 - [ ] T016 Regenerate the Payload types with `pnpm --filter @hht/web generate:types` and push the schema to the **local Docker** database only (`pnpm --filter @hht/web dev` starts the push). Confirm that `subscribers.source` and `analytics_counts.source` are `varchar` locally and existing rows keep their values. Run `pnpm check 2>&1 | tail -50`.
-- [ ] T017 Extend the seed in `apps/web/src/scripts/seed-public-feed.ts` so `hht-research` gets `embedPartners: [{ name: 'E2E partner', key: 'e2e-partner', origins: [{ origin: 'http://127.0.0.1:4310' }, { origin: 'http://partner.test' }] }]`. It must be idempotent: update the row on re-run, don't duplicate it.
+- [x] T017 Extend the seed in `apps/web/src/scripts/seed-public-feed.ts` so `hht-research` gets `embedPartners: [{ name: 'E2E partner', key: 'e2e-partner', origins: [{ origin: 'http://127.0.0.1:4310' }, { origin: 'http://partner.test' }] }]`. It must be idempotent: update the row on re-run, don't duplicate it.
 
 **Checkpoint**: shared rules are tested, the schema accepts `site:<key>`, the e2e partner is seeded, and `/embed/*` bypasses the proxy.
 

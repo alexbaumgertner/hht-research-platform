@@ -7,6 +7,7 @@ import { Stack } from '@mantine/core';
 import { IssueView } from '@/components/IssueView';
 import { SubscribeForm } from '@/components/SubscribeForm';
 import { TextLink } from '@/components/TextLink';
+import { resolveSubscriptionSource } from '@hht/shared';
 import { incrementAnalyticsCount } from '@/lib/analyticsCounts';
 import type { IssueDetail } from '@/lib/issues';
 import { findProjectBySlug } from '@/lib/issueQueries';
@@ -55,7 +56,7 @@ export default async function IssuePage({ params, searchParams }: Props) {
     await incrementAnalyticsCount({
       projectId: project.id,
       issueKey: issueId,
-      source: src,
+      source: resolveSubscriptionSource(src, project.partnerKeys),
       metric: 'page_view',
     });
   }

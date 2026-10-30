@@ -21,6 +21,7 @@ export type IssueProjectDoc = {
   id: string | number;
   slug: string;
   name: string;
+  partnerKeys: string[];
 };
 
 export type IssuePublicationDoc = PublicationForMaterial & {
