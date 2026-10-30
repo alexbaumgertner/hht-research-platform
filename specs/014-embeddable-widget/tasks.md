@@ -117,7 +117,7 @@ implemented and verified on its own.
   - `apps/web/src/app/[locale]/subscribe/confirm/[token]/page.tsx` (`confirmation`, using the subscriber's stored `source` as is).
 
 - [x] T015 Exclude `embed` from the `matcher` in `apps/web/src/proxy.ts`, alongside `api`, `admin`, `_next` and `_vercel`. This keeps next-intl from redirecting `/embed/ru/...` to `/en/embed/...`, and means the proxy never sets the `src` cookie on embed responses (FR-016). Keep the existing patterns for locale pages.
-- [ ] T016 Regenerate the Payload types with `pnpm --filter @hht/web generate:types` and push the schema to the **local Docker** database only (`pnpm --filter @hht/web dev` starts the push). Confirm that `subscribers.source` and `analytics_counts.source` are `varchar` locally and existing rows keep their values. Run `pnpm check 2>&1 | tail -50`.
+- [x] T016 Regenerate the Payload types with `pnpm --filter @hht/web generate:types` and push the schema to the **local Docker** database only (`pnpm --filter @hht/web dev` starts the push). Confirm that `subscribers.source` and `analytics_counts.source` are `varchar` locally and existing rows keep their values. Run `pnpm check 2>&1 | tail -50`.
 - [x] T017 Extend the seed in `apps/web/src/scripts/seed-public-feed.ts` so `hht-research` gets `embedPartners: [{ name: 'E2E partner', key: 'e2e-partner', origins: [{ origin: 'http://127.0.0.1:4310' }, { origin: 'http://partner.test' }] }]`. It must be idempotent: update the row on re-run, don't duplicate it.
 
 **Checkpoint**: shared rules are tested, the schema accepts `site:<key>`, the e2e partner is seeded, and `/embed/*` bypasses the proxy.
