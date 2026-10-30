@@ -71,12 +71,12 @@ implemented and verified on its own.
 
 ### Tests first
 
-- [ ] T006 [P] Write failing tests in `packages/shared/src/chatSource.test.ts`:
+- [x] T006 [P] Write failing tests in `packages/shared/src/chatSource.test.ts`:
   - `parseSourceToken`: accepts `vk`, `wa`, `fb`, `tg` and any `site:<key>` where the key matches `^[a-z0-9][a-z0-9-]{1,31}$`. Returns `other` for missing values, `site:`, `site:-x`, `site:UPPER`, a key longer than 32 chars, and `site:a b`.
   - `resolveSubscriptionSource(value, partnerKeys)`: returns `site:<key>` only when `<key>` is in `partnerKeys`, otherwise `other`. Chat sources pass through.
   - `partnerSource(key)`: returns `site:<key>`.
   - `parseChatSource` is unchanged.
-- [ ] T007 [P] Write failing tests in `packages/shared/src/embed.test.ts`:
+- [x] T007 [P] Write failing tests in `packages/shared/src/embed.test.ts`:
   - `PartnerKeySchema` (`^[a-z0-9][a-z0-9-]{1,31}$`).
   - `normalizeEmbedOrigin`:
     - returns the lowercased `scheme://host[:port]`;
@@ -92,8 +92,8 @@ implemented and verified on its own.
 
 ### Implementation
 
-- [ ] T008 Implement `parseSourceToken`, `resolveSubscriptionSource` and `partnerSource`, plus the `PARTNER_SOURCE_PREFIX = 'site:'` constant and the `SubscriptionSource` type, in `packages/shared/src/chatSource.ts` until T006 passes. Leave `CHAT_SOURCES` and `parseChatSource` unchanged.
-- [ ] T009 Implement `PartnerKeySchema`, `normalizeEmbedOrigin`, `EmbedTheme`/`EmbedMode` types, `parseEmbedOptions`, `formatEmbedOptions`, `EMBED_NOTICES` and `noticeToSegment`/`segmentToNotice` in the new `packages/shared/src/embed.ts`, until T007 passes. Re-export them from `packages/shared/src/index.ts` and build with `pnpm --filter @hht/shared build`.
+- [x] T008 Implement `parseSourceToken`, `resolveSubscriptionSource` and `partnerSource`, plus the `PARTNER_SOURCE_PREFIX = 'site:'` constant and the `SubscriptionSource` type, in `packages/shared/src/chatSource.ts` until T006 passes. Leave `CHAT_SOURCES` and `parseChatSource` unchanged.
+- [x] T009 Implement `PartnerKeySchema`, `normalizeEmbedOrigin`, `EmbedTheme`/`EmbedMode` types, `parseEmbedOptions`, `formatEmbedOptions`, `EMBED_NOTICES` and `noticeToSegment`/`segmentToNotice` in the new `packages/shared/src/embed.ts`, until T007 passes. Re-export them from `packages/shared/src/index.ts` and build with `pnpm --filter @hht/shared build`.
 - [ ] T010 Add the `embedPartners` array field to `apps/web/src/collections/ResearchProjects.ts`, in a new "Embedding" collapsible, with the same write access as the other project settings. Rows:
   - `name`: text, required. "Max 80 chars."
   - `key`: text, required, validated with `PartnerKeySchema`. "Unique within the project", enforced by a `beforeValidate` hook across rows.
