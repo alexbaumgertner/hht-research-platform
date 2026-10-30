@@ -107,7 +107,20 @@ MUST exclude `/embed/`, and this feature's E2E test asserts the exclusion holds.
 - Cached responses keep the handler's headers (CSP, `X-Robots-Tag`). Next sets the
   `Cache-Control` for ISR.
 
-**To verify in implementation**: the dependencies aren't installed in the planning worktree.
+**Verified (T001, 2026-10-30, `next@16.3.3`, `next build && next start`)**: all three checks pass.
+The real embed route was used as the spike, so no throwaway route was committed.
+
+- `revalidateTag(tag, { expire: 0 })` is accepted, and the next request is a `MISS` that re-renders
+  (hide issue 1 → the widget shows issue 2; unhide → issue 1 again, no waiting).
+- A `force-static` route handler with dynamic segments is cached per path (`x-nextjs-cache: HIT`).
+- `Content-Security-Policy`, `X-Robots-Tag` and `Referrer-Policy` survive the cache unchanged.
+- `next.config.ts` `headers()` must exclude `/embed/{locale}/…`, otherwise its global
+  `frame-ancestors 'none'` and `X-Frame-Options: DENY` override the per-partner header.
+
+The fallback below is not needed.
+
+Original note:
+
 Confirm against the installed `next@16.3.3` that:
 
 - `revalidateTag` accepts `{ expire: 0 }`;

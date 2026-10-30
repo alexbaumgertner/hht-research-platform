@@ -38,7 +38,7 @@ implemented and verified on its own.
 
 **Purpose**: Settle the one open technical question, and add test infrastructure.
 
-- [ ] T001 Spike the Next.js 16.3.3 cache APIs in a throwaway route under `apps/web/src/app/embed/_spike/[id]/route.ts`. Delete it afterwards and don't commit it. Using `next build && next start`, confirm all of these:
+- [x] T001 Spike the Next.js 16.3.3 cache APIs in a throwaway route under `apps/web/src/app/embed/_spike/[id]/route.ts`. Delete it afterwards and don't commit it. Using `next build && next start`, confirm all of these:
   - a route handler with `export const dynamic = 'force-static'`, `export const revalidate = 3600`, `export const dynamicParams = true` and `generateStaticParams() { return [] }` is cached per path;
   - custom response headers (`Content-Security-Policy`, `X-Robots-Tag`) are served unchanged from the cache;
   - `revalidateTag('t', { expire: 0 })`, called from a Payload hook context (a route handler), makes the next request re-render.
