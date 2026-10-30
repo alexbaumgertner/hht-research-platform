@@ -90,7 +90,7 @@ expect it to be gone from the header.
 - `gzip -9c apps/web/public/embed/v1.js | wc -c` must be ≤ 3072.
 - Lighthouse mobile (default throttling) on `http://127.0.0.1:4310/partner-host.html` against the
   production build, 5 runs. The widget frame's own LCP (Performance panel → frame) must be under
-  2.5 s at the median, and after launch also at p75 on the deployed site (SC-006).
+  2.5 s at the 75th percentile across those five runs before launch (FR-027, SC-006).
 - `curl -s …/embed/ru/hht-research/e2e-partner/auto-3-form | grep -c "_next/static"` must be `0`.
   No Next client runtime and no admin code (FR-026).
 

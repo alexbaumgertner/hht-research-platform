@@ -128,8 +128,10 @@ Confirm against the installed `next@16.3.3` that:
 - headers survive the cache.
 
 If any of these fails, use the fallback: a dynamic route handler with
-`Cache-Control: public, s-maxage=300`. That gives at most 5 minutes of staleness on every
-trigger, still within FR-024, and needs no purge.
+`Cache-Control: public, s-maxage=300`. In fallback mode, bypass `loadEmbedModel`'s
+`unstable_cache` entirely; the five-minute CDN cache is the only cache, so it bounds staleness
+and completed translations appear within FR-004's five-minute window. This is still within FR-024
+and needs no purge.
 
 **Alternatives considered**: dynamic rendering on every request (no-store), which is what the
 site does today. That means a database round trip on every partner page view, slower LCP, and no
@@ -277,7 +279,9 @@ not been verified, so:
 2. If it prompts or skips, the owner runs this one-off SQL on the branch first, then on production
    before deploying:
    ```sql
+   ALTER TABLE subscribers ALTER COLUMN source DROP DEFAULT;
    ALTER TABLE subscribers ALTER COLUMN source TYPE varchar USING source::text;
+   ALTER TABLE subscribers ALTER COLUMN source SET DEFAULT 'other'::varchar;
    ALTER TABLE analytics_counts ALTER COLUMN source TYPE varchar USING source::text;
    DROP TYPE IF EXISTS enum_subscribers_source;
    DROP TYPE IF EXISTS enum_analytics_counts_source;
