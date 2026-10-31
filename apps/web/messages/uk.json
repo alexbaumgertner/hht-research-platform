@@ -162,5 +162,18 @@
     "deletion": "To ask for deletion, reply to any email from this project or use the unsubscribe link.",
     "sourceCookie": "The chat you arrived from is remembered for this browser session so the subscription can be attributed. It is not an analytics cookie.",
     "rateLimit": "A short-lived hashed record of the network address is kept for a day to limit repeated submissions. It is not attached to the subscription."
+  },
+  "Widget": {
+    "frameTitle": "Свіжий огляд досліджень: {projectName}",
+    "heading": "{projectName}: огляд від {date}",
+    "summaryHeading": "Що нового і чому це важливо",
+    "moreItems": "{count, plural, one {Ще # матеріал в цьому огляді} few {Ще # матеріали в цьому огляді} many {Ще # матеріалів в цьому огляді} other {Ще # матеріалу в цьому огляді}}",
+    "allIssues": "Усі огляди",
+    "firstIssueComing": "Перший огляд незабаром з’явиться. Підпишіться, щоб отримати його поштою.",
+    "subscribeHeading": "Отримувати огляди поштою",
+    "subscribeButton": "Підписатися",
+    "fallbackSentence": "Новини досліджень простою мовою — на вашу пошту.",
+    "fallbackCommunity": "Спільнота",
+    "fallbackSubscribe": "Підписатися поштою"
   }
 }

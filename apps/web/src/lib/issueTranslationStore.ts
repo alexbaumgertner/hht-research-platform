@@ -3,6 +3,7 @@ import 'server-only';
 import { getPayload, type Where } from 'payload';
 import config from '@payload-config';
 
+import { revalidateEmbed } from '@/lib/embed/revalidateEmbed';
 import { relationId } from '@/lib/issueTypes';
 import type { IssueText, IssueTranslationLocale } from '@/lib/issueTranslator';
 import type { TranslationKey, TranslationRow, TranslationStore } from '@/lib/issueTranslation';
@@ -164,6 +165,20 @@ export function createPayloadTranslationStore(): TranslationStore {
         depth: 0,
         overrideAccess: true,
       });
+      const doc = updated.docs[0];
+      if (doc && result.status === 'ready') {
+        const digestId = relationId(doc.digest);
+        const digest = digestId
+          ? await payload.findByID({
+              collection: 'digests',
+              id: digestId,
+              depth: 0,
+              overrideAccess: true,
+            })
+          : null;
+        const projectId = relationId(digest?.project);
+        if (projectId) revalidateEmbed(projectId);
+      }
       return updated.docs.length > 0;
     },
   };

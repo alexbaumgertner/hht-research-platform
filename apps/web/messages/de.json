@@ -162,5 +162,18 @@
     "deletion": "To ask for deletion, reply to any email from this project or use the unsubscribe link.",
     "sourceCookie": "The chat you arrived from is remembered for this browser session so the subscription can be attributed. It is not an analytics cookie.",
     "rateLimit": "A short-lived hashed record of the network address is kept for a day to limit repeated submissions. It is not attached to the subscription."
+  },
+  "Widget": {
+    "frameTitle": "Aktueller Forschungsüberblick: {projectName}",
+    "heading": "{projectName}: Update vom {date}",
+    "summaryHeading": "Was es Neues gibt und warum es wichtig ist",
+    "moreItems": "{count, plural, one {# weiterer Beitrag in diesem Update} other {# weitere Beiträge in diesem Update}}",
+    "allIssues": "Alle Updates",
+    "firstIssueComing": "Das erste Update erscheint bald. Abonnieren Sie es per E-Mail.",
+    "subscribeHeading": "Updates per E-Mail erhalten",
+    "subscribeButton": "Abonnieren",
+    "fallbackSentence": "Neuigkeiten aus der Forschung in einfacher Sprache, per E-Mail.",
+    "fallbackCommunity": "Community",
+    "fallbackSubscribe": "Per E-Mail abonnieren"
   }
 }

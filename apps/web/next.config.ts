@@ -13,12 +13,17 @@ const dirname = path.dirname(__filename);
 const nextConfig: NextConfig = {
   transpilePackages: ['@hht/shared'],
   // Keep this outside proxy.ts: its matcher excludes Payload admin and APIs.
-  // Spec 014 must exclude only its concrete widget routes here when it adds
-  // their per-project frame-ancestors allow-list. Until then, deny framing everywhere.
+  // Exactly the two widget document routes (/embed/:locale/:slug/:partner/:options[/:notice])
+  // are excluded: they send their own per-partner
+  // frame-ancestors allow-list (spec 014). Everything else, including /embed/v1.js, denies framing.
   async headers() {
     return [
       {
-        source: '/:path*',
+        source: '/embed/v1.js',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=3600' }],
+      },
+      {
+        source: '/((?!embed/[^/]+/[^/]+/[^/]+/[^/]+(?:/[^/]+)?$).*)',
         headers: [
           { key: 'Content-Security-Policy', value: "frame-ancestors 'none'" },
           { key: 'X-Frame-Options', value: 'DENY' },

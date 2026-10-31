@@ -17,11 +17,13 @@ import {
   applyIssueTextRules,
   assertDigestHasPublications,
   capCreateDepth,
+  embedRelevantChange,
   invalidateIssueTranslations,
   resolveRelationshipId,
   stampFeedPublishedAt,
   validateRefsWithinDigest,
 } from './digestHooks';
+import { revalidateEmbed } from '../lib/embed/revalidateEmbed';
 
 const itemsWithinDigest: RelationshipFieldManyValidation = async (value, options) => {
   const base = await relationship(value, options);
@@ -70,13 +72,15 @@ export const Digests: CollectionConfig = {
     ],
     afterChange: [
       async ({ doc, previousDoc, req, operation }) => {
+        const projectId = resolveRelationshipId(doc.project);
         if (operation === 'update') {
           await invalidateIssueTranslations(doc, previousDoc, req);
+          if (projectId && embedRelevantChange(doc, previousDoc)) revalidateEmbed(projectId);
           return;
         }
         if (operation !== 'create') return;
-        const projectId = resolveRelationshipId(doc.project);
         if (!projectId) return;
+        revalidateEmbed(projectId);
         // Email is sent by the worker (`sendDigestPublishedEmail`), not this hook.
         // Nested `payload.update()` *without* `req` starts a second postgres
         // transaction while create still holds the first — that stalls the pool

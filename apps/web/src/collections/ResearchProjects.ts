@@ -1,5 +1,10 @@
 import type { CollectionConfig } from 'payload';
-import { hasNonEmptyKeywords, type KeywordInput } from '@hht/shared';
+import {
+  hasNonEmptyKeywords,
+  normalizeEmbedOrigin,
+  PartnerKeySchema,
+  type KeywordInput,
+} from '@hht/shared';
 
 import {
   canUpdateResearchProject,
@@ -7,6 +12,7 @@ import {
   isAuthenticatedOrWorker,
   isWorkerOrAdminFieldLevel,
 } from '../access';
+import { revalidateEmbed } from '../lib/embed/revalidateEmbed';
 
 export const ResearchProjects: CollectionConfig = {
   slug: 'research-projects',
@@ -22,6 +28,18 @@ export const ResearchProjects: CollectionConfig = {
     delete: isAuthenticated,
   },
   hooks: {
+    afterChange: [
+      ({ doc, previousDoc }) => {
+        const watched = ['embedPartners', 'name', 'slug'] as const;
+        const changed =
+          !previousDoc ||
+          watched.some(
+            (f) => JSON.stringify(doc[f] ?? null) !== JSON.stringify(previousDoc[f] ?? null),
+          );
+        if (changed) revalidateEmbed(doc.id);
+        return doc;
+      },
+    ],
     beforeDelete: [
       async ({ id, req }) => {
         const subscribers = await req.payload.find({
@@ -70,6 +88,24 @@ export const ResearchProjects: CollectionConfig = {
           const hasHour = data.publishHourUtc != null;
           if (hasWeekday !== hasHour) {
             throw new Error('Set both publish weekday and hour, or neither');
+          }
+        }
+        const partners = data.embedPartners as
+          Array<{ key?: string; origins?: Array<{ origin?: string }> }> | undefined;
+        if (partners) {
+          const keys = new Set<string>();
+          for (const partner of partners) {
+            const key = partner.key ?? '';
+            if (keys.has(key)) throw new Error(`Duplicate embed partner key: ${key}`);
+            keys.add(key);
+            const seen = new Set<string>();
+            for (const row of partner.origins ?? []) {
+              const origin = normalizeEmbedOrigin(row.origin ?? '');
+              if (!origin) throw new Error(`Invalid embed origin: ${row.origin}`);
+              if (seen.has(origin)) throw new Error(`Duplicate embed origin: ${origin}`);
+              seen.add(origin);
+              row.origin = origin;
+            }
           }
         }
         return data;
@@ -241,6 +277,70 @@ export const ResearchProjects: CollectionConfig = {
           Field: '/components/admin/SubscriberMetrics#SubscriberMetrics',
         },
       },
+    },
+    {
+      type: 'collapsible',
+      label: 'Embedding',
+      admin: { initCollapsed: true },
+      fields: [
+        {
+          name: 'embedPartners',
+          type: 'array',
+          admin: {
+            description:
+              'Partner sites that may embed the digest widget. The key is used in the widget URL and in the subscription source site:<key>.',
+          },
+          fields: [
+            { name: 'name', type: 'text', required: true, maxLength: 80 },
+            {
+              name: 'key',
+              type: 'text',
+              required: true,
+              admin: {
+                description:
+                  'Lowercase letters, digits and dashes, 2-32 chars. Unique within the project.',
+              },
+              validate: (value: unknown) =>
+                PartnerKeySchema.safeParse(value).success
+                  ? true
+                  : 'Use 2-32 lowercase letters, digits or dashes, starting with a letter or digit',
+            },
+            {
+              name: 'origins',
+              type: 'array',
+              minRows: 1,
+              admin: {
+                description:
+                  'Exact origins like https://example.org (no path or wildcard). Duplicates are rejected.',
+              },
+              fields: [
+                {
+                  name: 'origin',
+                  type: 'text',
+                  required: true,
+                  validate: (value: unknown) =>
+                    typeof value === 'string' && normalizeEmbedOrigin(value) !== null
+                      ? true
+                      : 'Use an exact https origin like https://example.org (http only for localhost, 127.0.0.1, *.test)',
+                },
+              ],
+            },
+            {
+              name: 'fallbackCommunityUrl',
+              type: 'text',
+              admin: { description: 'Optional https URL used in the snippet fallback block.' },
+              validate: (value: unknown) => {
+                if (value == null || value === '') return true;
+                try {
+                  return new URL(String(value)).protocol === 'https:' ? true : 'Use an https URL';
+                } catch {
+                  return 'Use an https URL';
+                }
+              },
+            },
+          ],
+        },
+      ],
     },
     {
       name: 'owner',
