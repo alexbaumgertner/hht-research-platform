@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Group, Stack, Text } from '@mantine/core';
+import { Badge, Box, Group, Stack, Text } from '@mantine/core';
 import { useTranslations } from 'next-intl';
 
 import { SourceBadge } from '@/components/SourceBadge';
@@ -38,6 +38,19 @@ export function MaterialCard({ material, locale, slug }: Props) {
       <Stack gap="xs">
         <Group gap="sm" wrap="wrap">
           <SourceBadge source={material.source} />
+          {material.recruitmentStatus ? (
+            <Badge
+              variant="light"
+              color={material.recruitmentStatus === 'recruiting' ? 'teal' : 'gray'}
+              size="sm"
+            >
+              {t(`recruitment.${material.recruitmentStatus}`)}
+            </Badge>
+          ) : material.studyCategory && material.studyCategory !== 'trialRegistration' ? (
+            <Badge variant="outline" color="gray" size="sm">
+              {t(`studyCategory.${material.studyCategory}`)}
+            </Badge>
+          ) : null}
           {isHigh ? (
             <Text size="xs" c="dimmed" fw={500}>
               {t('highImportance')}

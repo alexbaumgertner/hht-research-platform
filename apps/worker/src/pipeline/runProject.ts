@@ -139,6 +139,7 @@ export async function runProject(
             originalUrl: candidate.originalUrl,
             publishedOrUpdatedAt: candidate.publishedOrUpdatedAt?.toISOString(),
             publicationTypes: candidate.publicationTypes,
+            ...(candidate.trialMetadata ? { trialMetadata: candidate.trialMetadata } : {}),
             relevance: 'irrelevant',
             firstSeenRun: runId,
             monitoredSource: source.id,
@@ -150,6 +151,8 @@ export async function runProject(
           title: candidate.title,
           abstractOrBody: candidate.abstractOrBody,
           keywords: project.keywords,
+          sourceType: candidate.sourceType,
+          publicationTypes: candidate.publicationTypes,
         });
         stats.summarized += 1;
 
@@ -163,6 +166,7 @@ export async function runProject(
           originalUrl: candidate.originalUrl,
           publishedOrUpdatedAt: candidate.publishedOrUpdatedAt?.toISOString(),
           publicationTypes: candidate.publicationTypes,
+          ...(candidate.trialMetadata ? { trialMetadata: candidate.trialMetadata } : {}),
           relevance: 'relevant',
           importance,
           summary,
