@@ -26,8 +26,9 @@ describe('buildSummarizePrompt', () => {
     expect(system).toMatch(/plain everyday English/i);
     expect(system).toMatch(/never include a dose/i);
     expect(system).not.toMatch(/for specialists monitoring/i);
-    expect(prompt).toContain('Study types: Case Reports');
-    expect(prompt).toContain('<untrusted_content>');
+    expect(prompt).toMatch(
+      /<untrusted_content>[\s\S]*Study types: Case Reports[\s\S]*<\/untrusted_content>/,
+    );
   });
 
   it('marks pre-results clinical trial registrations as having no results yet', () => {
@@ -49,5 +50,25 @@ describe('buildSummarizePrompt', () => {
     });
     expect(prompt).toMatch(/completed clinical trial record/i);
     expect(prompt).not.toMatch(/no results yet/i);
+  });
+
+  it('uses cautious non-assertive wording when clinical trial status is missing or non-completed', () => {
+    const unknownStatus = buildSummarizePrompt({
+      title: 'Legacy trial in HHT',
+      keywords: ['HHT'],
+      sourceType: 'clinicaltrials',
+    });
+    expect(unknownStatus.prompt).toMatch(/clinical trial registration record/i);
+    expect(unknownStatus.prompt).not.toMatch(/no results yet/i);
+    expect(unknownStatus.prompt).not.toMatch(/completed clinical trial record/i);
+
+    const terminated = buildSummarizePrompt({
+      title: 'Terminated trial in HHT',
+      keywords: ['HHT'],
+      sourceType: 'clinicaltrials',
+      trialOverallStatus: 'TERMINATED',
+    });
+    expect(terminated.prompt).toMatch(/clinical trial registration record/i);
+    expect(terminated.prompt).not.toMatch(/completed clinical trial record/i);
   });
 });

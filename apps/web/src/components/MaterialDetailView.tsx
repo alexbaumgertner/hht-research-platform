@@ -16,10 +16,7 @@ export async function MaterialDetailView({ detail, locale }: Props) {
   const isTrial = detail.source === 'trials' || detail.studyCategory === 'trialRegistration';
   const recruitmentStatus = detail.trial?.recruitmentStatus;
   const isPreResultsTrial =
-    isTrial &&
-    (!recruitmentStatus ||
-      recruitmentStatus === 'recruiting' ||
-      recruitmentStatus === 'notYetRecruiting');
+    isTrial && (recruitmentStatus === 'recruiting' || recruitmentStatus === 'notYetRecruiting');
   const dateLabel = detail.date
     ? new Date(detail.date).toLocaleDateString(locale, {
         year: 'numeric',

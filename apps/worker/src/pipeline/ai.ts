@@ -36,13 +36,23 @@ export function getModel(): LanguageModel {
   return gateway(modelId);
 }
 
-function wrapUntrusted(title: string, abstractOrBody?: string): string {
+function wrapUntrusted(
+  title: string,
+  abstractOrBody?: string,
+  publicationTypes?: string[],
+): string {
   const safeTitle = escapeUntrusted(title).slice(0, 2000);
   const safeAbstract = escapeUntrusted(abstractOrBody || '(none)').slice(0, MAX_ABSTRACT_CHARS);
-  return `<untrusted_content>
-Title: ${safeTitle}
-Abstract: ${safeAbstract}
-</untrusted_content>`;
+  const safeTypes = (publicationTypes ?? [])
+    .map((t) => escapeUntrusted(t).trim())
+    .filter(Boolean)
+    .slice(0, 20);
+  const lines = [`Title: ${safeTitle}`];
+  if (safeTypes.length > 0) {
+    lines.push(`Study types: ${safeTypes.join(', ')}`);
+  }
+  lines.push(`Abstract: ${safeAbstract}`);
+  return `<untrusted_content>\n${lines.join('\n')}\n</untrusted_content>`;
 }
 
 export async function classifyRelevance(input: {
@@ -94,29 +104,35 @@ export function isPreResultsTrial(
 ): boolean {
   if (sourceType !== 'clinicaltrials') return false;
   const status = trialOverallStatus?.trim().toUpperCase();
-  if (!status) return true;
+  if (!status) return false;
   return PRE_RESULTS_TRIAL_STATUSES.has(status);
 }
 
 export function buildSummarizePrompt(input: SummarizeInput): { system: string; prompt: string } {
   const safeKeywords = input.keywords.map(escapeUntrusted).join(', ');
   const isTrial = input.sourceType === 'clinicaltrials';
-  const types = (input.publicationTypes ?? []).map(escapeUntrusted).filter(Boolean);
+  const normalizedTrialStatus = input.trialOverallStatus?.trim().toUpperCase();
   const metaLines: string[] = [];
   if (isTrial) {
     if (isPreResultsTrial(input.sourceType, input.trialOverallStatus)) {
       metaLines.push(
         'Kind: clinical trial registration (planned or recruiting study, no results yet)',
       );
-    } else {
+    } else if (normalizedTrialStatus === 'COMPLETED') {
       metaLines.push(
         'Kind: completed clinical trial record (summarize only details and results explicitly present in the source text)',
       );
+    } else {
+      metaLines.push(
+        'Kind: clinical trial registration record (do not claim results or outcomes unless they are explicitly stated in the source text)',
+      );
     }
-  } else if (types.length > 0) {
-    metaLines.push(`Study types: ${types.join(', ')}`);
   }
-  const baseBlock = wrapUntrusted(input.title, input.abstractOrBody);
+  const baseBlock = wrapUntrusted(
+    input.title,
+    input.abstractOrBody,
+    isTrial ? undefined : input.publicationTypes,
+  );
   const prompt = metaLines.length > 0 ? `${metaLines.join('\n')}\n${baseBlock}` : baseBlock;
 
   return {
