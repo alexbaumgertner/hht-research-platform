@@ -9,7 +9,8 @@ export type EmbedLinks = {
   archive: string;
   subscribe: string;
   privacy: string;
-  item: (publicationId: string) => string;
+  /** URL template with an `{id}` placeholder. Plain data, so the cached model survives JSON. */
+  item: string;
 };
 
 export type EmbedModel = {
@@ -93,7 +94,7 @@ function renderIssue(m: EmbedModel, t: EmbedT): string {
     ? `<ul class="items"${langAttr}>${m.items
         .map(
           (i) =>
-            `<li class="item">${link(m.links.item(i.id), i.title, ' data-track="item"')}` +
+            `<li class="item">${link(m.links.item.replace('{id}', encodeURIComponent(i.id)), i.title, ' data-track="item"')}` +
             (i.isTrialRegistration
               ? ` <span class="tag">${escapeHtml(t('Issue.trialLabel'))}</span>`
               : '') +

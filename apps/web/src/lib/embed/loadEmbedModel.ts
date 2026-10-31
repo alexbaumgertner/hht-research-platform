@@ -12,6 +12,9 @@ import { translateIssueText } from '@/lib/issueTextTranslation';
 import { toIssueDetail } from '@/lib/issues';
 import { getPublicSiteUrl } from '@/lib/siteUrl';
 
+/** Bump when `EmbedModel` changes shape: cached entries outlive deployments. */
+const EMBED_MODEL_CACHE_KEY = 'embed-model-v2';
+
 export function embedLinks(input: {
   siteUrl: string;
   locale: Locale;
@@ -27,7 +30,7 @@ export function embedLinks(input: {
     archive: `${project}/issues?${src}`,
     subscribe: `${project}?${src}#subscribe`,
     privacy: `${base}/privacy`,
-    item: (id) => `${project}/publications/${encodeURIComponent(id)}?${src}`,
+    item: `${project}/publications/{id}?${src}`,
   };
 }
 
@@ -86,7 +89,7 @@ export async function loadEmbedModel(input: {
   const { slug, partnerKey, locale, options } = input;
   return unstable_cache(
     () => build(slug, partnerKey, locale, options),
-    ['embed-model', slug, partnerKey, locale, formatEmbedOptions(options)],
+    [EMBED_MODEL_CACHE_KEY, slug, partnerKey, locale, formatEmbedOptions(options)],
     { tags: [embedTag(project.id)], revalidate: 3600 },
   )();
 }

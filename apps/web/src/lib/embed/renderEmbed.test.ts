@@ -49,19 +49,24 @@ function model(over: Partial<EmbedModel> = {}, issue: Partial<IssueDetail> = {})
       archive: `${SITE}/ru/projects/proj/issues?src=site:acme`,
       subscribe: `${SITE}/ru/projects/proj?src=site:acme#subscribe`,
       privacy: `${SITE}/ru/privacy`,
-      item: (id: string) => `${SITE}/ru/projects/proj/publications/${id}?src=site:acme`,
+      item: `${SITE}/ru/projects/proj/publications/{id}?src=site:acme`,
     },
     ...over,
   };
 }
 
 describe('renderEmbed', () => {
+  it('survives a JSON round trip (the model is cached)', () => {
+    const m = JSON.parse(JSON.stringify(model())) as EmbedModel;
+    expect(renderEmbed(m, t)).toContain('/publications/1?src=site:acme');
+  });
+
   it('escapes hostile text and rejects non-http urls', () => {
     const evil = `<script>alert(1)</script> "q" 'a' &`;
     const m = model({ project: { id: 1, slug: 'proj', name: evil } });
     m.items = [item(1, { title: evil, sentence: evil })];
     m.issue = { ...m.issue!, summary: { points: [{ text: evil, itemIds: [] }] } };
-    m.links.item = () => 'javascript:alert(1)';
+    m.links.item = 'javascript:alert({id})';
     const html = renderEmbed(m, t);
     expect(html).not.toContain('<script>alert');
     expect(html).not.toContain('javascript:');

@@ -386,7 +386,7 @@ implemented and verified on its own.
   Run the `security-review` skill on the branch and fix confirmed findings.
 
 - [ ] T063 [P] Add assertions to `apps/web/tests/e2e/embed-content.spec.ts` for both widget document routes (`/embed/:locale/:slug/:partner/:options` and `/embed/:locale/:slug/:partner/:options/:notice`): valid-partner responses never contain `X-Frame-Options` or `frame-ancestors 'none'`. This guards against the separate "Harden framing on non-widget routes" task breaking the widget (research R2).
-- [ ] T071 [P] In `apps/web/next.config.ts`, keep both global framing headers on non-widget routes while excluding exactly the two widget document route patterns (`/embed/:locale/:slug/:partner/:options` and `/embed/:locale/:slug/:partner/:options/:notice`) from both headers. Verify non-widget routes retain `frame-ancestors 'none'` and `X-Frame-Options: DENY` (research R2, T063).
+- [x] T071 [P] In `apps/web/next.config.ts`, keep both global framing headers on non-widget routes while excluding exactly the two widget document route patterns (`/embed/:locale/:slug/:partner/:options` and `/embed/:locale/:slug/:partner/:options/:notice`) from both headers. Verify non-widget routes retain `frame-ancestors 'none'` and `X-Frame-Options: DENY` (research R2, T063).
 - [ ] T064 Run the full gates: `pnpm check 2>&1 | tail -50`, `pnpm format:check 2>&1 | tail -20`, `pnpm --filter @hht/web test:e2e 2>&1 | tail -50`, and `pnpm --filter @hht/web build 2>&1 | tail -30`. Fix any failures. Then do the quickstart §1–§3 walkthrough.
 
 ---
