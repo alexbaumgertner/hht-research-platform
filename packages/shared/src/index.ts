@@ -114,6 +114,7 @@ export * from './schedule.js';
 export * from './subscriberEmail.js';
 export * from './chatSource.js';
 export * from './embed.js';
+export * from './embedSnippet.js';
 export * from './deliveryDecision.js';
 export * from './issueEmailBody.js';
 export * from './chatPost.js';

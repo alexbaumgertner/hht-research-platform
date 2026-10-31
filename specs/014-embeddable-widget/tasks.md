@@ -246,14 +246,14 @@ implemented and verified on its own.
   No cookies, storage or `eval`. Make T032 and T033 pass.
 
 - [x] T037 [P] [US2] Add a `headers()` entry in `apps/web/next.config.ts` for `source: '/embed/v1.js'` with `Cache-Control: public, max-age=3600`. Make no other header changes (contract `embed-endpoints.md`).
-- [ ] T038 [P] [US2] Write failing tests, then implement, `packages/shared/src/embedSnippet.ts` and `embedSnippet.test.ts`:
+- [x] T038 [P] [US2] Write failing tests, then implement, `packages/shared/src/embedSnippet.ts` and `embedSnippet.test.ts`:
   - `buildScriptSnippet({ siteUrl, project, partner, locale, items, theme, subscribe, fallback: { sentence, communityLabel, communityUrl?, subscribeLabel, subscribeUrl } })`;
   - `buildIframeSnippet({ siteUrl, project, partner, locale, options, title, height })`.
 
   Output matches contract `embed-snippet.md` byte for byte for a fixture. All text is HTML-escaped, and the subscribe URL carries `?src=site:<key>#subscribe`.
 
-- [ ] T039 [US2] Add the admin UI field `embedSnippets` (`type: 'ui'`) to `apps/web/src/collections/ResearchProjects.ts`, rendered by the new `apps/web/src/components/admin/EmbedSnippets.tsx` in the style of `IssuePostKit`. For each saved partner, it shows the script snippet and the plain-frame snippet in `ru` and `en`, built with `buildScriptSnippet`/`buildIframeSnippet` and the `Widget.fallback*` messages plus `fallbackCommunityUrl`, each with a copy button. Run `pnpm --filter @hht/web generate:importmap`.
-- [ ] T040 [P] [US2] Write the partner instructions `docs/embed-widget.md` (FR-031). Cover:
+- [x] T039 [US2] Add the admin UI field `embedSnippets` (`type: 'ui'`) to `apps/web/src/collections/ResearchProjects.ts`, rendered by the new `apps/web/src/components/admin/EmbedSnippets.tsx` in the style of `IssuePostKit`. For each saved partner, it shows the script snippet and the plain-frame snippet in `ru` and `en`, built with `buildScriptSnippet`/`buildIframeSnippet` and the `Widget.fallback*` messages plus `fallbackCommunityUrl`, each with a copy button. Run `pnpm --filter @hht/web generate:importmap`.
+- [x] T040 [P] [US2] Write the partner instructions `docs/embed-widget.md` (FR-031). Cover:
   - what the widget shows;
   - the script snippet, with every attribute and its default and invalid-value behavior, copied from contract `embed-snippet.md`;
   - the plain frame snippet and when to use it;
@@ -264,7 +264,8 @@ implemented and verified on its own.
 
   Link it from `README.md`.
 
-- [ ] T041 [US2] Make T032–T033 pass. Then verify with Playwright MCP on the production build using `apps/web/tests/fixtures/partner-host.html`, served by `python3 -m http.server 4310 --bind 127.0.0.1` (quickstart §2):
+- [x] T041 [US2] Make T032–T033 pass. Then verify with Playwright MCP on the production build using `apps/web/tests/fixtures/partner-host.html`, served by `python3 -m http.server 4310 --bind 127.0.0.1` (quickstart §2):
+  - _Verified through `embed-snippet.spec.ts` on `next dev`: allowed origin renders and resizes, a non-allowed origin keeps the fallback, an unreachable embed page or loader keeps the fallback. Not yet run against a production build._
   - `http://127.0.0.1:4310` renders and resizes;
   - `http://localhost:4310` keeps the fallback;
   - stopping the server leaves the fallback.
