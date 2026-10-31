@@ -1,14 +1,18 @@
 import type { Summary } from '@hht/shared';
 
 import {
+  classifyStudyCategory,
   collapseImportance,
+  extractReferenceIds,
   filterMaterials,
+  normalizeTrialInfo,
   pickNonEmptySections,
   placeholderTitle,
   resolveEmptyState,
   resolveLocalizedContent,
   resolveLocalizedDetail,
   resolveSource,
+  SUMMARY_SECTION_KEYS,
   toMaterial,
   toMaterialDetail,
 } from './materials';
@@ -370,5 +374,39 @@ describe('toMaterialDetail', () => {
       'en',
     );
     expect(detail.abstractIsFallback).toBe(false);
+  });
+
+  it('places whyItMatters first in SUMMARY_SECTION_KEYS for patient readability', () => {
+    expect(SUMMARY_SECTION_KEYS[0]).toBe('whyItMatters');
+  });
+
+  it('classifies study category, normalizes trial metadata, and extracts reference IDs', () => {
+    expect(classifyStudyCategory(['Case Reports'], 'pubmed')).toBe('caseReport');
+    expect(classifyStudyCategory(['Randomized Controlled Trial'], 'pubmed')).toBe('clinicalStudy');
+    expect(classifyStudyCategory(['Systematic Review'], 'pubmed')).toBe('review');
+    expect(classifyStudyCategory(['Practice Guideline'], 'pubmed')).toBe('guideline');
+    expect(classifyStudyCategory([], 'clinicaltrials')).toBe('trialRegistration');
+
+    const trial = normalizeTrialInfo({
+      overallStatus: 'RECRUITING',
+      phases: ['PHASE2', 'NA'],
+      countries: ['United States', 'Germany'],
+      minimumAge: '18 Years',
+      maximumAge: '75 Years',
+      sex: 'ALL',
+    });
+    expect(trial).toEqual({
+      recruitmentStatus: 'recruiting',
+      phases: ['Phase 2'],
+      countries: ['United States', 'Germany'],
+      minimumAge: '18 Years',
+      maximumAge: '75 Years',
+      sex: 'all',
+    });
+
+    expect(extractReferenceIds({ pmid: '12345', doi: '10.1000/xyz', nctId: null })).toEqual({
+      pmid: '12345',
+      doi: '10.1000/xyz',
+    });
   });
 });

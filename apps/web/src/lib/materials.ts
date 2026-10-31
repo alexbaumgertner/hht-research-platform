@@ -8,6 +8,27 @@ export type MaterialSourceOrFallback = MaterialSource | 'unknown';
 export type DisplayImportance = 'normal' | 'high';
 export type DisplayCategory = 'news' | 'guideline' | 'social';
 
+export type StudyCategory =
+  'guideline' | 'review' | 'clinicalStudy' | 'caseReport' | 'trialRegistration';
+
+export type RecruitmentStatus =
+  'recruiting' | 'notYetRecruiting' | 'active' | 'completed' | 'other';
+
+export type TrialInfo = {
+  recruitmentStatus?: RecruitmentStatus;
+  phases: string[];
+  countries: string[];
+  minimumAge?: string;
+  maximumAge?: string;
+  sex?: 'all' | 'female' | 'male';
+};
+
+export type ReferenceIds = {
+  pmid?: string;
+  doi?: string;
+  nctId?: string;
+};
+
 export type Material = {
   id: string;
   source: MaterialSourceOrFallback;
@@ -18,14 +39,16 @@ export type Material = {
   summary: string | null;
   displayedLocale: Locale;
   isFallback: boolean;
+  studyCategory?: StudyCategory | null;
+  recruitmentStatus?: RecruitmentStatus | null;
 };
 
 export const SUMMARY_SECTION_KEYS = [
-  'objective',
-  'methods',
-  'results',
-  'limitations',
   'whyItMatters',
+  'objective',
+  'results',
+  'methods',
+  'limitations',
 ] as const;
 
 export type SummarySectionKey = (typeof SUMMARY_SECTION_KEYS)[number];
@@ -43,6 +66,9 @@ export type MaterialDetail = {
   displayedLocale: Locale;
   isFallback: boolean;
   abstractIsFallback: boolean;
+  studyCategory?: StudyCategory | null;
+  trial?: TrialInfo | null;
+  referenceIds?: ReferenceIds | null;
 };
 
 /** Ordered chip set for the source filter (FR-025). */
@@ -69,6 +95,21 @@ export type PublicationForMaterial = {
   originalUrl?: string | null;
   abstractOrBody?: string | null;
   summary?: Partial<Summary> | null;
+  publicationTypes?: string[] | null;
+  externalIds?: {
+    pmid?: string | null;
+    doi?: string | null;
+    nctId?: string | null;
+    guid?: string | null;
+  } | null;
+  trialMetadata?: {
+    overallStatus?: string | null;
+    phases?: string[] | null;
+    countries?: string[] | null;
+    minimumAge?: string | null;
+    maximumAge?: string | null;
+    sex?: string | null;
+  } | null;
   monitoredSource?:
     | {
         id?: string | number;
@@ -245,6 +286,110 @@ function extractDisplayCategory(
   return null;
 }
 
+/** Map PubMed publicationTypes / sourceType into a patient-friendly study category. */
+export function classifyStudyCategory(
+  publicationTypes?: string[] | null,
+  sourceType?: string | null,
+): StudyCategory | null {
+  if (sourceType === 'clinicaltrials') return 'trialRegistration';
+  const types = (publicationTypes ?? []).map((t) => t.trim()).filter(Boolean);
+  if (types.length === 0) return null;
+
+  if (types.some((t) => /guideline|consensus/i.test(t))) return 'guideline';
+  if (
+    types.some((t) =>
+      /randomized controlled trial|clinical trial|clinical study|observational study|multicenter study|comparative study/i.test(
+        t,
+      ),
+    )
+  ) {
+    return 'clinicalStudy';
+  }
+  if (types.some((t) => /systematic review|meta-analysis|\breview\b/i.test(t))) {
+    return 'review';
+  }
+  if (types.some((t) => /case reports?/i.test(t))) return 'caseReport';
+  return null;
+}
+
+function normalizePhase(raw: string): string {
+  const cleaned = raw.trim().toUpperCase();
+  if (cleaned === 'EARLY_PHASE1') return 'Early Phase 1';
+  const match = cleaned.match(/^PHASE\s*(\d+)$/);
+  if (match) return `Phase ${match[1]}`;
+  return raw.trim();
+}
+
+export function normalizeRecruitmentStatus(
+  overallStatus?: string | null,
+): RecruitmentStatus | undefined {
+  const cleaned = overallStatus?.trim().toUpperCase();
+  if (!cleaned) return undefined;
+  if (cleaned === 'RECRUITING' || cleaned === 'ENROLLING_BY_INVITATION') return 'recruiting';
+  if (cleaned === 'NOT_YET_RECRUITING') return 'notYetRecruiting';
+  if (cleaned === 'ACTIVE_NOT_RECRUITING') return 'active';
+  if (cleaned === 'COMPLETED') return 'completed';
+  return 'other';
+}
+
+export function normalizeTrialInfo(
+  raw?: PublicationForMaterial['trialMetadata'],
+): TrialInfo | null {
+  if (!raw) return null;
+  const recruitmentStatus = normalizeRecruitmentStatus(raw.overallStatus);
+  const phases = (raw.phases ?? [])
+    .map((p) => p?.trim() ?? '')
+    .filter((p) => Boolean(p) && p.toUpperCase() !== 'NA')
+    .map(normalizePhase);
+  const countries = (raw.countries ?? []).map((c) => c?.trim() ?? '').filter(Boolean);
+  const minimumAge = raw.minimumAge?.trim() || undefined;
+  const maximumAge = raw.maximumAge?.trim() || undefined;
+  const sexRaw = raw.sex?.trim().toUpperCase();
+  const sex: TrialInfo['sex'] =
+    sexRaw === 'ALL'
+      ? 'all'
+      : sexRaw === 'FEMALE'
+        ? 'female'
+        : sexRaw === 'MALE'
+          ? 'male'
+          : undefined;
+
+  if (
+    !recruitmentStatus &&
+    phases.length === 0 &&
+    countries.length === 0 &&
+    !minimumAge &&
+    !maximumAge &&
+    !sex
+  ) {
+    return null;
+  }
+
+  return {
+    ...(recruitmentStatus ? { recruitmentStatus } : {}),
+    phases,
+    countries,
+    ...(minimumAge ? { minimumAge } : {}),
+    ...(maximumAge ? { maximumAge } : {}),
+    ...(sex ? { sex } : {}),
+  };
+}
+
+export function extractReferenceIds(
+  raw?: PublicationForMaterial['externalIds'],
+): ReferenceIds | null {
+  if (!raw) return null;
+  const pmid = raw.pmid?.trim() || undefined;
+  const doi = raw.doi?.trim() || undefined;
+  const nctId = raw.nctId?.trim() || undefined;
+  if (!pmid && !doi && !nctId) return null;
+  return {
+    ...(pmid ? { pmid } : {}),
+    ...(doi ? { doi } : {}),
+    ...(nctId ? { nctId } : {}),
+  };
+}
+
 /** Single boundary: internal publication → reader-facing Material (R11). */
 export function toMaterial(
   publication: PublicationForMaterial,
@@ -267,6 +412,9 @@ export function toMaterial(
   });
 
   const title = localized.title.trim() || placeholderTitle(source, date);
+  const studyCategory = classifyStudyCategory(publication.publicationTypes, publication.sourceType);
+  const recruitmentStatus =
+    normalizeRecruitmentStatus(publication.trialMetadata?.overallStatus) ?? null;
 
   return {
     id: String(publication.id),
@@ -278,6 +426,8 @@ export function toMaterial(
     summary: localized.summary,
     displayedLocale: localized.displayedLocale,
     isFallback: localized.isFallback,
+    studyCategory,
+    recruitmentStatus,
   };
 }
 
@@ -304,6 +454,9 @@ export function toMaterialDetail(
 
   const title = localized.title.trim() || placeholderTitle(source, date);
   const abstractOrBody = publication.abstractOrBody?.trim() || null;
+  const studyCategory = classifyStudyCategory(publication.publicationTypes, publication.sourceType);
+  const trial = normalizeTrialInfo(publication.trialMetadata);
+  const referenceIds = extractReferenceIds(publication.externalIds);
 
   return {
     id: String(publication.id),
@@ -317,6 +470,9 @@ export function toMaterialDetail(
     displayedLocale: localized.displayedLocale,
     isFallback: localized.isFallback,
     abstractIsFallback: Boolean(abstractOrBody) && locale !== 'en',
+    studyCategory,
+    trial,
+    referenceIds,
   };
 }
 

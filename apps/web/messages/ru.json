@@ -34,6 +34,20 @@
       "social": "Соцсети",
       "unknown": "Другое"
     },
+    "studyCategory": {
+      "guideline": "Клинические рекомендации",
+      "review": "Обзор исследований",
+      "clinicalStudy": "Клиническое исследование",
+      "caseReport": "Описание отдельного случая",
+      "trialRegistration": "Зарегистрированное исследование"
+    },
+    "recruitment": {
+      "recruiting": "Идёт набор участников",
+      "notYetRecruiting": "Набор ещё не начат",
+      "active": "Активно, набор закрыт",
+      "completed": "Завершено",
+      "other": "Другой статус"
+    },
     "highImportance": "Высокая важность",
     "emptyProject": "Для этого проекта ещё ничего не опубликовано.",
     "noMatches": "Нет материалов, подходящих под фильтры.",
@@ -58,6 +72,18 @@
     "originalLink": "Открыть первоисточник",
     "backToFeed": "Назад к ленте",
     "abstractHeading": "Аннотация",
+    "trialLabel": "Зарегистрированное исследование, результатов пока нет",
+    "trialInfoHeading": "Информация об исследовании для пациентов",
+    "trialStatusLabel": "Статус",
+    "trialPhaseLabel": "Фаза",
+    "trialCountriesLabel": "Страны проведения",
+    "trialEligibilityLabel": "Кто может участвовать",
+    "trialSex": {
+      "all": "Любой пол",
+      "female": "Женщины",
+      "male": "Мужчины"
+    },
+    "forYourDoctorHeading": "Для вашего врача",
     "notFound": "Этот материал не найден.",
     "loadError": "Не удалось загрузить этот материал. Попробуйте ещё раз.",
     "retry": "Повторить"

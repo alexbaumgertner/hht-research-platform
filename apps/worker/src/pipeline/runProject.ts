@@ -117,6 +117,21 @@ export async function runProject(
         const key = dedupeKey(candidate.externalIds, candidate.title, candidate.sourceType);
         const existing = await cms.findPublicationByDedupe(project.id, key);
         if (existing) {
+          if (candidate.trialMetadata) {
+            try {
+              await cms.updatePublication(existing.id, {
+                trialMetadata: candidate.trialMetadata,
+                ...(candidate.publishedOrUpdatedAt
+                  ? { publishedOrUpdatedAt: candidate.publishedOrUpdatedAt.toISOString() }
+                  : {}),
+              });
+            } catch (err) {
+              logError('trial metadata refresh failed', err, {
+                projectId: project.id,
+                publicationId: existing.id,
+              });
+            }
+          }
           stats.deduped += 1;
           continue;
         }
@@ -139,6 +154,7 @@ export async function runProject(
             originalUrl: candidate.originalUrl,
             publishedOrUpdatedAt: candidate.publishedOrUpdatedAt?.toISOString(),
             publicationTypes: candidate.publicationTypes,
+            ...(candidate.trialMetadata ? { trialMetadata: candidate.trialMetadata } : {}),
             relevance: 'irrelevant',
             firstSeenRun: runId,
             monitoredSource: source.id,
@@ -150,6 +166,9 @@ export async function runProject(
           title: candidate.title,
           abstractOrBody: candidate.abstractOrBody,
           keywords: project.keywords,
+          sourceType: candidate.sourceType,
+          publicationTypes: candidate.publicationTypes,
+          trialOverallStatus: candidate.trialMetadata?.overallStatus,
         });
         stats.summarized += 1;
 
@@ -163,6 +182,7 @@ export async function runProject(
           originalUrl: candidate.originalUrl,
           publishedOrUpdatedAt: candidate.publishedOrUpdatedAt?.toISOString(),
           publicationTypes: candidate.publicationTypes,
+          ...(candidate.trialMetadata ? { trialMetadata: candidate.trialMetadata } : {}),
           relevance: 'relevant',
           importance,
           summary,
