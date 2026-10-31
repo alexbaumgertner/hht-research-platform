@@ -3,6 +3,7 @@ import {
   assertDigestHasPublications,
   capCreateDepth,
   embedRelevantChange,
+  previousEmbedProject,
   invalidateIssueTranslations,
   issueTextFingerprint,
   resolveRelationshipId,
@@ -390,7 +391,24 @@ describe('embedRelevantChange', () => {
     expect(embedRelevantChange({ ...base, issueTextRevision: 2 }, base)).toBe(true);
     expect(embedRelevantChange({ ...base, publications: [1] }, base)).toBe(true);
   });
+  it('is true when the date or the project changes, ignoring populated vs id form', () => {
+    expect(embedRelevantChange({ ...base, publishedAt: 'b' }, { ...base, publishedAt: 'a' })).toBe(
+      true,
+    );
+    expect(embedRelevantChange({ ...base, project: 2 }, { ...base, project: 1 })).toBe(true);
+    expect(embedRelevantChange({ ...base, project: { id: 1 } }, { ...base, project: 1 })).toBe(
+      false,
+    );
+  });
   it('is true without a previous doc', () => {
     expect(embedRelevantChange(base, null)).toBe(true);
+  });
+});
+
+describe('previousEmbedProject', () => {
+  it('returns the old project only when the digest moved', () => {
+    expect(previousEmbedProject({ project: 2 }, { project: 1 })).toBe(1);
+    expect(previousEmbedProject({ project: { id: 1 } }, { project: 1 })).toBeUndefined();
+    expect(previousEmbedProject({ project: 1 }, null)).toBeUndefined();
   });
 });

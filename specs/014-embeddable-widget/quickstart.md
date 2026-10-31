@@ -31,7 +31,9 @@ Jest must cover:
 - **Redirect mapping**: subscribe redirects to `/embed/…/{notice}`.
 
 Playwright (`tests/e2e/embed.spec.ts`) must cover the following. The test host page is served by
-`page.route('http://partner.test/**')` and `page.route('http://blocked.test/**')`.
+`page.route('http://127.0.0.1:4310/**')` (allowed) and `page.route('http://localhost:4310/**')`
+(not allowed). Chrome blocks fake public hosts such as `partner.test` from framing localhost as a
+local-network request, so the helpers use loopback origins.
 
 | Scenario                                                                                                    | Spec                   |
 | ----------------------------------------------------------------------------------------------------------- | ---------------------- |
@@ -56,8 +58,15 @@ Playwright (`tests/e2e/embed.spec.ts`) must cover the following. The test host p
 
 The same file is served from two origins: `127.0.0.1` is allowed and `localhost` is not.
 
+The fixtures contain a `__BASE__` placeholder for the widget origin (Playwright fills it in).
+For a manual check, render copies with the real base URL first, then serve those copies:
+
 ```bash
-cd apps/web/tests/fixtures && python3 -m http.server 4310 --bind 127.0.0.1
+mkdir -p /tmp/partner-host
+for f in partner-host.html partner-host-iframe.html; do
+  sed 's#__BASE__#http://localhost:3000#g' apps/web/tests/fixtures/$f > /tmp/partner-host/$f
+done
+cd /tmp/partner-host && python3 -m http.server 4310 --bind 127.0.0.1
 ```
 
 - Open `http://127.0.0.1:4310/partner-host.html`. The fixture contains the script snippet pointing

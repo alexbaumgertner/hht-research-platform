@@ -196,6 +196,8 @@ export async function invalidateIssueTranslations(
 
 const EMBED_FIELDS = [
   'hiddenFromPublic',
+  'publishedAt',
+  'project',
   'issueTextStatus',
   'issueTextRevision',
   'issueSummaryPoints',
@@ -203,13 +205,26 @@ const EMBED_FIELDS = [
   'publications',
 ] as const;
 
+function embedComparable(doc: Record<string, unknown>, field: string): string {
+  const value = field === 'project' ? resolveRelationshipId(doc.project) : doc[field];
+  return JSON.stringify(value ?? null);
+}
+
 /** True when a digest update changes what the embed widget shows (spec 014 FR-004). */
 export function embedRelevantChange(
   doc: Record<string, unknown>,
   previousDoc: Record<string, unknown> | null | undefined,
 ): boolean {
   if (!previousDoc) return true;
-  return EMBED_FIELDS.some(
-    (f) => JSON.stringify(doc[f] ?? null) !== JSON.stringify(previousDoc[f] ?? null),
-  );
+  return EMBED_FIELDS.some((f) => embedComparable(doc, f) !== embedComparable(previousDoc, f));
+}
+
+/** The project a digest moved away from, whose widget also has to be refreshed. */
+export function previousEmbedProject(
+  doc: Record<string, unknown>,
+  previousDoc: Record<string, unknown> | null | undefined,
+): string | number | undefined {
+  if (!previousDoc) return undefined;
+  const before = resolveRelationshipId(previousDoc.project);
+  return before != null && before !== resolveRelationshipId(doc.project) ? before : undefined;
 }

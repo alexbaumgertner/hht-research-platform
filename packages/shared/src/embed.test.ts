@@ -60,6 +60,13 @@ describe('embed options', () => {
     expect(r.canonical).toBe('auto-3-form');
     expect(r.changed).toBe(true);
   });
+  it('keeps the valid parts when one part is bad', () => {
+    expect(parseEmbedOptions('dark-99-link').canonical).toBe('dark-3-link');
+    expect(parseEmbedOptions('light-5-x').canonical).toBe('light-5-form');
+    expect(parseEmbedOptions('x-7-link').canonical).toBe('auto-7-link');
+    expect(parseEmbedOptions('auto-3-form-extra').changed).toBe(true);
+    expect(parseEmbedOptions('').canonical).toBe('auto-3-form');
+  });
   it('rejects items out of 1..20', () => {
     expect(parseEmbedOptions('auto-0-form').changed).toBe(true);
     expect(parseEmbedOptions('auto-20-form').changed).toBe(false);

@@ -24,13 +24,14 @@ async function revalidateViaRoute(projectId: string | number): Promise<void> {
 }
 
 /**
- * Expires every cached embed page of a project. Never throws: a failed hook must not block a save.
- * Inside a render context it hands over to the internal route instead (fire and forget).
+ * Expires every cached embed page of a project. Never rejects: a failed hook must not block a save.
+ * Inside a render context it hands over to the internal route; callers that run as background work
+ * (`after()`) should await the result so the request is not cut short.
  */
-export function revalidateEmbed(
+export async function revalidateEmbed(
   projectId: string | number,
   options: { viaRoute?: boolean } = {},
-): void {
+): Promise<void> {
   const log = (error: unknown) =>
     console.error('[embed] revalidate failed', {
       projectId: String(projectId),
@@ -40,7 +41,7 @@ export function revalidateEmbed(
     revalidateTag(embedTag(projectId), { expire: 0 });
   } catch (error) {
     if (options.viaRoute !== false && isRenderContextError(error)) {
-      revalidateViaRoute(projectId).catch(log);
+      await revalidateViaRoute(projectId).catch(log);
       return;
     }
     log(error);

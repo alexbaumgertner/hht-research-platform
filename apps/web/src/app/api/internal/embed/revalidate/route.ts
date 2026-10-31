@@ -18,6 +18,6 @@ export async function POST(req: Request) {
   if (typeof projectId !== 'string' && typeof projectId !== 'number') {
     return NextResponse.json({ error: 'projectId required' }, { status: 400 });
   }
-  revalidateEmbed(projectId, { viaRoute: false });
+  await revalidateEmbed(projectId, { viaRoute: false });
   return NextResponse.json({ ok: true });
 }

@@ -18,6 +18,7 @@ import {
   assertDigestHasPublications,
   capCreateDepth,
   embedRelevantChange,
+  previousEmbedProject,
   invalidateIssueTranslations,
   resolveRelationshipId,
   stampFeedPublishedAt,
@@ -70,17 +71,27 @@ export const Digests: CollectionConfig = {
         return applyIssueTextRules({ data, originalDoc, req });
       },
     ],
+    afterDelete: [
+      async ({ doc }) => {
+        const projectId = resolveRelationshipId(doc.project);
+        if (projectId) await revalidateEmbed(projectId);
+      },
+    ],
     afterChange: [
       async ({ doc, previousDoc, req, operation }) => {
         const projectId = resolveRelationshipId(doc.project);
         if (operation === 'update') {
           await invalidateIssueTranslations(doc, previousDoc, req);
-          if (projectId && embedRelevantChange(doc, previousDoc)) revalidateEmbed(projectId);
+          if (projectId && embedRelevantChange(doc, previousDoc)) {
+            await revalidateEmbed(projectId);
+            const movedFrom = previousEmbedProject(doc, previousDoc);
+            if (movedFrom != null) await revalidateEmbed(movedFrom);
+          }
           return;
         }
         if (operation !== 'create') return;
         if (!projectId) return;
-        revalidateEmbed(projectId);
+        await revalidateEmbed(projectId);
         // Email is sent by the worker (`sendDigestPublishedEmail`), not this hook.
         // Nested `payload.update()` *without* `req` starts a second postgres
         // transaction while create still holds the first — that stalls the pool

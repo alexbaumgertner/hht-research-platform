@@ -177,7 +177,7 @@ export function createPayloadTranslationStore(): TranslationStore {
             })
           : null;
         const projectId = relationId(digest?.project);
-        if (projectId) revalidateEmbed(projectId);
+        if (projectId) await revalidateEmbed(projectId);
       }
       return updated.docs.length > 0;
     },

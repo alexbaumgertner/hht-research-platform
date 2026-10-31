@@ -33,21 +33,25 @@ export type EmbedOptions = { theme: EmbedTheme; items: number; mode: EmbedMode }
 
 export const DEFAULT_EMBED_OPTIONS: EmbedOptions = { theme: 'auto', items: 3, mode: 'form' };
 
-const OPTIONS_RE = /^(auto|light|dark)-([1-9]|1[0-9]|20)-(form|link)$/;
-
 export function formatEmbedOptions(o: EmbedOptions): string {
   return `${o.theme}-${o.items}-${o.mode}`;
 }
 
+/** Each part is validated on its own, so one bad part doesn't reset the good ones. */
 export function parseEmbedOptions(segment: string): {
   options: EmbedOptions;
   canonical: string;
   changed: boolean;
 } {
-  const m = OPTIONS_RE.exec(segment);
-  const options: EmbedOptions = m
-    ? { theme: m[1] as EmbedTheme, items: Number(m[2]), mode: m[3] as EmbedMode }
-    : { ...DEFAULT_EMBED_OPTIONS };
+  const [theme, items, mode] = segment.split('-');
+  const options: EmbedOptions = {
+    theme:
+      theme === 'light' || theme === 'dark' || theme === 'auto'
+        ? theme
+        : DEFAULT_EMBED_OPTIONS.theme,
+    items: /^([1-9]|1[0-9]|20)$/.test(items ?? '') ? Number(items) : DEFAULT_EMBED_OPTIONS.items,
+    mode: mode === 'link' || mode === 'form' ? mode : DEFAULT_EMBED_OPTIONS.mode,
+  };
   const canonical = formatEmbedOptions(options);
   return { options, canonical, changed: canonical !== segment };
 }

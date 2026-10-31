@@ -28,15 +28,20 @@ export const ResearchProjects: CollectionConfig = {
     delete: isAuthenticated,
   },
   hooks: {
+    afterDelete: [
+      async ({ id }) => {
+        await revalidateEmbed(id);
+      },
+    ],
     afterChange: [
-      ({ doc, previousDoc }) => {
+      async ({ doc, previousDoc }) => {
         const watched = ['embedPartners', 'name', 'slug'] as const;
         const changed =
           !previousDoc ||
           watched.some(
             (f) => JSON.stringify(doc[f] ?? null) !== JSON.stringify(previousDoc[f] ?? null),
           );
-        if (changed) revalidateEmbed(doc.id);
+        if (changed) await revalidateEmbed(doc.id);
         return doc;
       },
     ],
