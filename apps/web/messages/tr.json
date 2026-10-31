@@ -34,6 +34,20 @@
       "social": "Sosyal",
       "unknown": "Diğer"
     },
+    "studyCategory": {
+      "guideline": "Klinik kılavuz",
+      "review": "Araştırma derlemesi",
+      "clinicalStudy": "Klinik çalışma",
+      "caseReport": "Olgu sunumu",
+      "trialRegistration": "Kayıtlı çalışma"
+    },
+    "recruitment": {
+      "recruiting": "Katılımcı alımı açık",
+      "notYetRecruiting": "Katılımcı alımı henüz başlamadı",
+      "active": "Aktif, alım kapalı",
+      "completed": "Tamamlandı",
+      "other": "Diğer durum"
+    },
     "highImportance": "Yüksek önem",
     "emptyProject": "Bu proje için henüz yayımlanmış materyal yok.",
     "noMatches": "Filtrelerinize uyan materyal yok.",
@@ -58,6 +72,18 @@
     "originalLink": "Orijinal kaynağı görüntüle",
     "backToFeed": "Akışa dön",
     "abstractHeading": "Özet",
+    "trialLabel": "Kayıtlı çalışma, henüz sonuç yok",
+    "trialInfoHeading": "Katılımcılar için çalışma bilgileri",
+    "trialStatusLabel": "Durum",
+    "trialPhaseLabel": "Faz",
+    "trialCountriesLabel": "Ülkeler",
+    "trialEligibilityLabel": "Katılım kriterleri",
+    "trialSex": {
+      "all": "Tüm cinsiyetler",
+      "female": "Kadın",
+      "male": "Erkek"
+    },
+    "forYourDoctorHeading": "Doktorunuz için",
     "notFound": "Bu materyal bulunamadı.",
     "loadError": "Bu materyal yüklenemedi. Lütfen yeniden deneyin.",
     "retry": "Yeniden dene"

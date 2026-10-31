@@ -54,10 +54,16 @@ async function main(): Promise<void> {
   for (const publication of trials) {
     try {
       const candidate = studyToCandidate(await fetchStudy(publication.externalIds!.nctId!));
-      if (!candidate?.publishedOrUpdatedAt) continue;
-      await cms.updatePublication(publication.id, {
-        publishedOrUpdatedAt: candidate.publishedOrUpdatedAt.toISOString(),
-      });
+      if (!candidate) continue;
+      const patch: Record<string, unknown> = {};
+      if (candidate.publishedOrUpdatedAt) {
+        patch.publishedOrUpdatedAt = candidate.publishedOrUpdatedAt.toISOString();
+      }
+      if (candidate.trialMetadata) {
+        patch.trialMetadata = candidate.trialMetadata;
+      }
+      if (Object.keys(patch).length === 0) continue;
+      await cms.updatePublication(publication.id, patch);
       updated += 1;
     } catch (err) {
       failed += 1;

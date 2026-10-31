@@ -150,6 +150,15 @@ async function seed() {
     url: string;
     translateDe?: boolean;
     includeAbstract?: boolean;
+    publicationTypes?: string[];
+    trialMetadata?: {
+      overallStatus?: string;
+      phases?: string[];
+      countries?: string[];
+      minimumAge?: string;
+      maximumAge?: string;
+      sex?: string;
+    };
   }> = [
     {
       key: 'pubmed-high',
@@ -161,6 +170,7 @@ async function seed() {
       publishedOrUpdatedAt: '2026-08-20T10:00:00.000Z',
       url: 'https://pubmed.ncbi.nlm.nih.gov/seed-pubmed/',
       translateDe: true,
+      publicationTypes: ['Clinical Trial'],
     },
     {
       key: 'trials',
@@ -171,6 +181,14 @@ async function seed() {
       objective: 'Assess safety of anti-angiogenic therapy.',
       publishedOrUpdatedAt: '2026-08-18T10:00:00.000Z',
       url: 'https://clinicaltrials.gov/study/NCTSEED',
+      trialMetadata: {
+        overallStatus: 'RECRUITING',
+        phases: ['PHASE2'],
+        countries: ['United States', 'Germany'],
+        minimumAge: '18 Years',
+        maximumAge: '75 Years',
+        sex: 'ALL',
+      },
     },
     {
       key: 'news',
@@ -278,9 +296,14 @@ async function seed() {
           ...(sample.publishedOrUpdatedAt
             ? { publishedOrUpdatedAt: sample.publishedOrUpdatedAt }
             : {}),
+          ...(sample.publicationTypes ? { publicationTypes: sample.publicationTypes } : {}),
+          ...(sample.trialMetadata ? { trialMetadata: sample.trialMetadata } : {}),
           firstSeenRun: run.id,
           monitoredSource: sample.monitoredSource,
-          externalIds: { pmid: `SEED-${sample.key}` },
+          externalIds:
+            sample.sourceType === 'clinicaltrials'
+              ? { nctId: `NCT-${sample.key.toUpperCase()}` }
+              : { pmid: `SEED-${sample.key}` },
         },
         overrideAccess: true,
       });

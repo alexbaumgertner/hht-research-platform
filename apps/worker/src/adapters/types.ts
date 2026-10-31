@@ -5,6 +5,15 @@ export type ExternalIds = {
   guid?: string;
 };
 
+export type TrialMetadata = {
+  overallStatus?: string;
+  phases?: string[];
+  countries?: string[];
+  minimumAge?: string;
+  maximumAge?: string;
+  sex?: string;
+};
+
 export type Candidate = {
   externalIds: ExternalIds;
   title: string;
@@ -13,6 +22,8 @@ export type Candidate = {
   publishedOrUpdatedAt?: Date;
   /** PubMed PublicationType values (e.g. "Randomized Controlled Trial"); feeds importance rubric. */
   publicationTypes?: string[];
+  /** ClinicalTrials.gov protocol metadata for patient-facing display. */
+  trialMetadata?: TrialMetadata;
   sourceType: 'pubmed' | 'clinicaltrials' | 'rss';
 };
 

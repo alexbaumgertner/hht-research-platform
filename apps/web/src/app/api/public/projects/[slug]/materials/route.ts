@@ -80,6 +80,9 @@ export async function GET(req: Request, { params }: Params) {
       publishedOrUpdatedAt: doc.publishedOrUpdatedAt ?? null,
       originalUrl: doc.originalUrl,
       summary: (doc.summary as Summary | null) ?? null,
+      publicationTypes: doc.publicationTypes ?? null,
+      externalIds: doc.externalIds ?? null,
+      trialMetadata: doc.trialMetadata ?? null,
       monitoredSource: doc.monitoredSource as PublicationForMaterial['monitoredSource'],
     };
     return toMaterial(publication, locale, translationByPubId.get(String(doc.id)) ?? null);
