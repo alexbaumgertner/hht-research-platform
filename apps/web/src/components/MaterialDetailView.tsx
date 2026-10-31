@@ -14,6 +14,12 @@ export async function MaterialDetailView({ detail, locale }: Props) {
   const tMaterials = await getTranslations('Materials');
   const isHigh = detail.importance === 'high';
   const isTrial = detail.source === 'trials' || detail.studyCategory === 'trialRegistration';
+  const recruitmentStatus = detail.trial?.recruitmentStatus;
+  const isPreResultsTrial =
+    isTrial &&
+    (!recruitmentStatus ||
+      recruitmentStatus === 'recruiting' ||
+      recruitmentStatus === 'notYetRecruiting');
   const dateLabel = detail.date
     ? new Date(detail.date).toLocaleDateString(locale, {
         year: 'numeric',
@@ -47,12 +53,12 @@ export async function MaterialDetailView({ detail, locale }: Props) {
         <Stack gap="xs">
           <Group gap="sm" wrap="wrap">
             <SourceBadge source={detail.source} />
-            {detail.studyCategory && detail.studyCategory !== 'trialRegistration' ? (
+            {detail.studyCategory ? (
               <Badge variant="outline" color="gray" size="sm">
                 {tMaterials(`studyCategory.${detail.studyCategory}`)}
               </Badge>
             ) : null}
-            {isTrial ? (
+            {isPreResultsTrial ? (
               <Text size="xs" c="dimmed">
                 {t('trialLabel')}
               </Text>

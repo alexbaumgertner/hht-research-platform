@@ -38,6 +38,11 @@ export function MaterialCard({ material, locale, slug }: Props) {
       <Stack gap="xs">
         <Group gap="sm" wrap="wrap">
           <SourceBadge source={material.source} />
+          {material.studyCategory ? (
+            <Badge variant="outline" color="gray" size="sm">
+              {t(`studyCategory.${material.studyCategory}`)}
+            </Badge>
+          ) : null}
           {material.recruitmentStatus ? (
             <Badge
               variant="light"
@@ -45,10 +50,6 @@ export function MaterialCard({ material, locale, slug }: Props) {
               size="sm"
             >
               {t(`recruitment.${material.recruitmentStatus}`)}
-            </Badge>
-          ) : material.studyCategory && material.studyCategory !== 'trialRegistration' ? (
-            <Badge variant="outline" color="gray" size="sm">
-              {t(`studyCategory.${material.studyCategory}`)}
             </Badge>
           ) : null}
           {isHigh ? (

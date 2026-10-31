@@ -30,12 +30,24 @@ describe('buildSummarizePrompt', () => {
     expect(prompt).toContain('<untrusted_content>');
   });
 
-  it('marks clinical trial registrations as having no results yet', () => {
+  it('marks pre-results clinical trial registrations as having no results yet', () => {
     const { prompt } = buildSummarizePrompt({
       title: 'Phase II trial in HHT',
       keywords: ['HHT'],
       sourceType: 'clinicaltrials',
+      trialOverallStatus: 'RECRUITING',
     });
     expect(prompt).toMatch(/clinical trial registration.*no results yet/i);
+  });
+
+  it('does not claim no results yet when a clinical trial is completed', () => {
+    const { prompt } = buildSummarizePrompt({
+      title: 'Completed trial in HHT',
+      keywords: ['HHT'],
+      sourceType: 'clinicaltrials',
+      trialOverallStatus: 'COMPLETED',
+    });
+    expect(prompt).toMatch(/completed clinical trial record/i);
+    expect(prompt).not.toMatch(/no results yet/i);
   });
 });
