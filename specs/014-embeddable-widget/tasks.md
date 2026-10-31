@@ -146,8 +146,7 @@ implemented and verified on its own.
   - empty or missing origins give `frame-ancestors 'none'`;
   - it always sets `X-Robots-Tag: noindex, nofollow`, `Referrer-Policy: strict-origin-when-cross-origin` and `Content-Type: text/html; charset=utf-8`;
   - it never sets `X-Frame-Options` or `Set-Cookie`.
-- [ ] T020 [P] [US1] Write failing Playwright tests in `apps/web/tests/e2e/embed-content.spec.ts`, using `embed-helpers.ts` and `partner-host-iframe.html` content:
-  - _Status: the content, `items`, FR-009, routing, FR-016 and hide/unhide cases are written and passing. The translation-fallback (US1 #3, #4) and "no issue" (US1 #7) cases are still to add._
+- [x] T020 [P] [US1] Write failing Playwright tests in `apps/web/tests/e2e/embed-content.spec.ts`, using `embed-helpers.ts` and `partner-host-iframe.html` content:
   - **US1 #1, #5**: via `http://partner.test`, the frame shows the issue date heading, every summary point, the first 3 items in issue-page order (compare with `GET /api/public/projects/hht-research/issues/{id}?locale=ru`), the "more items" link, "All issues", the disclaimer and the AI label.
   - **US1 #2**: options `auto-5-form` shows 5 items, or all of them if there are fewer.
   - **US1 #3, #4**: `ru` text when the translation is ready; the English text plus the note when it isn't (use `/api/test/issue-translations` as `issue-translation.spec.ts` does).
