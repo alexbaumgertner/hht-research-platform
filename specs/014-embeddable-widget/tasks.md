@@ -159,7 +159,7 @@ implemented and verified on its own.
 ### Implementation for User Story 1
 
 - [x] T021 [US1] Extract `translateIssueText(loaded, locale, deadline)` from `apps/web/src/app/api/public/projects/[slug]/issues/[id]/route.ts` into the new `apps/web/src/lib/issueTextTranslation.ts`, and use it from both the issue API route and the embed loader. Behavior must be identical: the ≈8 s wait, then fallback, with background completion via `after()` (spec 005 FR-012/013). The existing tests and `issue-translation.spec.ts` must still pass.
-- [x] T022 [US1] Implement `loadEmbedModel({ slug, partnerKey, locale, options })` in `apps/web/src/lib/embed/loadEmbedModel.ts`. Use `unstable_cache`, tagged `embed:project:<projectId>`, with `revalidate: 3600`.
+- [x] T022 [US1] Implement `loadEmbedModel({ slug, partnerKey, locale, options })` in `apps/web/src/lib/embed/loadEmbedModel.ts`. For ISR, use `unstable_cache`, tagged `embed:project:<projectId>`, with `revalidate: 3600`. If research R3's fallback is selected, bypass `unstable_cache` entirely so the five-minute CDN cache is the only cache.
   - Project and partner come from `findProjectBySlug` and `findEmbedPartner`; return `null` if either is missing.
   - The issue is `listVisibleIssues(projectId, 1)[0]`, then `loadIssueSummary`, `translateIssueText` and `toIssueDetail`.
   - `items = issue.items.slice(0, options.items)` and `moreCount = issue.items.length - items.length`.
@@ -183,7 +183,7 @@ implemented and verified on its own.
   Never read cookies or the query string.
 
 - [x] T026 [P] [US1] Add a test-only endpoint `apps/web/src/app/api/test/issues/[id]/visibility/route.ts` (`POST {"hidden":true|false}`). It uses the same guard as `apps/web/src/app/api/test/subscribers/route.ts` (`isEmailStubEnabled()`, so it's 404 in production), and calls `payload.update({ collection: 'digests', … hiddenFromPublic })`, so the real hooks run.
-- [x] T027 [US1] Implement `revalidateEmbed(projectId)` in `apps/web/src/lib/embed/revalidateEmbed.ts`. It calls `revalidateTag('embed:project:' + projectId, { expire: 0 })` (or the T001 outcome), wrapped in `try/catch` that logs with `console.error('[embed] revalidate failed', …)` and never throws (contract `embed-endpoints.md` "Revalidation hooks").
+- [x] T027 [US1] Implement `revalidateEmbed(projectId)` in `apps/web/src/lib/embed/revalidateEmbed.ts`. For ISR, it calls `revalidateTag('embed:project:' + projectId, { expire: 0 })` (or the T001 outcome), wrapped in `try/catch` that logs with `console.error('[embed] revalidate failed', …)` and never throws (contract `embed-endpoints.md` "Revalidation hooks"). If research R3's fallback is selected, do not depend on tag invalidation; the model bypasses `unstable_cache` and the five-minute CDN TTL bounds staleness.
 - [x] T028 [US1] Call `revalidateEmbed` in `apps/web/src/collections/Digests.ts` `afterChange`:
   - on `create`;
   - on `update` when any of `hiddenFromPublic`, `issueTextStatus`, `issueTextRevision`, `issueSummaryPoints`, `issueItemSentences` or `publications` changed compared with `previousDoc`.
@@ -375,7 +375,7 @@ implemented and verified on its own.
 - [ ] T061 [P] Performance check per quickstart §4. Record the numbers in `specs/014-embeddable-widget/quickstart.md` under a dated "Results" note:
   - `gzip -9c apps/web/public/embed/v1.js | wc -c` ≤ 3072;
   - `curl -s http://localhost:3000/embed/ru/hht-research/e2e-partner/auto-3-form | grep -c "_next/static"` = 0 (FR-026);
-  - 5 Lighthouse mobile runs on the fixture host with frame LCP < 2.5 s (FR-027, SC-006).
+  - 5 Lighthouse mobile runs on the fixture host, with the 75th-percentile frame LCP < 2.5 s (FR-027, SC-006).
 - [ ] T062 [P] Security review of the embed surface:
   - the escaping helpers in `renderEmbed.ts`, with every interpolation going through them;
   - the `sandbox` flags in `public/embed/v1.js`;
@@ -385,7 +385,8 @@ implemented and verified on its own.
 
   Run the `security-review` skill on the branch and fix confirmed findings.
 
-- [ ] T063 [P] Add an assertion to `apps/web/tests/e2e/embed-content.spec.ts`: `/embed/*` responses never contain `X-Frame-Options`, and their `Content-Security-Policy` never contains `frame-ancestors 'none'` for a valid partner. This guards against the separate "Harden framing on non-widget routes" task breaking the widget (research R2).
+- [ ] T063 [P] Add assertions to `apps/web/tests/e2e/embed-content.spec.ts` for both widget document routes (`/embed/:locale/:slug/:partner/:options` and `/embed/:locale/:slug/:partner/:options/:notice`): valid-partner responses never contain `X-Frame-Options` or `frame-ancestors 'none'`. This guards against the separate "Harden framing on non-widget routes" task breaking the widget (research R2).
+- [ ] T071 [P] In `apps/web/next.config.ts`, keep both global framing headers on non-widget routes while excluding exactly the two widget document route patterns (`/embed/:locale/:slug/:partner/:options` and `/embed/:locale/:slug/:partner/:options/:notice`) from both headers. Verify non-widget routes retain `frame-ancestors 'none'` and `X-Frame-Options: DENY` (research R2, T063).
 - [ ] T064 Run the full gates: `pnpm check 2>&1 | tail -50`, `pnpm format:check 2>&1 | tail -20`, `pnpm --filter @hht/web test:e2e 2>&1 | tail -50`, and `pnpm --filter @hht/web build 2>&1 | tail -30`. Fix any failures. Then do the quickstart §1–§3 walkthrough.
 
 ---
@@ -438,7 +439,7 @@ implemented and verified on its own.
 - US3: T042 ∥ T043 ∥ T044, then T049 ∥ T051 alongside T045 → T046 → T047 → T048 → T050.
 - US5: T054 ∥ T055.
 - After US1, US3 and US5 can proceed in parallel with US2. Only `renderEmbed.ts` edits must be serialized, in the order above.
-- Polish: T060 ∥ T061 ∥ T062 ∥ T063.
+- Polish: T060 ∥ T061 ∥ T062 ∥ T063 ∥ T071, then T064.
 
 ## Parallel Example: User Story 1
 

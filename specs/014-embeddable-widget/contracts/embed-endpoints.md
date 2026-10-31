@@ -76,4 +76,6 @@ and swallows and logs errors, because revalidation must never fail a write. It i
 
 `/embed/v1.js` → `Cache-Control: public, max-age=3600`. No other header changes in this feature.
 Framing headers for other routes belong to the separate hardening task, and that task MUST exclude
-`/embed/` (research R2).
+both widget document routes from both global framing headers:
+`/embed/:locale/:slug/:partner/:options` and `/embed/:locale/:slug/:partner/:options/:notice`
+(research R2).
