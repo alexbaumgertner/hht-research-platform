@@ -13,11 +13,11 @@ export async function servePartnerHost(
   page: Page,
   origin: string,
   fixture: 'partner-host.html' | 'partner-host-iframe.html' = 'partner-host-iframe.html',
-  baseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000',
+  opts: { baseURL?: string; transform?: (html: string) => string } = {},
 ) {
-  const html = fs
-    .readFileSync(path.join(FIXTURES, fixture), 'utf8')
-    .replaceAll('__BASE__', baseURL);
+  const baseURL = opts.baseURL ?? (process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000');
+  let html = fs.readFileSync(path.join(FIXTURES, fixture), 'utf8').replaceAll('__BASE__', baseURL);
+  if (opts.transform) html = opts.transform(html);
   await page.route(`${origin}/**`, (route) =>
     route.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body: html }),
   );

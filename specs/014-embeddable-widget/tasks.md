@@ -215,8 +215,8 @@ implemented and verified on its own.
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T032 [P] [US2] Write a failing Jest test, `apps/web/src/lib/embed/loaderSize.test.ts`: `zlib.gzipSync(fs.readFileSync('public/embed/v1.js'), { level: 9 }).length <= 3072` (FR-025). The file must also contain no `import`, `require`, `eval`, `document.cookie`, `localStorage` or `sessionStorage`.
-- [ ] T033 [P] [US2] Write failing Playwright tests in `apps/web/tests/e2e/embed-snippet.spec.ts`:
+- [x] T032 [P] [US2] Write a failing Jest test, `apps/web/src/lib/embed/loaderSize.test.ts`: `zlib.gzipSync(fs.readFileSync('public/embed/v1.js'), { level: 9 }).length <= 3072` (FR-025). The file must also contain no `import`, `require`, `eval`, `document.cookie`, `localStorage` or `sessionStorage`.
+- [x] T033 [P] [US2] Write failing Playwright tests in `apps/web/tests/e2e/embed-snippet.spec.ts`:
   - **US2 #1, #3**: at 320 and 1280 px viewports, frame height equals the inner `documentElement` height within ±2 px, the inner `scrollHeight <= clientHeight`, and there's no horizontal scroll.
   - **US2 #2**: change the inner content height via `frame.evaluate` and the outer height follows.
   - **US2 #4**: `page.emulateMedia({ colorScheme: 'dark' })` with `auto` gives a dark computed background in the frame; `data-theme="light"` forces light.
@@ -229,9 +229,9 @@ implemented and verified on its own.
 
 ### Implementation for User Story 2
 
-- [ ] T034 [US2] Add the inline ready/size script to `apps/web/src/lib/embed/renderEmbed.ts` (research R6, contract `embed-page.md` "Inline script" step 1). It runs only when `window.parent !== window`, posts `{ type: 'digest-widget:ready', v: 1, height, title: document.title }` on `DOMContentLoaded`, then `digest-widget:size` from a `ResizeObserver` on `document.documentElement` when the rounded height changes, at most once per animation frame, with target origin `'*'`. Keep the inline script at about 1 KB or less. Extend `renderEmbed.test.ts` to assert the script is present and contains no cookie or storage access.
-- [ ] T035 [US2] Add theming to `apps/web/src/lib/embed/renderEmbed.ts` (research R9): `<html data-theme="auto|light|dark">` and CSS custom properties for light. Override them under `@media (prefers-color-scheme: dark)` for `auto`, and under `[data-theme=dark]`. Set a matching `color-scheme` and always paint an explicit `background`. Keep the total inline CSS at 4 KB or less and check text contrast against WCAG 2.1 AA for both palettes.
-- [ ] T036 [US2] Write the loader `apps/web/public/embed/v1.js`, following contract `embed-snippet.md` "Loader behavior (normative)" steps 1–6 exactly:
+- [x] T034 [US2] Add the inline ready/size script to `apps/web/src/lib/embed/renderEmbed.ts` (research R6, contract `embed-page.md` "Inline script" step 1). It runs only when `window.parent !== window`, posts `{ type: 'digest-widget:ready', v: 1, height, title: document.title }` on `DOMContentLoaded`, then `digest-widget:size` from a `ResizeObserver` on `document.documentElement` when the rounded height changes, at most once per animation frame, with target origin `'*'`. Keep the inline script at about 1 KB or less. Extend `renderEmbed.test.ts` to assert the script is present and contains no cookie or storage access.
+- [x] T035 [US2] Add theming to `apps/web/src/lib/embed/renderEmbed.ts` (research R9): `<html data-theme="auto|light|dark">` and CSS custom properties for light. Override them under `@media (prefers-color-scheme: dark)` for `auto`, and under `[data-theme=dark]`. Set a matching `color-scheme` and always paint an explicit `background`. Keep the total inline CSS at 4 KB or less and check text contrast against WCAG 2.1 AA for both palettes.
+- [x] T036 [US2] Write the loader `apps/web/public/embed/v1.js`, following contract `embed-snippet.md` "Loader behavior (normative)" steps 1–6 exactly:
   - plain ES2017 in an IIFE;
   - the widget origin comes from `document.currentScript.src`;
   - processed-container marking;
@@ -245,7 +245,7 @@ implemented and verified on its own.
 
   No cookies, storage or `eval`. Make T032 and T033 pass.
 
-- [ ] T037 [P] [US2] Add a `headers()` entry in `apps/web/next.config.ts` for `source: '/embed/v1.js'` with `Cache-Control: public, max-age=3600`. Make no other header changes (contract `embed-endpoints.md`).
+- [x] T037 [P] [US2] Add a `headers()` entry in `apps/web/next.config.ts` for `source: '/embed/v1.js'` with `Cache-Control: public, max-age=3600`. Make no other header changes (contract `embed-endpoints.md`).
 - [ ] T038 [P] [US2] Write failing tests, then implement, `packages/shared/src/embedSnippet.ts` and `embedSnippet.test.ts`:
   - `buildScriptSnippet({ siteUrl, project, partner, locale, items, theme, subscribe, fallback: { sentence, communityLabel, communityUrl?, subscribeLabel, subscribeUrl } })`;
   - `buildIframeSnippet({ siteUrl, project, partner, locale, options, title, height })`.

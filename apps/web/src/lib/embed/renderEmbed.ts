@@ -129,9 +129,18 @@ export function renderEmbed(m: EmbedModel, t: EmbedT): string {
     )}</title><style>${CSS}</style></head>` +
     `<body><main>${body}<footer><p>${escapeHtml(t('Trust.disclaimer'))}</p><p>${escapeHtml(
       t('Trust.aiLabel'),
-    )}</p></footer></main></body></html>`
+    )}</p></footer></main><script>${SCRIPT}</script></body></html>`
   );
 }
+
+/** Tells the loader on the partner page when the frame is ready and how tall it is (research R6). */
+const SCRIPT = `(function(){if(window.parent===window)return;var d=document.documentElement,last=-1,pending=false;
+function h(){return Math.ceil(d.getBoundingClientRect().height)}
+function post(type,extra){var m={type:type,v:1,height:h()};for(var k in extra)m[k]=extra[k];parent.postMessage(m,'*')}
+function size(){var n=h();if(n===last||pending)return;pending=true;requestAnimationFrame(function(){pending=false;last=h();post('digest-widget:size')})}
+document.addEventListener('DOMContentLoaded',function(){last=h();post('digest-widget:ready',{title:document.title});
+if(window.ResizeObserver)new ResizeObserver(size).observe(d)});
+})();`;
 
 /** No project content, no script: the loader keeps the partner's fallback. */
 export function renderEmbedNotFound(): string {

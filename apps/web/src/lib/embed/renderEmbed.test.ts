@@ -139,6 +139,18 @@ describe('renderEmbed', () => {
   });
 });
 
+describe('renderEmbed inline script', () => {
+  it('posts ready and size messages and touches no cookies or storage', () => {
+    const html = renderEmbed(model(), t);
+    const script = html.match(/<script>([\s\S]*)<\/script>/)?.[1] ?? '';
+    expect(script).toContain('digest-widget:ready');
+    expect(script).toContain('digest-widget:size');
+    expect(script).toContain('ResizeObserver');
+    expect(script).not.toMatch(/cookie|localStorage|sessionStorage|eval\(/);
+    expect(script.length).toBeLessThan(1200);
+  });
+});
+
 describe('renderEmbedNotFound', () => {
   it('has no project content and no script', () => {
     const html = renderEmbedNotFound();

@@ -19,6 +19,10 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        source: '/embed/v1.js',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=3600' }],
+      },
+      {
         source: '/((?!embed/[^/]+/[^/]+/[^/]+/[^/]+(?:/[^/]+)?$).*)',
         headers: [
           { key: 'Content-Security-Policy', value: "frame-ancestors 'none'" },
