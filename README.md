@@ -39,6 +39,8 @@ Deploy the worker to GCP and connect it to production web: [`docs/deploy-worker.
 
 Embed the latest issue and a subscribe form on a partner site: [`docs/embed-widget.md`](docs/embed-widget.md).
 
+Production change for the widget (two columns become text): [`docs/migrations/014-embed-source.md`](docs/migrations/014-embed-source.md).
+
 ### Databases per environment
 
 | Environment         | Database                                                                                      |

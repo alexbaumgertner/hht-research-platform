@@ -270,7 +270,7 @@ gains:
 **Rationale**: This is the owner's clarification (spec, Session 2026-10-27): one source value
 names the partner, with no new subscriber field. Per-project values can't be a Postgres enum.
 
-**Risk: schema push.** `ensure-schema` runs Payload's dev push during the Vercel build. Changing
+**Risk: schema push.** (Tested later: see `docs/migrations/014-embed-source.md`. On a copy of the old schema the push alone converted the columns and kept the data, and the SQL below stays as the explicit, idempotent path.) `ensure-schema` runs Payload's dev push during the Vercel build. Changing
 an enum column to `varchar` isn't additive. Drizzle push may ask for interactive confirmation of
 warnings, and with no TTY Payload may exit without applying, while the build carries on. This has
 not been verified, so:
