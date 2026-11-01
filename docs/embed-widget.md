@@ -28,7 +28,7 @@ for at most one hour.
 ```html
 <div
   data-digest-widget
-  data-project="hht-research"
+  data-project="hht"
   data-partner="curehht-ru"
   data-locale="ru"
   data-items="3"
@@ -38,12 +38,12 @@ for at most one hour.
   <p>
     Новости исследований простым языком.
     <a href="https://vk.com/club1">Сообщество</a> ·
-    <a href="https://hht.example.org/ru/projects/hht-research?src=site:curehht-ru#subscribe"
+    <a href="https://hht.rarediseasedigest.org/ru/projects/hht?src=site:curehht-ru#subscribe"
       >Подписаться</a
     >
   </p>
 </div>
-<script async src="https://hht.example.org/embed/v1.js"></script>
+<script async src="https://hht.rarediseasedigest.org/embed/v1.js"></script>
 ```
 
 The script inserts an iframe, resizes it to its content, and follows the page's light or dark
@@ -86,7 +86,7 @@ For sites that do not allow third-party scripts:
 
 ```html
 <iframe
-  src="https://hht.example.org/embed/ru/hht-research/curehht-ru/auto-3-form"
+  src="https://hht.rarediseasedigest.org/embed/ru/hht/curehht-ru/auto-3-form"
   title="Новости исследований: последний выпуск"
   width="100%"
   height="900"
@@ -117,3 +117,22 @@ dependencies. A subscription stores only email, language, consent and the source
 Spec 013 sets `periodReview` in `loadEmbedModel` (`apps/web/src/lib/embed/loadEmbedModel.ts`) and
 calls `revalidateEmbed(projectId)` when a review is published or hidden. Nothing else in the
 widget changes.
+
+## Launch checklist for production
+
+Production is `https://hht.rarediseasedigest.org`, and the project slug there is `hht` (the
+`hht-research` slug is only the local seed).
+
+1. Apply the `source` column change first: [`docs/migrations/014-embed-source.md`](migrations/014-embed-source.md).
+2. Merge and deploy. Check that `https://hht.rarediseasedigest.org/embed/v1.js` answers 200.
+3. Check that Vercel has `PUBLIC_SITE_URL=https://hht.rarediseasedigest.org` (no trailing slash) and
+   `PAYLOAD_API_KEY`. The widget uses them to refresh its cache after a background translation.
+4. In the admin, open the project **hht → Embedding → Embed partners** and add the partner, for
+   example name `curehht-ru.org`, key `curehht-ru`, origin `https://curehht-ru.org`, and the VK
+   community URL as the fallback link. Save.
+5. Copy the Russian script snippet from the same page into the partner's news page.
+6. Open the partner page. Expect the widget to render and resize. Then open the widget URL
+   directly, `https://hht.rarediseasedigest.org/embed/ru/hht/curehht-ru/auto-3-form`, and check
+   the response header `content-security-policy: frame-ancestors https://curehht-ru.org`.
+7. Check reachability from Russian residential and mobile networks without a VPN (open question
+   Q1 in the spec). If the widget stays empty there, the fallback block is what readers see.
