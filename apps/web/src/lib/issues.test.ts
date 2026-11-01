@@ -28,6 +28,8 @@ const project: IssueProjectDoc = {
   id: 1,
   slug: 'hht-research',
   name: 'HHT Research',
+  partnerKeys: [],
+  embedPartners: [],
 };
 
 const publications: IssuePublicationDoc[] = [

@@ -65,6 +65,59 @@ async function seed() {
     projectId = project.id;
   }
 
+  // Embed partner for e2e (spec 014). Idempotent: always overwrites the same single row.
+  await payload.update({
+    collection: 'research-projects',
+    id: projectId,
+    data: {
+      embedPartners: [
+        {
+          name: 'E2E partner',
+          key: 'e2e-partner',
+          origins: [{ origin: 'http://127.0.0.1:4310' }, { origin: 'http://partner.test' }],
+        },
+      ],
+    },
+    overrideAccess: true,
+  });
+
+  // A project with no issue, to test the widget's "first issue is coming" state (spec 014 US1 #7).
+  const emptySlug = 'embed-empty';
+  const emptyPartners = [
+    { name: 'E2E partner', key: 'e2e-partner', origins: [{ origin: 'http://127.0.0.1:4310' }] },
+  ];
+  const emptyExisting = await payload.find({
+    collection: 'research-projects',
+    where: { slug: { equals: emptySlug } },
+    limit: 1,
+    overrideAccess: true,
+  });
+  if (emptyExisting.docs[0]) {
+    await payload.update({
+      collection: 'research-projects',
+      id: emptyExisting.docs[0].id,
+      data: { embedPartners: emptyPartners },
+      overrideAccess: true,
+    });
+  } else {
+    await payload.create({
+      collection: 'research-projects',
+      data: {
+        name: 'Embed Empty',
+        slug: emptySlug,
+        description: 'Fixture project without issues.',
+        keywords: [{ value: 'empty' }],
+        schedule: 'daily',
+        monitoringStatus: 'paused',
+        emailNotificationEnabled: false,
+        owner: ownerId,
+        hasPublishedDigest: false,
+        embedPartners: emptyPartners,
+      },
+      overrideAccess: true,
+    });
+  }
+
   async function ensureSource(input: {
     type: 'pubmed' | 'clinicaltrials' | 'rss';
     label: string;

@@ -6,13 +6,7 @@ import type {
 
 import { isAuthenticatedOrWorker, isWorkerOrAdmin } from '../access';
 
-const chatSourceOptions = [
-  { label: 'VK', value: 'vk' },
-  { label: 'WhatsApp', value: 'wa' },
-  { label: 'Facebook', value: 'fb' },
-  { label: 'Telegram', value: 'tg' },
-  { label: 'Other', value: 'other' },
-];
+const SOURCE_PATTERN = /^(vk|wa|fb|tg|other|site:[a-z0-9][a-z0-9-]{1,31})$/;
 
 const hiddenToken = {
   admin: { hidden: true, disableListColumn: true, disableListFilter: true },
@@ -90,10 +84,13 @@ export const Subscribers: CollectionConfig = {
     },
     {
       name: 'source',
-      type: 'select',
+      type: 'text',
       required: true,
       defaultValue: 'other',
-      options: chatSourceOptions,
+      validate: (value: unknown) =>
+        typeof value === 'string' && SOURCE_PATTERN.test(value)
+          ? true
+          : 'Source must be vk, wa, fb, tg, other or site:<key>',
     },
     {
       name: 'status',
