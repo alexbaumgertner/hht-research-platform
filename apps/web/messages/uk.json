@@ -34,6 +34,20 @@
       "social": "Соцмережі",
       "unknown": "Інше"
     },
+    "studyCategory": {
+      "guideline": "Клінічні настанови",
+      "review": "Огляд досліджень",
+      "clinicalStudy": "Клінічне дослідження",
+      "caseReport": "Опис окремого випадку",
+      "trialRegistration": "Зареєстроване дослідження"
+    },
+    "recruitment": {
+      "recruiting": "Триває набір учасників",
+      "notYetRecruiting": "Набір ще не розпочато",
+      "active": "Активне, набір закрито",
+      "completed": "Завершено",
+      "other": "Інший статус"
+    },
     "highImportance": "Висока важливість",
     "emptyProject": "Для цього проєкту ще нічого не опубліковано.",
     "noMatches": "Немає матеріалів, що відповідають фільтрам.",
@@ -58,6 +72,18 @@
     "originalLink": "Відкрити першоджерело",
     "backToFeed": "Назад до стрічки",
     "abstractHeading": "Анотація",
+    "trialLabel": "Зареєстроване дослідження, результатів поки немає",
+    "trialInfoHeading": "Інформація про дослідження для пацієнтів",
+    "trialStatusLabel": "Статус",
+    "trialPhaseLabel": "Фаза",
+    "trialCountriesLabel": "Країни проведення",
+    "trialEligibilityLabel": "Хто може брати участь",
+    "trialSex": {
+      "all": "Будь-яка стать",
+      "female": "Жінки",
+      "male": "Чоловіки"
+    },
+    "forYourDoctorHeading": "Для вашого лікаря",
     "notFound": "Цей матеріал не знайдено.",
     "loadError": "Не вдалося завантажити цей матеріал. Спробуйте ще раз.",
     "retry": "Повторити"

@@ -34,6 +34,20 @@
       "social": "Social",
       "unknown": "Sonstige"
     },
+    "studyCategory": {
+      "guideline": "Klinische Leitlinie",
+      "review": "Forschungsübersicht",
+      "clinicalStudy": "Klinische Studie",
+      "caseReport": "Einzelfallbericht",
+      "trialRegistration": "Registrierte Studie"
+    },
+    "recruitment": {
+      "recruiting": "Rekrutierung läuft",
+      "notYetRecruiting": "Rekrutierung noch nicht gestartet",
+      "active": "Aktiv, keine Rekrutierung",
+      "completed": "Abgeschlossen",
+      "other": "Anderer Status"
+    },
     "highImportance": "Hohe Wichtigkeit",
     "emptyProject": "Für dieses Projekt wurde noch nichts veröffentlicht.",
     "noMatches": "Keine Materialien entsprechen Ihren Filtern.",
@@ -58,6 +72,18 @@
     "originalLink": "Originalquelle ansehen",
     "backToFeed": "Zurück zum Feed",
     "abstractHeading": "Abstract",
+    "trialLabel": "Registrierte Studie, noch keine Ergebnisse",
+    "trialInfoHeading": "Studiendetails für Teilnehmende",
+    "trialStatusLabel": "Status",
+    "trialPhaseLabel": "Phase",
+    "trialCountriesLabel": "Länder",
+    "trialEligibilityLabel": "Teilnahme",
+    "trialSex": {
+      "all": "Alle Geschlechter",
+      "female": "Weiblich",
+      "male": "Männlich"
+    },
+    "forYourDoctorHeading": "Für Ihre Ärztin / Ihren Arzt",
     "notFound": "Dieses Material wurde nicht gefunden.",
     "loadError": "Dieses Material konnte nicht geladen werden. Bitte erneut versuchen.",
     "retry": "Erneut versuchen"

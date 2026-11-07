@@ -15,6 +15,9 @@ export const Publications: CollectionConfig = {
     summary: true,
     sourceType: true,
     publishedOrUpdatedAt: true,
+    publicationTypes: true,
+    externalIds: true,
+    trialMetadata: true,
     monitoredSource: true,
     feedPublishedAt: true,
   },
@@ -96,6 +99,22 @@ export const Publications: CollectionConfig = {
         description:
           'Source study/article types (PubMed PublicationType), e.g. "Randomized Controlled Trial".',
       },
+    },
+    {
+      name: 'trialMetadata',
+      type: 'group',
+      admin: {
+        readOnly: true,
+        description: 'ClinicalTrials.gov protocol details (status, phase, locations, eligibility).',
+      },
+      fields: [
+        { name: 'overallStatus', type: 'text' },
+        { name: 'phases', type: 'text', hasMany: true },
+        { name: 'countries', type: 'text', hasMany: true },
+        { name: 'minimumAge', type: 'text' },
+        { name: 'maximumAge', type: 'text' },
+        { name: 'sex', type: 'text' },
+      ],
     },
     {
       name: 'relevance',

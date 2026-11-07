@@ -34,6 +34,20 @@
       "social": "Social",
       "unknown": "Other"
     },
+    "studyCategory": {
+      "guideline": "Clinical guideline",
+      "review": "Research review",
+      "clinicalStudy": "Clinical study",
+      "caseReport": "Single case report",
+      "trialRegistration": "Registered study"
+    },
+    "recruitment": {
+      "recruiting": "Recruiting",
+      "notYetRecruiting": "Not yet recruiting",
+      "active": "Active, not recruiting",
+      "completed": "Completed",
+      "other": "Other status"
+    },
     "highImportance": "High importance",
     "emptyProject": "Nothing published yet for this project.",
     "noMatches": "No materials match your filters.",
@@ -58,6 +72,18 @@
     "originalLink": "View original source",
     "backToFeed": "Back to feed",
     "abstractHeading": "Abstract",
+    "trialLabel": "Registered study, no results yet",
+    "trialInfoHeading": "Study details for participants",
+    "trialStatusLabel": "Status",
+    "trialPhaseLabel": "Phase",
+    "trialCountriesLabel": "Countries",
+    "trialEligibilityLabel": "Eligibility",
+    "trialSex": {
+      "all": "All sexes",
+      "female": "Female",
+      "male": "Male"
+    },
+    "forYourDoctorHeading": "For your doctor",
     "notFound": "This material could not be found.",
     "loadError": "This material could not be loaded. Please try again.",
     "retry": "Retry"

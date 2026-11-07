@@ -93,6 +93,9 @@ export async function GET(req: Request, { params }: Params) {
     originalUrl: publication.originalUrl,
     abstractOrBody: publication.abstractOrBody ?? null,
     summary: (publication.summary as Summary | null) ?? null,
+    publicationTypes: publication.publicationTypes ?? null,
+    externalIds: publication.externalIds ?? null,
+    trialMetadata: publication.trialMetadata ?? null,
     monitoredSource: publication.monitoredSource as PublicationForMaterial['monitoredSource'],
   };
 

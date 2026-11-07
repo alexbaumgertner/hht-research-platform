@@ -1,4 +1,4 @@
-import type { Candidate, FetchCandidatesInput, SourceAdapter } from './types.js';
+import type { Candidate, FetchCandidatesInput, SourceAdapter, TrialMetadata } from './types.js';
 import { formatYmd, resolveSinceDate } from './types.js';
 import { safeFetch } from '../net/safeFetch.js';
 
@@ -19,11 +19,60 @@ export type Study = {
       briefSummary?: string;
     };
     statusModule?: {
+      overallStatus?: string;
       studyFirstPostDateStruct?: DateStruct;
       lastUpdatePostDateStruct?: DateStruct;
     };
+    designModule?: {
+      phases?: string[];
+    };
+    eligibilityModule?: {
+      minimumAge?: string;
+      maximumAge?: string;
+      sex?: string;
+    };
+    contactsLocationsModule?: {
+      locations?: Array<{
+        city?: string;
+        country?: string;
+        facility?: string;
+      }>;
+    };
   };
 };
+
+const MAX_TRIAL_COUNTRIES = 10;
+
+export function extractTrialMetadata(study: Study): TrialMetadata | undefined {
+  const section = study.protocolSection;
+  if (!section) return undefined;
+
+  const overallStatus = section.statusModule?.overallStatus?.trim() || undefined;
+  const phases = (section.designModule?.phases ?? [])
+    .map((p) => p.trim())
+    .filter((p) => Boolean(p) && p !== 'NA');
+  const countries = [
+    ...new Set(
+      (section.contactsLocationsModule?.locations ?? [])
+        .map((loc) => loc.country?.trim())
+        .filter((c): c is string => Boolean(c)),
+    ),
+  ].slice(0, MAX_TRIAL_COUNTRIES);
+  const minimumAge = section.eligibilityModule?.minimumAge?.trim() || undefined;
+  const maximumAge = section.eligibilityModule?.maximumAge?.trim() || undefined;
+  const sex = section.eligibilityModule?.sex?.trim() || undefined;
+
+  const meta: TrialMetadata = {
+    ...(overallStatus ? { overallStatus } : {}),
+    ...(phases.length > 0 ? { phases } : {}),
+    ...(countries.length > 0 ? { countries } : {}),
+    ...(minimumAge ? { minimumAge } : {}),
+    ...(maximumAge ? { maximumAge } : {}),
+    ...(sex ? { sex } : {}),
+  };
+
+  return Object.keys(meta).length > 0 ? meta : undefined;
+}
 
 /** Registry dates are "YYYY-MM-DD" or "YYYY-MM". */
 function parseRegistryDate(value: string | undefined): Date | undefined {
@@ -37,6 +86,7 @@ export function studyToCandidate(study: Study): Candidate | null {
   const id = section?.identificationModule?.nctId;
   if (!id) return null;
   const status = section?.statusModule;
+  const trialMetadata = extractTrialMetadata(study);
   return {
     externalIds: { nctId: id },
     title:
@@ -48,6 +98,7 @@ export function studyToCandidate(study: Study): Candidate | null {
     publishedOrUpdatedAt:
       parseRegistryDate(status?.lastUpdatePostDateStruct?.date) ??
       parseRegistryDate(status?.studyFirstPostDateStruct?.date),
+    ...(trialMetadata ? { trialMetadata } : {}),
     sourceType: 'clinicaltrials',
   };
 }
