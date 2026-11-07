@@ -4,12 +4,16 @@ import { NextResponse } from 'next/server';
 
 import { buildHealthReport } from '@/lib/health';
 
-export const dynamic = 'force-dynamic';
+const HEALTHY_CACHE_CONTROL = 'public, s-maxage=3600, stale-while-revalidate=300';
 
 /**
  * Public monitoring health: 200 when every public project's pipeline ran on
  * schedule, 503 when one is overdue. Polled by a Cloud Monitoring uptime check
  * (dead-man switch for the worker).
+ *
+ * A healthy report is cached at the CDN for an hour so uptime pings do not wake
+ * the database; an overdue report is never cached so a problem shows up (and
+ * clears) on the next ping.
  */
 export async function GET() {
   const payload = await getPayload({ config });
@@ -49,6 +53,6 @@ export async function GET() {
   const report = buildHealthReport(rows);
   return NextResponse.json(report, {
     status: report.ok ? 200 : 503,
-    headers: { 'Cache-Control': 'no-store' },
+    headers: { 'Cache-Control': report.ok ? HEALTHY_CACHE_CONTROL : 'no-store' },
   });
 }
