@@ -306,11 +306,29 @@ Two independent signals email the owner:
 | Log alert `hht-worker-errors` | Any source/project/digest/translation failure in a run  | Cloud Monitoring alert policy on `severity>=ERROR` for `cloud_run_job/hht-monitor-worker`                                     |
 | Uptime check `hht-health`     | Dead-man switch: no successful run within schedule + 6h | Cloud Monitoring uptime check on `GET https://hht.rarediseasedigest.org/api/health` (returns `503` when a project is overdue) |
 
+The uptime check can lag the real state by up to 1 hour (see `/api/health` below), which the 6 hour
+tolerance absorbs.
+
 The worker writes structured JSON lines (`severity`, `message`, context fields); in Logs Explorer
 filter with `jsonPayload.message:"[worker]"`.
 
-`/api/health` is public and returns per-project `lastSuccessfulRunAt`, `latestDigestPublishedAt`
-and `stale`.
+### `/api/health`
+
+Public. Returns per-project `lastSuccessfulRunAt`, `latestDigestPublishedAt` and `stale`: `200` when
+every project is on schedule, `503` when one is overdue.
+
+Caching exists so the constant uptime pings do not hit Neon and keep its compute awake (it can then
+scale to zero between worker runs):
+
+- `200` is sent with `Cache-Control: public, s-maxage=3600, stale-while-revalidate=300`; the Vercel
+  CDN serves pings from cache and queries the database at most about once per hour.
+- `503` is sent with `Cache-Control: no-store`, so a problem is never cached.
+
+**Allowed signal delay:** a healthy cached response can be up to 1 hour old (plus up to 5 minutes
+of stale-while-revalidate), so an overdue project may be reported up to about 1 hour late. This is
+acceptable because the overdue threshold already carries a 6 hour tolerance. Once a `503` is
+produced, later pings see it immediately. To see the live state, call with a cache-busting query
+string (e.g. `/api/health?nocache=1`).
 
 ## One-off maintenance scripts
 
