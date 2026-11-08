@@ -22,8 +22,16 @@ export type SchemaPushDecision =
   | { action: 'skip'; reason: string }
   | { action: 'fail'; reason: string; destructive: string[] };
 
-const DROP_COLUMN = /ALTER\s+TABLE\s+"?([\w.]+)"?\s+DROP\s+COLUMN\s+(?:IF\s+EXISTS\s+)?"?(\w+)"?/i;
-const DROP_TABLE = /DROP\s+TABLE\s+(?:IF\s+EXISTS\s+)?"?([\w.]+)"?/i;
+const SCHEMA_PREFIX = String.raw`(?:(?:"[^"]+"|\w+)\.)?`;
+const TABLE_NAME = String.raw`(?:"([^"]+)"|(\w+))`;
+const DROP_COLUMN = new RegExp(
+  String.raw`ALTER\s+TABLE\s+${SCHEMA_PREFIX}${TABLE_NAME}\s+DROP\s+COLUMN\s+(?:IF\s+EXISTS\s+)?(?:"([^"]+)"|(\w+))`,
+  'i',
+);
+const DROP_TABLE = new RegExp(
+  String.raw`DROP\s+TABLE\s+(?:IF\s+EXISTS\s+)?${SCHEMA_PREFIX}${TABLE_NAME}`,
+  'i',
+);
 
 /** Columns / tables a plan would remove, as `table.column` or `table` (whole table). */
 export function listDestructiveChanges(plan: SchemaPushPlan): string[] {
@@ -31,11 +39,11 @@ export function listDestructiveChanges(plan: SchemaPushPlan): string[] {
   for (const statement of plan.statements) {
     const column = DROP_COLUMN.exec(statement);
     if (column) {
-      found.add(`${column[1]}.${column[2]}`);
+      found.add(`${column[1] ?? column[2]}.${column[3] ?? column[4]}`);
       continue;
     }
     const table = DROP_TABLE.exec(statement);
-    if (table) found.add(`${table[1]} (whole table)`);
+    if (table) found.add(`${table[1] ?? table[2]} (whole table)`);
   }
   return [...found].sort();
 }
@@ -71,7 +79,7 @@ export function previewTargetError(env: Env): string | null {
     return `preview DATABASE_URL points at the production host ${target.host}.`;
   }
   const prodName = env.PRODUCTION_DATABASE_NAME?.trim();
-  if (prodName && prodHost === undefined && prodName === target.database) {
+  if (prodName && !prodHost && prodName === target.database) {
     return `preview DATABASE_URL uses the production database name "${target.database}" and PRODUCTION_DATABASE_HOST is not set to tell branches apart.`;
   }
   return null;

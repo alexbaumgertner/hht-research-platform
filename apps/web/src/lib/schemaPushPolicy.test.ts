@@ -27,6 +27,32 @@ describe('listDestructiveChanges', () => {
   });
 });
 
+describe('listDestructiveChanges with schema qualifiers', () => {
+  const plan = (...statements: string[]) => ({ statements, warnings: [], hasDataLoss: true });
+  it('reports the real table for a quoted schema qualifier', () => {
+    expect(
+      listDestructiveChanges(
+        plan('ALTER TABLE "public"."publications" DROP COLUMN "trial_metadata_phase";'),
+      ),
+    ).toEqual(['publications.trial_metadata_phase']);
+  });
+  it('reports the real table for a qualified DROP TABLE', () => {
+    expect(listDestructiveChanges(plan('DROP TABLE IF EXISTS "public"."publications";'))).toEqual([
+      'publications (whole table)',
+    ]);
+  });
+  it('handles an unquoted public.table', () => {
+    expect(
+      listDestructiveChanges(
+        plan(
+          'ALTER TABLE public.publications DROP COLUMN trial_metadata_phase;',
+          'DROP TABLE public.old_things;',
+        ),
+      ),
+    ).toEqual(['old_things (whole table)', 'publications.trial_metadata_phase']);
+  });
+});
+
 describe('previewTargetError', () => {
   const prod = { PRODUCTION_DATABASE_HOST: 'ep-prod.eu-central-1.aws.neon.tech' };
   it('rejects the production host in a preview, ignoring -pooler', () => {
@@ -42,6 +68,17 @@ describe('previewTargetError', () => {
     expect(
       previewTargetError({ ...prod, VERCEL_ENV: 'production', DATABASE_URL: NEON }),
     ).toBeNull();
+  });
+  it('treats an empty or whitespace host as unset for the database-name fallback', () => {
+    for (const host of ['', '   ']) {
+      const env = {
+        VERCEL_ENV: 'preview',
+        DATABASE_URL: NEON,
+        PRODUCTION_DATABASE_HOST: host,
+        PRODUCTION_DATABASE_NAME: 'neondb',
+      };
+      expect(previewTargetError(env)).toMatch(/production database name/);
+    }
   });
   it('rejects a preview without a usable DATABASE_URL', () => {
     expect(previewTargetError({ VERCEL_ENV: 'preview' })).toMatch(/DATABASE_URL/);
