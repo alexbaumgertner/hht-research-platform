@@ -306,8 +306,8 @@ Two independent signals email the owner:
 | Log alert `hht-worker-errors` | Any source/project/digest/translation failure in a run  | Cloud Monitoring alert policy on `severity>=ERROR` for `cloud_run_job/hht-monitor-worker`                                     |
 | Uptime check `hht-health`     | Dead-man switch: no successful run within schedule + 6h | Cloud Monitoring uptime check on `GET https://hht.rarediseasedigest.org/api/health` (returns `503` when a project is overdue) |
 
-The uptime check can lag the real state by up to 1 hour (see `/api/health` below), which the 6 hour
-tolerance absorbs.
+The uptime check can lag the real state by up to 6 hours (see `/api/health` below); together with the
+6 hour tolerance that is up to ~12 hours in total.
 
 The worker writes structured JSON lines (`severity`, `message`, context fields); in Logs Explorer
 filter with `jsonPayload.message:"[worker]"`.
@@ -320,15 +320,18 @@ every project is on schedule, `503` when one is overdue.
 Caching exists so the constant uptime pings do not hit Neon and keep its compute awake (it can then
 scale to zero between worker runs):
 
-- `200` is sent with `Cache-Control: public, s-maxage=3600, stale-while-revalidate=300`; the Vercel
-  CDN serves pings from cache and queries the database at most about once per hour.
+- `200` is sent with `Cache-Control: public, s-maxage=21600, stale-while-revalidate=300`; the Vercel
+  CDN serves pings from cache. Each probe region has its own cache, so the database is queried
+  roughly once per region per 6 hours.
 - `503` is sent with `Cache-Control: no-store`, so a problem is never cached.
 
-**Allowed signal delay:** a healthy cached response can be up to 1 hour old (plus up to 5 minutes
-of stale-while-revalidate), so an overdue project may be reported up to about 1 hour late. This is
-acceptable because the overdue threshold already carries a 6 hour tolerance. Once a `503` is
-produced, later pings see it immediately. To see the live state, call with a cache-busting query
-string (e.g. `/api/health?nocache=1`).
+**Allowed signal delay:** a healthy cached response can be up to 6 hours old (plus up to 5 minutes
+of stale-while-revalidate), so an overdue project may be reported up to 6 hours late on top of the
+existing 6 hour tolerance, i.e. up to ~12 hours in total. This is acceptable for a weekly schedule.
+Once a `503` is produced, later pings see it immediately.
+
+Do not add query parameters (e.g. `?nocache=1`) to see live state: any unknown query string bypasses
+the cache and wakes the database. Check the current state in Admin or in the worker logs instead.
 
 ## One-off maintenance scripts
 
