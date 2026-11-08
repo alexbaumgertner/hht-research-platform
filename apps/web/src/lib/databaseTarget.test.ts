@@ -92,3 +92,15 @@ describe('assertDevDatabaseIsLocal', () => {
     ).not.toThrow();
   });
 });
+
+describe('shouldPushSchema with PAYLOAD_SKIP_AUTO_PUSH', () => {
+  it('disables Payload auto-push even for local and allowed-remote databases', () => {
+    expect(
+      shouldPushSchema({
+        DATABASE_URL: 'postgres://u:p@localhost/db',
+        PAYLOAD_ALLOW_REMOTE_PUSH: '1',
+        PAYLOAD_SKIP_AUTO_PUSH: '1',
+      }),
+    ).toBe(false);
+  });
+});

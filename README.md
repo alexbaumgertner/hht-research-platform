@@ -46,7 +46,7 @@ Deploy the worker to GCP and connect it to production web: [`docs/deploy-worker.
 | Local               | `docker compose` Postgres — never production (see `apps/web/src/lib/databaseTarget.ts`)       |
 
 Preview builds run `ensure-schema` against their own branch, so schema changes in a PR never touch
-production before merge. Branches are removed together with their Vercel deployments.
+production before merge (`ensure-schema` also fails the build instead of dropping columns). Branches are removed together with their Vercel deployments.
 
 See `specs/001-research-monitoring-mvp/` for the full Spec Kit plan, data model, and contracts.
 
