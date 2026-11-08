@@ -4,7 +4,9 @@ import { NextResponse } from 'next/server';
 
 import { buildHealthReport } from '@/lib/health';
 
-const HEALTHY_CACHE_CONTROL = 'public, s-maxage=3600, stale-while-revalidate=300';
+const HEALTHY_S_MAXAGE_SECONDS = 6 * 60 * 60;
+const HEALTHY_STALE_WHILE_REVALIDATE_SECONDS = 300;
+const HEALTHY_CACHE_CONTROL = `public, s-maxage=${HEALTHY_S_MAXAGE_SECONDS}, stale-while-revalidate=${HEALTHY_STALE_WHILE_REVALIDATE_SECONDS}`;
 
 /**
  * Public monitoring health: 200 when every public project's pipeline ran on
