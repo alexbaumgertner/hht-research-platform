@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload';
 import { hasNonEmptyKeywords, type KeywordInput } from '@hht/shared';
 
+import { revalidatePublicContent } from '../lib/publicCache';
 import {
   canUpdateResearchProject,
   isAuthenticated,
@@ -22,6 +23,8 @@ export const ResearchProjects: CollectionConfig = {
     delete: isAuthenticated,
   },
   hooks: {
+    afterChange: [() => revalidatePublicContent()],
+    afterDelete: [() => revalidatePublicContent()],
     beforeDelete: [
       async ({ id, req }) => {
         const subscribers = await req.payload.find({

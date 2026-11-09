@@ -17,12 +17,11 @@ import {
   toIssueDetail,
   type IssueTextTranslation,
 } from '@/lib/issues';
+import { NO_STORE_HEADERS, PUBLIC_CACHE_HEADERS } from '@/lib/publicCache';
 
 type Params = { params: Promise<{ slug: string; id: string }> };
 
 export const maxDuration = 60;
-
-const NO_STORE = { 'Cache-Control': 'no-store' };
 
 /**
  * Wait-then-fallback (research R8): the same path for browsers and crawlers, with
@@ -75,12 +74,12 @@ export async function GET(req: Request, { params }: Params) {
 
   const project = await findProjectBySlug(slug);
   if (!project) {
-    return NextResponse.json({ error: 'Not found' }, { status: 404, headers: NO_STORE });
+    return NextResponse.json({ error: 'Not found' }, { status: 404, headers: NO_STORE_HEADERS });
   }
 
   const digest = await getVisibleIssue(project.id, id);
   if (!digest) {
-    return NextResponse.json({ error: 'Not found' }, { status: 404, headers: NO_STORE });
+    return NextResponse.json({ error: 'Not found' }, { status: 404, headers: NO_STORE_HEADERS });
   }
 
   const [loaded, t] = await Promise.all([
@@ -90,5 +89,9 @@ export async function GET(req: Request, { params }: Params) {
   const translation = await translateIssueText(loaded, locale, deadline);
   const detail = toIssueDetail(loaded, locale, t, translation);
 
-  return NextResponse.json(detail, { headers: NO_STORE });
+  // Only a settled translation is safe for the CDN; pending/failed must be retried per visit.
+  const settled = translation.status === 'ready' || translation.status === 'not-needed';
+  return NextResponse.json(detail, {
+    headers: settled ? PUBLIC_CACHE_HEADERS : NO_STORE_HEADERS,
+  });
 }

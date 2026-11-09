@@ -3,6 +3,7 @@ import type { CollectionConfig } from 'payload';
 import { isValidHttpUrl } from '@hht/shared';
 
 import { isAuthenticated, isAuthenticatedOrWorker, isWorkerOrAdmin } from '../access';
+import { revalidatePublicContent } from '../lib/publicCache';
 
 export const Publications: CollectionConfig = {
   slug: 'publications',
@@ -25,6 +26,10 @@ export const Publications: CollectionConfig = {
     useAsTitle: 'title',
     group: 'Research',
     defaultColumns: ['title', 'importance', 'relevance', 'sourceType', 'project'],
+  },
+  hooks: {
+    afterChange: [() => revalidatePublicContent()],
+    afterDelete: [() => revalidatePublicContent()],
   },
   access: {
     read: isAuthenticatedOrWorker,

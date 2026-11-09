@@ -5,6 +5,8 @@ import type {
 } from 'payload';
 import { relationship } from 'payload/shared';
 
+import { revalidatePublicContent } from '../lib/publicCache';
+
 import {
   isAdminFieldLevel,
   isAuthenticated,
@@ -52,6 +54,7 @@ export const Digests: CollectionConfig = {
     delete: isAuthenticated,
   },
   hooks: {
+    afterDelete: [() => revalidatePublicContent()],
     beforeValidate: [
       ({ data, operation }) => {
         assertDigestHasPublications(data, operation);
@@ -70,6 +73,7 @@ export const Digests: CollectionConfig = {
     ],
     afterChange: [
       async ({ doc, previousDoc, req, operation }) => {
+        revalidatePublicContent();
         if (operation === 'update') {
           await invalidateIssueTranslations(doc, previousDoc, req);
           return;
