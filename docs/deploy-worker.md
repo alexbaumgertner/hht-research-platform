@@ -333,6 +333,30 @@ Once a `503` is produced, later pings see it immediately.
 Do not add query parameters (e.g. `?nocache=1`) to see live state: any unknown query string bypasses
 the cache and wakes the database. Check the current state in Admin or in the worker logs instead.
 
+## Preview databases and subscriber data
+
+Preview deployments get their own Neon branch (`preview/<git-branch>`), created by the Vercel
+Neon integration as a copy-on-write fork of production. That keeps schema changes away from
+production, but the fork contains **production data, including the `subscribers` collection (e-mail
+addresses)**, and anyone with preview access (Vercel team members, the Neon project) can read it. A
+preview with a working `RESEND_API_KEY` could also mail real subscribers.
+
+`ensure-schema` protects the schema, not the data: it refuses destructive changes, and in a preview
+it refuses to run when `DATABASE_URL` matches `PRODUCTION_DATABASE_HOST` / `PRODUCTION_DATABASE_NAME`
+(set them on the Vercel **Preview** environment).
+
+Options (proposal, not implemented):
+
+| Option                                                                                 | Pros                                         | Cons                                                               |
+| -------------------------------------------------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------ |
+| A. Anonymize subscribers after the fork (build step / script replaces e-mails, tokens) | Previews keep realistic content; no extra DB | Real data exists briefly before the script runs; script can fail   |
+| B. Previews fork from a dedicated seed Neon branch (sanitized once, no subscribers)    | Real e-mails never reach a preview           | Needs a refresh routine when schema/content drift; one more branch |
+
+Recommendation: **B**. Keeping personal data out of previews by construction is sturdier than
+cleaning it after the copy. Also leave `RESEND_API_KEY` unset on Preview.
+
+---
+
 ## One-off maintenance scripts
 
 The image also contains backfill scripts. Run them with the job's own secrets by overriding the
