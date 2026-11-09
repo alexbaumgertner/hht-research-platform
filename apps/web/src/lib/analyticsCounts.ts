@@ -1,20 +1,21 @@
-import { parseChatSource, type ChatSource } from '@hht/shared';
+import type { SubscriptionSource } from '@hht/shared';
 import { getPayload } from 'payload';
 import config from '@payload-config';
 
-export type AnalyticsMetric = 'page_view' | 'form_submit' | 'confirmation';
+export type AnalyticsMetric =
+  'page_view' | 'form_submit' | 'confirmation' | 'widget_view' | 'outbound_click';
 
 /**
  * Anonymous +1 on (project, issueKey, source, metric). Does not read the `src` cookie.
- * `source` is the request query value, or `other` when it is missing or unknown.
+ * `source` must already be resolved (`resolveSubscriptionSource`) or read from a stored row.
  */
 export async function incrementAnalyticsCount(input: {
   projectId: string | number;
   issueKey: string;
-  source: string | null | undefined;
+  source: SubscriptionSource;
   metric: AnalyticsMetric;
 }): Promise<void> {
-  const source: ChatSource = parseChatSource(input.source);
+  const source = input.source;
   const payload = await getPayload({ config });
   const existing = await payload.find({
     collection: 'analytics-counts',

@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
-import { parseChatSource } from '@hht/shared';
+import { parseSourceToken } from '@hht/shared';
 
 import { routing } from './i18n/routing';
 
@@ -14,7 +14,7 @@ const handleI18n = createMiddleware(routing);
 export default async function proxy(request: NextRequest) {
   const response = await handleI18n(request);
   const incoming = request.nextUrl.searchParams.get('src');
-  const source = parseChatSource(incoming);
+  const source = parseSourceToken(incoming);
   if (source !== 'other' && !request.cookies.get('src') && response instanceof NextResponse) {
     response.cookies.set('src', source, {
       httpOnly: true,
@@ -28,5 +28,5 @@ export default async function proxy(request: NextRequest) {
 
 export const config = {
   // Match pages only — skip API, Payload admin, Next internals, and static files.
-  matcher: ['/', '/(en|de|tr|ru|uk)/:path*', '/((?!api|admin|_next|_vercel|.*\\..*).*)'],
+  matcher: ['/', '/(en|de|tr|ru|uk)/:path*', '/((?!api|admin|embed|_next|_vercel|.*\\..*).*)'],
 };

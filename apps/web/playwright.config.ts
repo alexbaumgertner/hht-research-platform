@@ -17,7 +17,12 @@ const config: Config = defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        // Partner pages are served from fake loopback origins (embed-helpers.ts); without this
+        // Chrome blocks them from framing localhost as a local-network request.
+        launchOptions: { args: ['--disable-features=LocalNetworkAccessChecks'] },
+      },
     },
   ],
   webServer: {
