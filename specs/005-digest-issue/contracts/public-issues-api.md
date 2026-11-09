@@ -9,7 +9,10 @@ conventions:
 - `?locale=` accepts `en|de|tr|ru|uk` (default `en`). Anything else returns `400 { "error": "Invalid locale" }`.
 - Unknown project, unknown issue, wrong project, or hidden issue all return `404 { "error": "Not found" }`
   with the same body, so hidden and unpublished issues are indistinguishable from unknown ones.
-- Every response sends `Cache-Control: no-store`.
+- Errors (`400`, `404`) send `Cache-Control: no-store`. Successful list responses, and issue detail
+  responses whose translation is settled (`ready` / `not-needed`), send
+  `Cache-Control: public, s-maxage=300, stale-while-revalidate=300` (see `docs/public-caching.md`).
+  A detail response with a `pending`, `failed` or `unavailable` translation stays `no-store`.
 - Only digests with `hiddenFromPublic !== true` are visible. Only publications with
   `feedPublishedAt` are listed as items. Every digest publication has it; the check is
   defensive.

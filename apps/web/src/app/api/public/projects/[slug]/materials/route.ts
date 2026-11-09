@@ -9,19 +9,11 @@ import {
   type PublicationForMaterial,
   type TranslationForMaterial,
 } from '@/lib/materials';
+import { cachePublicRead, NO_STORE_HEADERS, PUBLIC_CACHE_HEADERS } from '@/lib/publicCache';
 
 type Params = { params: Promise<{ slug: string }> };
 
-export async function GET(req: Request, { params }: Params) {
-  const { slug } = await params;
-  const url = new URL(req.url);
-  const localeRaw = url.searchParams.get('locale') || 'en';
-  const localeParsed = LocaleSchema.safeParse(localeRaw);
-  if (!localeParsed.success) {
-    return NextResponse.json({ error: 'Invalid locale' }, { status: 400 });
-  }
-  const locale: Locale = localeParsed.data;
-
+const loadMaterials = cachePublicRead('materials', async (slug: string, locale: Locale) => {
   const payload = await getPayload({ config });
 
   const projects = await payload.find({
@@ -32,9 +24,7 @@ export async function GET(req: Request, { params }: Params) {
     overrideAccess: true,
   });
   const project = projects.docs[0];
-  if (!project) {
-    return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  }
+  if (!project) return null;
 
   const publications = await payload.find({
     collection: 'publications',
@@ -88,5 +78,21 @@ export async function GET(req: Request, { params }: Params) {
     return toMaterial(publication, locale, translationByPubId.get(String(doc.id)) ?? null);
   });
 
-  return NextResponse.json({ docs: sortMaterialsByDateDesc(materials) });
+  return sortMaterialsByDateDesc(materials);
+});
+
+export async function GET(req: Request, { params }: Params) {
+  const { slug } = await params;
+  const url = new URL(req.url);
+  const localeRaw = url.searchParams.get('locale') || 'en';
+  const localeParsed = LocaleSchema.safeParse(localeRaw);
+  if (!localeParsed.success) {
+    return NextResponse.json({ error: 'Invalid locale' }, { status: 400 });
+  }
+
+  const docs = await loadMaterials(slug, localeParsed.data);
+  if (!docs) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404, headers: NO_STORE_HEADERS });
+  }
+  return NextResponse.json({ docs }, { headers: PUBLIC_CACHE_HEADERS });
 }
