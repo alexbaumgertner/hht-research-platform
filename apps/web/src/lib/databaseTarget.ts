@@ -27,6 +27,8 @@ export function isLocalDatabaseUrl(url: string | undefined): boolean {
  * `scripts/ensure-schema.mjs` sets PAYLOAD_ALLOW_REMOTE_PUSH=1 for deploy builds.
  */
 export function shouldPushSchema(env: Env = process.env): boolean {
+  // ensure-schema runs its own guarded push (no interactive prompt).
+  if (env.PAYLOAD_SKIP_AUTO_PUSH === '1') return false;
   return isLocalDatabaseUrl(env.DATABASE_URL) || env.PAYLOAD_ALLOW_REMOTE_PUSH === '1';
 }
 
