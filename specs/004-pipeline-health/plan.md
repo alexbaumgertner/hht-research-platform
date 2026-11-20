@@ -13,7 +13,7 @@ write the "verify monitoring" checklist.
 
 Same stack as spec 005 (TypeScript/Node ≥ 24, Next.js 16, Payload 3 + Postgres, Jest). **No new
 packages. No new collections.** Schema change is additive: one optional field on the monitoring-run
-`sourceResults` item (`remainingCount`).
+`sourceResults` item (`remainingCount`) and one optional `cursorState` JSON field on `monitored-sources`.
 
 **Constraints**: Constitution III (free tier; no extra LLM calls), VII (worker owns fetching and
 watermarks, web only reads), IX (tests precede implementation where practical).
@@ -29,12 +29,22 @@ Proposed flow:
 
 1. Fetch candidates since the source watermark, request `batchSize + 1` (or use adapter paging).
 2. If more than `batchSize` came back, **overflow = true**.
-3. Sort the processed batch by its own date ascending; on overflow set the watermark to the date of
-   the newest _processed_ candidate (not `startedAt`), so the next run starts there. On no overflow
-   keep today's behaviour (`startedAt`).
-4. Candidates with identical timestamps at the boundary are safe: the next run re-fetches them and
-   dedupe skips them (existing behaviour).
-5. Record `remainingCount` (unknown exact count → `>= 1`; store the number returned beyond the batch).
+3. **Cursor is the source's own query key, not the display date.** PubMed is queried with
+   `datetype=edat`, ClinicalTrials.gov with `LastUpdatePostDate`. The cursor MUST be expressed in
+   that key. `Candidate.publishedOrUpdatedAt` (electronic/journal date, may even be in the future)
+   MUST NOT be used. Adapters therefore return, per candidate, a `cursorKey` (EDAT / last-update
+   date at full available precision) in addition to the display date.
+4. Process candidates in ascending `cursorKey` order. On overflow set the watermark to the
+   `cursorKey` of the newest _processed_ candidate (not `startedAt`). With no overflow keep today's
+   behaviour (`startedAt`).
+5. **Progress across equal-key boundaries.** Both sources query at day precision, so more than one
+   batch can share the boundary day; an inclusive re-fetch would then return the same candidates
+   forever. Therefore persist, per source, a small `cursorState`:
+   `{ boundaryKey, processedIds[] }` (ids already handled at the boundary day). The next run
+   excludes `processedIds` _before_ applying the batch limit (or pages past them with the adapter's
+   offset/page token). Once the boundary day is exhausted the watermark moves to the next day and
+   `cursorState` is cleared. A unit test covers "3 × batchSize candidates, all on one day".
+6. Record `remainingCount` (unknown exact count → `>= 1`; store the number returned beyond the batch).
 
 **Risk**: adapters do not guarantee ordering (see Research R1). If an adapter cannot be ordered by
 date, fall back to fetching with explicit sort or paging until the date window is exhausted, capped

@@ -10,9 +10,9 @@ Format: `[ID] [P?] [Story] Description`. `[P]` = parallelisable.
 
 ## Phase 2: US1 — no lost items (P1)
 
-- [ ] T002 [US1] Test first: stub adapter with `batchSize + N` candidates, boundary timestamps, mid-batch failure, zero items, in `apps/worker/src/pipeline/runProject.test.ts` (new) and `publish.test.ts`.
+- [ ] T002 [US1] Test first: stub adapter with `batchSize + N` candidates, **3 × batchSize on a single boundary day**, cursor key differs from display date (PubMed EDAT vs electronic/future journal date), mid-batch failure, zero items, in `apps/worker/src/pipeline/runProject.test.ts` (new) and `publish.test.ts`.
 - [ ] T003 [US1] Replace `clampBatch` usage with overflow-aware selection and cursor watermark in `apps/worker/src/pipeline/publish.ts` and `runProject.ts`.
-- [ ] T004 [P] [US1] Add optional `remainingCount` to `sourceResults` in `apps/web/src/collections/MonitoringRuns.ts`; worker writes it in `apps/worker/src/cms/client.ts`; `pnpm --filter @hht/web generate:types`.
+- [ ] T004 [P] [US1] Add optional `remainingCount` to `sourceResults` in `apps/web/src/collections/MonitoringRuns.ts` and optional `cursorState` (JSON) to `apps/web/src/collections/MonitoredSources.ts`; adapters return `cursorKey` in `apps/worker/src/adapters/{pubmed,clinicaltrials}.ts`; worker writes it in `apps/worker/src/cms/client.ts`; `pnpm --filter @hht/web generate:types`.
 - [ ] T005 [US1] ERROR log when `remainingCount > 0` for 3 consecutive runs (per source) in `runProject.ts`.
 
 ## Phase 3: US2 — drill (P1)
