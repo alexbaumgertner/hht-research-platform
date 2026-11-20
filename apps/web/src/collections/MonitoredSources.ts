@@ -7,6 +7,7 @@ import {
   isWorkerOrAdmin,
   isWorkerOrAdminFieldLevel,
 } from '../access';
+import { revalidatePublicContent } from '../lib/publicCache';
 
 export const MonitoredSources: CollectionConfig = {
   slug: 'monitored-sources',
@@ -22,6 +23,9 @@ export const MonitoredSources: CollectionConfig = {
     delete: isAuthenticated,
   },
   hooks: {
+    // Public materials show the source's displayCategory, so edits must drop the cached lists.
+    afterChange: [() => revalidatePublicContent()],
+    afterDelete: [() => revalidatePublicContent()],
     beforeValidate: [
       ({ data }) => {
         if (!data) return data;

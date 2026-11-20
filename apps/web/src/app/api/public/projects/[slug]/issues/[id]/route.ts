@@ -17,7 +17,7 @@ import {
   toIssueDetail,
   type IssueTextTranslation,
 } from '@/lib/issues';
-import { NO_STORE_HEADERS, PUBLIC_CACHE_HEADERS } from '@/lib/publicCache';
+import { NO_STORE_HEADERS } from '@/lib/publicCache';
 
 type Params = { params: Promise<{ slug: string; id: string }> };
 
@@ -89,9 +89,7 @@ export async function GET(req: Request, { params }: Params) {
   const translation = await translateIssueText(loaded, locale, deadline);
   const detail = toIssueDetail(loaded, locale, t, translation);
 
-  // Only a settled translation is safe for the CDN; pending/failed must be retried per visit.
-  const settled = translation.status === 'ready' || translation.status === 'not-needed';
-  return NextResponse.json(detail, {
-    headers: settled ? PUBLIC_CACHE_HEADERS : NO_STORE_HEADERS,
-  });
+  // Never CDN-cached: a hidden or deleted issue must 404 at once, and a discarded translation
+  // must not outlive the edit that invalidated it. Purging every CDN variant is not possible.
+  return NextResponse.json(detail, { headers: NO_STORE_HEADERS });
 }

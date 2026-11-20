@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 import { findProjectBySlug, listVisibleIssues, loadIssueSummary } from '@/lib/issueQueries';
 import { findReadyIssueTranslations } from '@/lib/issueTranslationStore';
 import { toIssueSummaryListItem } from '@/lib/issues';
-import { cachePublicRead, NO_STORE_HEADERS, PUBLIC_CACHE_HEADERS } from '@/lib/publicCache';
+import { cachePublicRead, NO_STORE_HEADERS } from '@/lib/publicCache';
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -76,5 +76,7 @@ export async function GET(req: Request, { params }: Params) {
     return NextResponse.json({ error: 'Not found' }, { status: 404, headers: NO_STORE_HEADERS });
   }
 
-  return NextResponse.json({ docs }, { headers: PUBLIC_CACHE_HEADERS });
+  // The data cache above spares Postgres, but the CDN must not keep a hidden or deleted issue
+  // visible: a purge of every variant is not possible, so the response stays no-store.
+  return NextResponse.json({ docs }, { headers: NO_STORE_HEADERS });
 }
