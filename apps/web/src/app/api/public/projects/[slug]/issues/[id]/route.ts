@@ -17,12 +17,11 @@ import {
   toIssueDetail,
   type IssueTextTranslation,
 } from '@/lib/issues';
+import { NO_STORE_HEADERS } from '@/lib/publicCache';
 
 type Params = { params: Promise<{ slug: string; id: string }> };
 
 export const maxDuration = 60;
-
-const NO_STORE = { 'Cache-Control': 'no-store' };
 
 /**
  * Wait-then-fallback (research R8): the same path for browsers and crawlers, with
@@ -75,12 +74,12 @@ export async function GET(req: Request, { params }: Params) {
 
   const project = await findProjectBySlug(slug);
   if (!project) {
-    return NextResponse.json({ error: 'Not found' }, { status: 404, headers: NO_STORE });
+    return NextResponse.json({ error: 'Not found' }, { status: 404, headers: NO_STORE_HEADERS });
   }
 
   const digest = await getVisibleIssue(project.id, id);
   if (!digest) {
-    return NextResponse.json({ error: 'Not found' }, { status: 404, headers: NO_STORE });
+    return NextResponse.json({ error: 'Not found' }, { status: 404, headers: NO_STORE_HEADERS });
   }
 
   const [loaded, t] = await Promise.all([
@@ -90,5 +89,7 @@ export async function GET(req: Request, { params }: Params) {
   const translation = await translateIssueText(loaded, locale, deadline);
   const detail = toIssueDetail(loaded, locale, t, translation);
 
-  return NextResponse.json(detail, { headers: NO_STORE });
+  // Never CDN-cached: a hidden or deleted issue must 404 at once, and a discarded translation
+  // must not outlive the edit that invalidated it. Purging every CDN variant is not possible.
+  return NextResponse.json(detail, { headers: NO_STORE_HEADERS });
 }

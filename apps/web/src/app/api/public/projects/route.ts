@@ -2,7 +2,9 @@ import { getPayload } from 'payload';
 import config from '@payload-config';
 import { NextResponse } from 'next/server';
 
-export async function GET() {
+import { cachePublicRead, PUBLIC_CACHE_HEADERS } from '@/lib/publicCache';
+
+const loadProjects = cachePublicRead('projects', async () => {
   const payload = await getPayload({ config });
 
   const result = await payload.find({
@@ -37,5 +39,10 @@ export async function GET() {
     }),
   );
 
-  return NextResponse.json({ docs });
+  return docs;
+});
+
+export async function GET() {
+  const docs = await loadProjects();
+  return NextResponse.json({ docs }, { headers: PUBLIC_CACHE_HEADERS });
 }

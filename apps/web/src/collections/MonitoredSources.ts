@@ -7,6 +7,20 @@ import {
   isWorkerOrAdmin,
   isWorkerOrAdminFieldLevel,
 } from '../access';
+import { revalidatePublicContent } from '../lib/publicCache';
+
+/**
+ * Public materials only show a source's displayCategory. The worker updates
+ * lastSuccessfulFetchAt on every successful fetch, so dropping the caches for any change would
+ * evict them during every ingestion run.
+ */
+export function sourceChangeAffectsPublicReads(
+  operation: 'create' | 'update',
+  doc: { displayCategory?: unknown },
+  previousDoc?: { displayCategory?: unknown },
+): boolean {
+  return operation === 'create' || doc.displayCategory !== previousDoc?.displayCategory;
+}
 
 export const MonitoredSources: CollectionConfig = {
   slug: 'monitored-sources',
@@ -22,6 +36,13 @@ export const MonitoredSources: CollectionConfig = {
     delete: isAuthenticated,
   },
   hooks: {
+    // Public materials show the source's displayCategory: drop the cached lists when it changes.
+    afterChange: [
+      ({ doc, previousDoc, operation }) => {
+        if (sourceChangeAffectsPublicReads(operation, doc, previousDoc)) revalidatePublicContent();
+      },
+    ],
+    afterDelete: [() => revalidatePublicContent()],
     beforeValidate: [
       ({ data }) => {
         if (!data) return data;

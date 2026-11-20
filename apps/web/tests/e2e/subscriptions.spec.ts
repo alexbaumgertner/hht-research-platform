@@ -109,6 +109,9 @@ test.describe('subscriptions', () => {
     }
     await page.goto(`/en/projects/${PROJECT}/issues/${issueId}?src=wa`);
     await page.getByRole('link', { name: 'Back to project' }).click();
+    // The issue page has its own subscribe form: wait for the project page, or the fill below
+    // can land on the issue page's form and be wiped by the client-side navigation.
+    await page.waitForURL(new RegExp(`/en/projects/${PROJECT}/?$`));
     const email = `plus.${Date.now()}+hht@example.com`;
     await page.getByLabel('Email', { exact: true }).fill(email);
     await page.locator('input[name="consent"]').check();

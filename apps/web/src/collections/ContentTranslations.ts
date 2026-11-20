@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload';
 
 import { isAuthenticatedOrWorker, isWorkerOrAdmin } from '../access';
+import { revalidatePublicContent } from '../lib/publicCache';
 
 export const ContentTranslations: CollectionConfig = {
   slug: 'content-translations',
@@ -8,6 +9,10 @@ export const ContentTranslations: CollectionConfig = {
     useAsTitle: 'locale',
     group: 'Research',
     defaultColumns: ['locale', 'publication', 'updatedAt'],
+  },
+  hooks: {
+    afterChange: [() => revalidatePublicContent()],
+    afterDelete: [() => revalidatePublicContent()],
   },
   access: {
     read: isAuthenticatedOrWorker,
