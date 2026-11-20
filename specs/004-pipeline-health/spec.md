@@ -124,7 +124,7 @@ After a domain or project move, the owner has a checklist that proves the alerts
 ### Key Entities
 
 - **Monitoring run** (existing): gains per-source `remainingCount`.
-- **Monitored source** (existing): `lastSuccessfulFetchAt` semantics change from "start time of last successful run" to "boundary up to which all candidates are processed".
+- **Monitored source** (existing): `lastSuccessfulFetchAt` semantics change from "start time of last successful run" to "boundary up to which all candidates are processed"; plus a small `cursorState` (boundary key and ids already processed on the boundary day) so progress is guaranteed when several batches share one day. The cursor uses the source's query key (PubMed EDAT, ClinicalTrials.gov last-update date), never the display date.
 - **Project** (existing): last successful check time is exposed publicly (read-only).
 
 ## Success Criteria _(mandatory)_
