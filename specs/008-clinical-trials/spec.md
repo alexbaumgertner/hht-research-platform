@@ -159,7 +159,7 @@ Start date, expected primary completion and planned enrolment appear on the tria
 - **FR-003**: The country cap of 10 MUST be removed from stored data; display collapsing is a UI concern.
 - **FR-004**: For papers, an intervention-type tag MAY be produced by the LLM with the allowed set {medicine, procedure, device, gene-cell, supportive, diagnostic, unspecified}; when the abstract does not state it, the tag MUST be `unspecified`.
 - **FR-005**: The worker MUST compare a re-fetched trial's `overallStatus` and `hasResults` with the stored values and record a **status transition** when they differ in a patient-relevant way (see Open Question 3).
-- **FR-006**: A transition MUST be recorded once per distinct `(trial, from, to)` and be reported in the next digest (idempotent across re-runs).
+- **FR-006**: A transition MUST be recorded once per distinct occurrence `(trial, from, to, hasResults, registry update date)` and be reported in the next digest. Retries of the same run are idempotent; a later recurrence of the same change type (e.g. a second suspension) MUST remain reportable. Only trials eligible for the public feed (relevant, `feedPublishedAt` set) produce public transitions.
 
 **Reader experience (web):**
 

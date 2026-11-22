@@ -16,8 +16,8 @@ Format: `[ID] [P?] [Story] Description`. `[P]` = parallelisable. Tests precede i
 - [ ] T005 [US1] Extend `Study` type and `extractTrialMetadata`; drop the 10-country cap in `apps/worker/src/adapters/clinicaltrials.ts` and `types.ts`.
 - [ ] T006 [US1] Extend `trialMetadata` fields in `apps/web/src/collections/Publications.ts`; `pnpm --filter @hht/web generate:types`; migration per repo rules (ask first).
 - [ ] T007 [P] [US1] `researchStage` pure function + tests in `packages/shared/src/` (`trialStage.ts`, `trialStage.test.ts`).
-- [ ] T008 [US1] Tests for `filterMaterials({ recruitingNow })` and extended `normalizeTrialInfo` in `apps/web/src/lib/materials.test.ts`.
-- [ ] T009 [US1] Implement `recruitingNow` filter and extended `TrialInfo` in `apps/web/src/lib/materials.ts`.
+- [ ] T008 [US1] Tests: server-side `status=recruiting` in the materials API **including a recruiting trial outside the first 200 feed records**, pagination, and extended `normalizeTrialInfo` (`apps/web/src/lib/materials.test.ts`, API route test).
+- [ ] T009 [US1] Implement the `status=recruiting` query parameter (filter before limit/pagination) in the materials API and extended `TrialInfo` in `apps/web/src/lib/materials.ts`; the feed switch sets the parameter.
 - [ ] T010 [P] [US1] "Recruiting now" switch in `apps/web/src/components/MaterialsFeed.tsx`; trial card fields in `MaterialCard.tsx`.
 - [ ] T011 [US1] "Recruiting now" group in `apps/web/src/components/IssueView.tsx`.
 - [ ] T012 [P] [US1] i18n keys in `apps/web/messages/{en,ru,de,tr,uk}.json`.
@@ -26,13 +26,14 @@ Format: `[ID] [P?] [Story] Description`. `[P]` = parallelisable. Tests precede i
 
 ## Phase 3: Release 1b — US3 Status transitions (P1)
 
-- [ ] T015 [US3] Tests: transition detection (change, none, flapping, results posted, duplicate run) in `apps/worker/src/pipeline/trialTransitions.test.ts`.
+- [ ] T015 [US3] Tests: transition detection (change, none, flapping, results posted, duplicate run, **repeated A→B→A→B occurrences reported twice**, **irrelevant trial / no `feedPublishedAt` records no public update**) in `apps/worker/src/pipeline/trialTransitions.test.ts`.
 - [ ] T016 [US3] Widen `findPublicationByDedupe` result in `apps/worker/src/cms/client.ts`; detect and record transitions in `runProject.ts` dedupe branch (depends on 004 T003).
 - [ ] T017 [US3] New `trial-transitions` collection with unique index in `apps/web/src/collections/TrialTransitions.ts`; register in `payload.config.ts`; access: worker create, public none.
 - [ ] T018 [US3] Per chosen D3 option: `digests.trialUpdates` + relax `assertDigestHasPublications` in `apps/web/src/collections/Digests.ts` and `digestHooks.ts`; amend spec 005 note.
+- [ ] T018a [US3] (D3-A) Publication gate: `shouldPublishDigest` accepts zero publications with non-empty `trialUpdates`; issue-text generation and readiness work from update items; public issue API maps `trialUpdates`; re-check visibility when attaching and loading updates.
 - [ ] T019 [US3] Worker attaches unreported transitions to the next digest; marks `reportedInDigest`.
 - [ ] T020 [P] [US3] Update block in `IssueView.tsx` and email template in `apps/worker/src/notify/` (spec 006 issue email) — check email renders updates.
-- [ ] T021 [US3] Playwright + integration: one entry, then none, on rerun.
+- [ ] T021 [US3] Playwright + integration: one entry, then none, on rerun; **integration test delivers an update-only issue to subscribers** (issue text `ready`, email sent).
 
 **Release 1 checkpoint**: owner reviews the first issue with real data; sends calibration set (FR-017) to the physician.
 
@@ -49,7 +50,8 @@ Format: `[ID] [P?] [Story] Description`. `[P]` = parallelisable. Tests precede i
 - [ ] T027 [US5] Sites list on `MaterialDetailView.tsx` with locale-relevant countries first (config from OQ1) + test.
 - [ ] T028 [P] [US6] Dates/enrolment/sponsor on detail page + tests (missing values omitted).
 - [ ] T029 [US4] Eligibility points generator behind `ELIGIBILITY_POINTS`: prompt with `untrusted_content` wrapper, zod ≤ 6 points, forbidden-phrase test, in `apps/worker/src/pipeline/ai.ts` (or `eligibility.ts`).
-- [ ] T030 [US4] Render points + AI label + "only the study team decides" on the detail page; structured facts first.
+- [ ] T029a [US4] Translation of `eligibilityPoints`: storage per locale, translation-contract and public-reader changes, English fallback, re-translate on criteria change, locale tests; budget under FR-018.
+- [ ] T030 [US4] Render points (in the reader's locale) + AI label + "only the study team decides" on the detail page; structured facts first.
 - [ ] T031 Prepare the calibration set (≥ 15 items) as a doc in `docs/launch/` for the physician (FR-017). **Owner action**: send and collect written feedback.
 
 ## Done when

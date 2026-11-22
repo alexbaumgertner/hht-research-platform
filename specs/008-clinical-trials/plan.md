@@ -41,8 +41,12 @@ Mantine, next-intl, `ai` SDK with the gateway, Jest + Playwright). Free-tier dis
 `researchStage` (select, closed set from the spec; derived from phase/type, **not** free text).
 
 New small collection **`trial-transitions`**: `{ publication, fromStatus, toStatus, fromHasResults,
-toHasResults, registryUpdatedAt, detectedInRun, reportedInDigest? }` with a unique index on
-`(publication, fromStatus, toStatus, toHasResults)` to make FR-006 idempotent.
+toHasResults, registryUpdatedAt, registryVersion, detectedInRun, reportedInDigest? }`. The unique index
+is on the **occurrence**, `(publication, fromStatus, toStatus, toHasResults, registryUpdatedAt)`,
+not on the transition type: a trial that goes RECRUITING → SUSPENDED → RECRUITING → SUSPENDED must
+report the second suspension, while a retry of the same run (same registry update date) must not
+duplicate. Repeated changes sharing one registry date are collapsed to the latest observed state
+(documented policy; the net change is what a patient needs). FR-006 and tests T015 are aligned to this.
 
 Digest link: see D3.
 
@@ -62,7 +66,7 @@ The query already returns trials updated since the watermark (`AREA[LastUpdatePo
 a status change **arrives as a candidate** and hits the dedupe branch. Today that branch refreshes
 metadata and `continue`s. Change:
 
-1. `cms.findPublicationByDedupe` currently returns only `id`; widen to return the stored `trialMetadata.overallStatus` and `hasResults`.
+1. `cms.findPublicationByDedupe` currently returns only `id`; widen to return the stored `trialMetadata.overallStatus` and `hasResults`, **plus relevance and feed visibility** (`relevant`, `feedPublishedAt`). Transitions are recorded and published **only for trials that are eligible for the public feed**: an irrelevant trial stored without `feedPublishedAt` must not gain a public update, and visibility is re-checked when a transition is attached to a digest and when the public issue loads its updates.
 2. If status or `hasResults` differs in a patient-relevant way (spec OQ3), create a `trial-transitions` row (unique index swallows duplicates), then refresh metadata.
 3. Flapping A→B→A between runs: compare against the stored value only, so net-zero produces no row.
 4. No LLM call for transitions. The entry is rendered from structured data and localised UI strings.
@@ -80,9 +84,11 @@ Depends on spec 004 T003 (cursor): a status change that falls into an overflowed
 
 Recommendation: A. Needs owner confirmation because it changes FR-010 semantics. **[Open: OQ in PR]**
 
+Relaxing the digest hook alone is not enough. D3-A also requires: (1) `shouldPublishDigest` accepts zero publications when `trialUpdates` is non-empty; (2) issue-text generation (spec 005) works from update items and reaches `ready` for an update-only week, because subscriber delivery requires issue text `ready`; (3) the public issue API maps `trialUpdates`; (4) an integration test delivers an update-only issue to subscribers (spec 006 email).
+
 ### D4 — Web (`apps/web`)
 
-- `lib/materials.ts`: extend `TrialInfo` (interventions, dates, sites, stage); add `filterMaterials` option `recruitingNow`.
+- `lib/materials.ts`: extend `TrialInfo` (interventions, dates, sites, stage). **Recruiting-now filtering must happen on the server before the 200-item limit and pagination**: the materials endpoint currently selects at most 200 feed-published records before mapping, so a client-side `filterMaterials` option would omit a recruiting trial outside those 200. Add a `status=recruiting` query parameter to the materials API (filter in the Payload query, then limit/paginate); keep a client-side switch only as a thin toggle that sets the parameter.
 - `components/MaterialsFeed.tsx`: "Recruiting now" switch (pattern: `HighImportanceSwitch.tsx`), sorted by `registryUpdatedAt` desc.
 - `components/IssueView.tsx`: group "Recruiting now" before papers; update entries block (D3-A).
 - `components/MaterialCard.tsx` / `MaterialDetailView.tsx`: intervention names, plain-words phase, countries (collapsed beyond 5), age/sex, registry link primary; detail adds dates, enrolment, sponsor, sites with locale-relevant countries first.
@@ -93,7 +99,7 @@ Recommendation: A. Needs owner confirmation because it changes FR-010 semantics.
 ### D5 — AI parts (worker, behind flags)
 
 - **Paper intervention tag**: add one field to the existing `summarizeAndRank` schema (no extra call). Prompt: "state the type only if the abstract names it, else `unspecified`". Output validated by zod enum.
-- **Eligibility points**: one call per newly recruiting trial, only if `ELIGIBILITY_POINTS=1`. Prompt reuses the `untrusted_content` wrapping from `ai.ts`; output ≤ 6 short points; instruction forbids "you are eligible/not eligible". Stored on the publication as `eligibilityPoints` (en) and translated by the existing path.
+- **Eligibility points**: one call per newly recruiting trial, only if `ELIGIBILITY_POINTS=1`. Prompt reuses the `untrusted_content` wrapping from `ai.ts`; output ≤ 6 short points; instruction forbids "you are eligible/not eligible". Stored on the publication as `eligibilityPoints` (en). **The existing translation path is not enough**: it accepts only a title and five summary fields. T029/T030 therefore include explicit storage for translated points (per-locale field or `translations` entry), an extension of the translation contract and of the public reader, locale fallback to English, invalidation (re-translate) when criteria change, and locale tests. Translation calls count against FR-018.
 
 ## Research (T001–T003)
 
