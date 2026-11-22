@@ -19,11 +19,14 @@ import {
   applyIssueTextRules,
   assertDigestHasPublications,
   capCreateDepth,
+  embedRelevantChange,
+  previousEmbedProject,
   invalidateIssueTranslations,
   resolveRelationshipId,
   stampFeedPublishedAt,
   validateRefsWithinDigest,
 } from './digestHooks';
+import { revalidateEmbed } from '../lib/embed/revalidateEmbed';
 
 const itemsWithinDigest: RelationshipFieldManyValidation = async (value, options) => {
   const base = await relationship(value, options);
@@ -54,7 +57,6 @@ export const Digests: CollectionConfig = {
     delete: isAuthenticated,
   },
   hooks: {
-    afterDelete: [() => revalidatePublicContent()],
     beforeValidate: [
       ({ data, operation }) => {
         assertDigestHasPublications(data, operation);
@@ -71,16 +73,29 @@ export const Digests: CollectionConfig = {
         return applyIssueTextRules({ data, originalDoc, req });
       },
     ],
+    afterDelete: [
+      async ({ doc }) => {
+        revalidatePublicContent();
+        const projectId = resolveRelationshipId(doc.project);
+        if (projectId) await revalidateEmbed(projectId);
+      },
+    ],
     afterChange: [
       async ({ doc, previousDoc, req, operation }) => {
         revalidatePublicContent();
+        const projectId = resolveRelationshipId(doc.project);
         if (operation === 'update') {
           await invalidateIssueTranslations(doc, previousDoc, req);
+          if (projectId && embedRelevantChange(doc, previousDoc)) {
+            await revalidateEmbed(projectId);
+            const movedFrom = previousEmbedProject(doc, previousDoc);
+            if (movedFrom != null) await revalidateEmbed(movedFrom);
+          }
           return;
         }
         if (operation !== 'create') return;
-        const projectId = resolveRelationshipId(doc.project);
         if (!projectId) return;
+        await revalidateEmbed(projectId);
         // Email is sent by the worker (`sendDigestPublishedEmail`), not this hook.
         // Nested `payload.update()` *without* `req` starts a second postgres
         // transaction while create still holds the first — that stalls the pool
