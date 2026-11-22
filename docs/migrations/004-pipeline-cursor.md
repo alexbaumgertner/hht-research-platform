@@ -17,6 +17,11 @@ deploys apply the schema with `ensure-schema` (a Drizzle push), and `pnpm db:gen
 baseline of the whole schema. The change is two `ADD COLUMN IF NOT EXISTS` statements, so it is a
 small reviewed file: `apps/web/scripts/sql/004-pipeline-cursor.sql`. It is idempotent.
 
+## Status
+
+Applied to production by the owner (verified on a Neon branch first). Nothing left to run for this
+file; the steps below stay as the record.
+
 ## Is it required?
 
 Not strictly: `ensure-schema` adds nullable columns on its own during the web deploy. Run the SQL
