@@ -348,6 +348,15 @@ export const ResearchProjects: CollectionConfig = {
             },
           ],
         },
+        {
+          name: 'embedSnippets',
+          type: 'ui',
+          admin: {
+            components: {
+              Field: '/components/admin/EmbedSnippets#EmbedSnippets',
+            },
+          },
+        },
       ],
     },
     {
