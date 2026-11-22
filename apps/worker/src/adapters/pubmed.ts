@@ -1,5 +1,5 @@
 import type { Candidate, FetchCandidatesInput, SourceAdapter } from './types.js';
-import { formatYmd, resolveSinceDate } from './types.js';
+import { formatYmd, orderByCursor, resolveSinceDate } from './types.js';
 import { safeFetch } from '../net/safeFetch.js';
 
 function buildQuery(keywords: string[]): string {
@@ -63,6 +63,16 @@ function parsePublishedDate(block: string): Date | undefined {
   return parseDateElement(electronic) ?? parseDateElement(entrez) ?? parseDateElement(issue);
 }
 
+/**
+ * PubMed's own indexing day (EDAT = the "entrez" history date): the key ESearch filters on with
+ * `datetype=edat`. This, not the display date, is what the run cursor is expressed in.
+ */
+export function parseEntrezDay(block: string): string | undefined {
+  const entrez = block.match(/<PubMedPubDate PubStatus="entrez">([\s\S]*?)<\/PubMedPubDate>/)?.[1];
+  const date = parseDateElement(entrez);
+  return date ? formatYmd(date) : undefined;
+}
+
 /** All `<AbstractText>` sections; structured ones keep their label ("METHODS: …"). */
 function parseAbstract(block: string): string | undefined {
   const sections = [...block.matchAll(/<AbstractText([^>]*)>([\s\S]*?)<\/AbstractText>/g)].map(
@@ -87,6 +97,7 @@ export function parsePubmedArticles(xml: string, limit: number): Candidate[] {
       ...block.matchAll(/<PublicationType[^>]*>([^<]+)<\/PublicationType>/g),
     ].map(([, type]) => textOf(type ?? ''));
 
+    const cursorKey = parseEntrezDay(block);
     articles.push({
       externalIds: doi ? { pmid, doi } : { pmid },
       title: (rawTitle && textOf(rawTitle)) || 'Untitled',
@@ -95,6 +106,7 @@ export function parsePubmedArticles(xml: string, limit: number): Candidate[] {
       publishedOrUpdatedAt: parsePublishedDate(block),
       publicationTypes,
       sourceType: 'pubmed',
+      ...(cursorKey ? { cursorKey } : {}),
     });
   }
   return articles;
@@ -111,7 +123,16 @@ export async function fetchPubmedXml(pmids: string[]): Promise<string> {
   return fetchRes.text();
 }
 
+/** ESearch caps retmax at 10 000; a window larger than that is a keyword problem, not a batch. */
+const MAX_ESEARCH_IDS = 10_000;
+const EFETCH_CHUNK = 200;
+
 export const pubmedAdapter: SourceAdapter = {
+  /**
+   * ESearch gives no EDAT ordering, so ids for the whole window are listed (cheap), the ones
+   * already handled on the boundary day are dropped, the rest are fetched in chunks and ordered
+   * by their EDAT day here. Returns the oldest `limit` candidates.
+   */
   async fetchCandidates(input: FetchCandidatesInput): Promise<Candidate[]> {
     const since = resolveSinceDate(input.since, input.bootstrapLookbackDays);
     const mindate = formatYmd(since);
@@ -119,7 +140,7 @@ export const pubmedAdapter: SourceAdapter = {
     const term = encodeURIComponent(buildQuery(input.keywords));
     const searchUrl =
       `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed` +
-      `&retmode=json&retmax=${input.limit}&term=${term}` +
+      `&retmode=json&retmax=${MAX_ESEARCH_IDS}&term=${term}` +
       `&datetype=edat&mindate=${mindate}&maxdate=${maxdate}`;
 
     const searchRes = await safeFetch(searchUrl);
@@ -129,9 +150,14 @@ export const pubmedAdapter: SourceAdapter = {
     const searchJson = (await searchRes.json()) as {
       esearchresult?: { idlist?: string[] };
     };
-    const ids = searchJson.esearchresult?.idlist ?? [];
-    if (ids.length === 0) return [];
+    const excluded = new Set(input.excludeIds ?? []);
+    const ids = (searchJson.esearchresult?.idlist ?? []).filter((id) => !excluded.has(id));
 
-    return parsePubmedArticles(await fetchPubmedXml(ids), input.limit);
+    const candidates: Candidate[] = [];
+    for (let i = 0; i < ids.length; i += EFETCH_CHUNK) {
+      const chunk = ids.slice(i, i + EFETCH_CHUNK);
+      candidates.push(...parsePubmedArticles(await fetchPubmedXml(chunk), chunk.length));
+    }
+    return orderByCursor(candidates).slice(0, input.limit);
   },
 };

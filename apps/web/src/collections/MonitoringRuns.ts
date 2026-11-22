@@ -72,6 +72,14 @@ export const MonitoringRuns: CollectionConfig = {
         { name: 'error', type: 'text' },
         { name: 'fetchedCount', type: 'number', defaultValue: 0 },
         { name: 'acceptedCount', type: 'number', defaultValue: 0 },
+        {
+          name: 'remainingCount',
+          type: 'number',
+          admin: {
+            description:
+              'Candidates left unprocessed after this run (at least this many); 0 or empty when none.',
+          },
+        },
       ],
     },
     {

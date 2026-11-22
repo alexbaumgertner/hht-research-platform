@@ -128,5 +128,18 @@ export const MonitoredSources: CollectionConfig = {
         update: isWorkerOrAdminFieldLevel,
       },
     },
+    {
+      name: 'cursorState',
+      type: 'json',
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+        description:
+          'Worker-owned (spec 004): while a backlog is drained, the ids already processed on the watermark day. Cleared when nothing is left over.',
+      },
+      access: {
+        update: isWorkerOrAdminFieldLevel,
+      },
+    },
   ],
 };

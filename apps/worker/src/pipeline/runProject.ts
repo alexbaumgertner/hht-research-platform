@@ -7,13 +7,13 @@ import type { SourceAdapter } from '../adapters/types.js';
 import { classifyRelevance, summarizeAndRank } from './ai.js';
 import { translateSummary } from './translate.js';
 import {
-  clampBatch,
   formatDigestStepError,
   resolveRunStatus,
   shouldPublishDigest,
   sourceSince,
   statusAfterDigestStepFailure,
 } from './publish.js';
+import { BACKLOG_ERROR_AFTER_RUNS, selectBatch, type CursorState } from './cursor.js';
 import { sendDigestPublishedEmail } from '../notify/digestEmail.js';
 import { logError, logInfo } from '../log.js';
 
@@ -67,14 +67,26 @@ export type ProjectForRun = {
     rssUrl?: string | null;
     enabled: boolean;
     lastSuccessfulFetchAt?: string | null;
+    cursorState?: CursorState | null;
   }>;
+};
+
+/** Seams for tests; production uses the real adapters and AI calls. */
+export type RunProjectDeps = {
+  adapters?: Record<'pubmed' | 'clinicaltrials' | 'rss', SourceAdapter>;
+  classifyRelevance?: typeof classifyRelevance;
+  summarizeAndRank?: typeof summarizeAndRank;
 };
 
 export async function runProject(
   cms: CmsClient,
   project: ProjectForRun,
   triggeredBy: 'schedule' | 'manual' = 'schedule',
+  deps: RunProjectDeps = {},
 ): Promise<void> {
+  const sourceAdapters = deps.adapters ?? adapters;
+  const classify = deps.classifyRelevance ?? classifyRelevance;
+  const summarize = deps.summarizeAndRank ?? summarizeAndRank;
   // Watermarks use the run start: items indexed while the run is in progress
   // are picked up next time instead of falling into a gap.
   const startedAt = new Date().toISOString();
@@ -87,6 +99,7 @@ export async function runProject(
     error?: string;
     fetchedCount: number;
     acceptedCount: number;
+    remainingCount: number;
   }> = [];
 
   const stats = {
@@ -101,15 +114,19 @@ export async function runProject(
 
   for (const source of project.sources.filter((s) => s.enabled)) {
     try {
-      const adapter = adapters[source.type];
+      const adapter = sourceAdapters[source.type];
+      const prevState = source.cursorState ?? null;
+      // batchSize + 1 reveals whether anything is left over after this run's batch.
       const fetched = await adapter.fetchCandidates({
         keywords: project.keywords,
         since: sourceSince(source, project),
         bootstrapLookbackDays: project.bootstrapLookbackDays,
-        limit: cms.batchSize,
+        limit: cms.batchSize + 1,
+        excludeIds: prevState?.processedIds,
         rssUrl: source.rssUrl || undefined,
       });
-      const batch = clampBatch(fetched, cms.batchSize);
+      const selection = selectBatch(fetched, cms.batchSize, prevState);
+      const batch = selection.batch;
       stats.candidates += batch.length;
       let accepted = 0;
 
@@ -136,7 +153,7 @@ export async function runProject(
           continue;
         }
 
-        const relevant = await classifyRelevance({
+        const relevant = await classify({
           title: candidate.title,
           abstractOrBody: candidate.abstractOrBody,
           keywords: project.keywords,
@@ -162,7 +179,7 @@ export async function runProject(
           continue;
         }
 
-        const { importance, summary } = await summarizeAndRank({
+        const { importance, summary } = await summarize({
           title: candidate.title,
           abstractOrBody: candidate.abstractOrBody,
           keywords: project.keywords,
@@ -198,10 +215,24 @@ export async function runProject(
         status: 'success',
         fetchedCount: batch.length,
         acceptedCount: accepted,
+        remainingCount: selection.remainingCount,
       });
 
+      if (selection.cursorState && selection.cursorState.overflowRuns >= BACKLOG_ERROR_AFTER_RUNS) {
+        logError('source backlog persists', undefined, {
+          projectId: project.id,
+          projectSlug: project.slug,
+          sourceId: source.id,
+          sourceType: source.type,
+          remainingCount: selection.remainingCount,
+          consecutiveRuns: selection.cursorState.overflowRuns,
+        });
+      }
+
       try {
-        await cms.patchSourceWatermark(source.id, startedAt);
+        // Overflow: stop at the newest processed key, never at the run start (spec 004 G1).
+        const watermark = selection.watermark.kind === 'at' ? selection.watermark.iso : startedAt;
+        await cms.patchSourceWatermark(source.id, watermark, selection.cursorState);
       } catch (err) {
         // Non-fatal: the source re-fetches the same window next run (deduped).
         logError('source watermark update failed', err, {
@@ -222,6 +253,7 @@ export async function runProject(
         error: err instanceof Error ? err.message : String(err),
         fetchedCount: 0,
         acceptedCount: 0,
+        remainingCount: 0,
       });
     }
   }

@@ -1,4 +1,4 @@
-import { parsePubmedArticles } from './pubmed.js';
+import { parseEntrezDay, parsePubmedArticles } from './pubmed.js';
 
 // Synthetic efetch XML shaped like PubMed's; content is illustrative only.
 const STRUCTURED = `<?xml version="1.0" ?>
@@ -80,5 +80,23 @@ describe('parsePubmedArticles', () => {
 
   it('respects the limit', () => {
     expect(parsePubmedArticles(STRUCTURED, 1)).toHaveLength(1);
+  });
+});
+
+describe('cursor key (spec 004)', () => {
+  it('is the entrez (EDAT) day, not the display date', () => {
+    const [first, second] = parsePubmedArticles(STRUCTURED, 10);
+    // display date is the 2026-09-10 electronic date; EDAT is 2026-09-12
+    expect(first?.publishedOrUpdatedAt?.toISOString().slice(0, 10)).toBe('2026-09-10');
+    expect(first?.cursorKey).toBe('2026-09-12');
+    expect(second?.cursorKey).toBe('2026-08-20');
+  });
+
+  it('parseEntrezDay ignores other history dates', () => {
+    expect(
+      parseEntrezDay(
+        '<PubMedPubDate PubStatus="received"><Year>2026</Year><Month>1</Month><Day>1</Day></PubMedPubDate>',
+      ),
+    ).toBeUndefined();
   });
 });

@@ -1,5 +1,5 @@
 import type { Candidate, FetchCandidatesInput, SourceAdapter, TrialMetadata } from './types.js';
-import { formatYmd, resolveSinceDate } from './types.js';
+import { candidateId, formatYmd, orderByCursor, resolveSinceDate } from './types.js';
 import { safeFetch } from '../net/safeFetch.js';
 
 function buildQuery(keywords: string[]): string {
@@ -81,12 +81,19 @@ function parseRegistryDate(value: string | undefined): Date | undefined {
   return new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3] ?? 1)));
 }
 
+/** Query key for the cursor: the last-update day the API filters and sorts on (never the first-post fallback). */
+function lastUpdateKey(value: string | undefined): string | undefined {
+  const date = parseRegistryDate(value);
+  return date ? formatYmd(date) : undefined;
+}
+
 export function studyToCandidate(study: Study): Candidate | null {
   const section = study.protocolSection;
   const id = section?.identificationModule?.nctId;
   if (!id) return null;
   const status = section?.statusModule;
   const trialMetadata = extractTrialMetadata(study);
+  const cursorKey = lastUpdateKey(status?.lastUpdatePostDateStruct?.date);
   return {
     externalIds: { nctId: id },
     title:
@@ -100,6 +107,7 @@ export function studyToCandidate(study: Study): Candidate | null {
       parseRegistryDate(status?.studyFirstPostDateStruct?.date),
     ...(trialMetadata ? { trialMetadata } : {}),
     sourceType: 'clinicaltrials',
+    ...(cursorKey ? { cursorKey } : {}),
   };
 }
 
@@ -111,14 +119,23 @@ export async function fetchStudy(nctId: string): Promise<Study> {
   return (await res.json()) as Study;
 }
 
+const MAX_PAGE_SIZE = 1000;
+
 export const clinicalTrialsAdapter: SourceAdapter = {
+  /**
+   * Sorted by last update ascending so the oldest unprocessed studies come first. The page is
+   * widened by the number of excluded ids (all on the boundary day, hence at the start of the
+   * order) so excluded studies never eat into `limit`. The result is re-ordered locally anyway.
+   */
   async fetchCandidates(input: FetchCandidatesInput): Promise<Candidate[]> {
     const since = resolveSinceDate(input.since, input.bootstrapLookbackDays);
     const sinceYmd = formatYmd(since);
+    const excluded = new Set(input.excludeIds ?? []);
     const params = new URLSearchParams({
       'query.term': buildQuery(input.keywords),
       'filter.advanced': `AREA[LastUpdatePostDate]RANGE[${sinceYmd},MAX]`,
-      pageSize: String(input.limit),
+      sort: 'LastUpdatePostDate:asc',
+      pageSize: String(Math.min(MAX_PAGE_SIZE, input.limit + excluded.size)),
       format: 'json',
     });
 
@@ -129,9 +146,10 @@ export const clinicalTrialsAdapter: SourceAdapter = {
     const json = (await res.json()) as { studies?: Study[] };
     const studies = json.studies ?? [];
 
-    return studies
-      .slice(0, input.limit)
+    const candidates = studies
       .map(studyToCandidate)
-      .filter((c): c is Candidate => c !== null);
+      .filter((c): c is Candidate => c !== null)
+      .filter((c) => !excluded.has(candidateId(c) ?? ''));
+    return orderByCursor(candidates).slice(0, input.limit);
   },
 };

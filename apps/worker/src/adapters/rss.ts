@@ -1,7 +1,7 @@
 import Parser from 'rss-parser';
 import { sanitizeHttpUrl } from '@hht/shared';
 import type { Candidate, FetchCandidatesInput, SourceAdapter } from './types.js';
-import { resolveSinceDate } from './types.js';
+import { orderByCursor, resolveSinceDate } from './types.js';
 import { safeFetch } from '../net/safeFetch.js';
 
 const parser = new Parser();
@@ -37,8 +37,9 @@ export const rssAdapter: SourceAdapter = {
     const since = resolveSinceDate(input.since, input.bootstrapLookbackDays);
     const items: Candidate[] = [];
 
+    const excluded = new Set(input.excludeIds ?? []);
+
     for (const item of feed.items) {
-      if (items.length >= input.limit) break;
       const title = item.title || 'Untitled';
       const description = item.contentSnippet || item.content || item.summary || '';
       const haystack = `${title}\n${description}`;
@@ -49,17 +50,22 @@ export const rssAdapter: SourceAdapter = {
       if (published && published < since) continue;
 
       const link = sanitizeHttpUrl(item.link) ?? input.rssUrl;
-      const guid = item.guid || item.id || link;
+      const guid = String(item.guid || item.id || link);
+      if (excluded.has(guid)) continue;
+      const validDate = published && !Number.isNaN(published.getTime()) ? published : undefined;
       items.push({
-        externalIds: { guid: String(guid) },
+        externalIds: { guid },
         title,
         abstractOrBody: description,
         originalUrl: link,
         publishedOrUpdatedAt: published,
         sourceType: 'rss',
+        ...(validDate ? { cursorKey: validDate.toISOString() } : {}),
       });
     }
 
-    return items;
+    // Feed order is newest first; the whole matching feed is returned (no network paging) and the
+    // run selects the oldest batch, so older items are not cut off by a truncated feed prefix.
+    return orderByCursor(items);
   },
 };

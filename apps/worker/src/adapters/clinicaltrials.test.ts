@@ -67,3 +67,27 @@ describe('studyToCandidate', () => {
     ).toBeUndefined();
   });
 });
+
+describe('cursor key (spec 004)', () => {
+  it('is the last-update day, even if only first-post is present for display', () => {
+    const withUpdate = studyToCandidate({
+      protocolSection: {
+        identificationModule: { nctId: 'NCT00000002' },
+        statusModule: {
+          studyFirstPostDateStruct: { date: '2026-06-25' },
+          lastUpdatePostDateStruct: { date: '2026-08-21' },
+        },
+      },
+    });
+    expect(withUpdate?.cursorKey).toBe('2026-08-21');
+
+    const firstPostOnly = studyToCandidate({
+      protocolSection: {
+        identificationModule: { nctId: 'NCT00000003' },
+        statusModule: { studyFirstPostDateStruct: { date: '2026-06-25' } },
+      },
+    });
+    expect(firstPostOnly?.publishedOrUpdatedAt).toBeDefined();
+    expect(firstPostOnly?.cursorKey).toBeUndefined();
+  });
+});

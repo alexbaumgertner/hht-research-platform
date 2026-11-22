@@ -7,10 +7,6 @@ export function shouldPublishDigest(input: PublishDecisionInput): boolean {
   return input.qualifyingCount > 0;
 }
 
-export function clampBatch<T>(items: T[], limit: number): T[] {
-  return items.slice(0, Math.max(0, limit));
-}
-
 export type SourceOutcome = 'success' | 'failure';
 
 export type TerminalRunStatus = 'completed' | 'completed_partial_failure' | 'failed';
