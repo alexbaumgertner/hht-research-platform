@@ -33,7 +33,7 @@ Format: `[ID] [P?] [Story] Description`. `[P]` = parallelisable.
 
 ## Phase 5: US4 — monitoring checklist (P3)
 
-- [ ] T012 [US4] Add "Verify monitoring" checklist to `docs/deploy-worker.md`; **owner action**: confirm `hht-health` host (Open Question 4).
+- [ ] T012 [US4] Add "Verify monitoring" checklist to `docs/deploy-worker.md`; owner confirmed 2026-11-22 that `hht-health` is repointed; the checklist records how to verify it.
 
 ## Done when
 
