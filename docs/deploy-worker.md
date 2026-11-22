@@ -333,6 +333,63 @@ Once a `503` is produced, later pings see it immediately.
 Do not add query parameters (e.g. `?nocache=1`) to see live state: any unknown query string bypasses
 the cache and wakes the database. Check the current state in Admin or in the worker logs instead.
 
+### Backlog (more candidates than `BATCH_SIZE_PER_SOURCE`)
+
+A source never advances its watermark past a candidate it did not process (spec 004). When a run
+leaves candidates over, the watermark stays at the newest processed day, the source's `cursorState`
+remembers which ids of that day are done, and the next hourly tick continues. Each run record shows
+`remainingCount` per source (a lower bound). If a source ends three consecutive runs with candidates
+left, the worker logs `source backlog persists` at `ERROR` (it reaches the same alert policy). Fixes:
+raise `BATCH_SIZE_PER_SOURCE`, or narrow the keywords. Schema: see
+[`docs/migrations/004-pipeline-cursor.md`](migrations/004-pipeline-cursor.md).
+
+### Failure drill
+
+Purpose: prove that a real failure emails the owner (spec 004, FR-008). An invalid AI key alone
+proves nothing: `listDueProjects` skips projects outside their cadence and `runProject` skips AI
+calls for deduplicated candidates. The drill must reach an AI call. **Needs production access: an
+agent must not run it; the owner does.**
+
+1. Create a temporary test project in Admin: `schedule=daily`, `monitoringStatus=active`, one
+   PubMed source, a keyword that matches recent papers, and a fresh `bootstrapLookbackDays` so at
+   least one candidate is new for this project (a project with no stored publications guarantees it).
+2. Replace the job's AI key with an invalid one:
+   `gcloud run jobs update "$JOB_NAME" --region="$REGION" --update-env-vars=AI_GATEWAY_API_KEY=invalid-drill`
+   (or the secret version, if Secret Manager is used; note the previous value/version first).
+3. Note the time, then run `gcloud run jobs execute "$JOB_NAME" --region="$REGION" --wait`.
+4. Confirm the authentication `ERROR` entry exists in Logs Explorer
+   (`severity>=ERROR jsonPayload.message:"[worker]"`). **If it does not, the drill is invalid**:
+   stop, fix the setup and repeat before measuring anything.
+5. Record when the alert email arrived. Target: within 60 minutes (SC-002).
+6. Clean up: restore the real AI key, delete the test project and any candidate/publication it
+   created, and confirm the next scheduled run succeeds (`completed` in Monitoring Runs).
+
+Results:
+
+| Date | Person | `ERROR` log at | Alert email at | Delay | Cleanup done / next run OK |
+| ---- | ------ | -------------- | -------------- | ----- | -------------------------- |
+|      |        |                |                |       |                            |
+
+### Verify monitoring
+
+Run after **any** host, domain or Google Cloud project change, and once per quarter. A check that
+points at an old host fails silently or starts redirecting.
+
+- [ ] Uptime check `hht-health`: host is `hht.rarediseasedigest.org`, path `/api/health`, 2xx
+      expected, no redirect (`curl -sI https://hht.rarediseasedigest.org/api/health` returns 200).
+- [ ] The uptime check's alert policy has a notification channel that reaches the owner (send the
+      test notification).
+- [ ] Log alert `hht-worker-errors` filters `cloud_run_job/hht-monitor-worker` at `severity>=ERROR`
+      and has the same channel (the job and project names are the live ones).
+- [ ] Job env `PUBLIC_SITE_URL` equals Vercel Production `PUBLIC_SITE_URL`.
+- [ ] Remember the delay budget above: the 6 h CDN cache plus the 6 h grace is up to ~12 h before a
+      stale pipeline alerts.
+- [ ] Record the date and who checked in the table below.
+
+| Date | Person | Result |
+| ---- | ------ | ------ |
+|      |        |        |
+
 ## Preview databases and subscriber data
 
 Preview deployments get their own Neon branch (`preview/<git-branch>`), created by the Vercel
