@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 import { cookies } from 'next/headers';
 import { Box, Group, Stack, Text } from '@mantine/core';
-import { parseChatSource } from '@hht/shared';
+import { parseSourceToken } from '@hht/shared';
 import { getTranslations } from 'next-intl/server';
 
 type Props = {
@@ -66,7 +66,7 @@ const submitButtonStyle: CSSProperties = {
 export async function SubscribeForm({ projectName, projectSlug, locale, notice, issueId }: Props) {
   const t = await getTranslations('Subscribe');
   const jar = await cookies();
-  const src = parseChatSource(jar.get('src')?.value);
+  const src = parseSourceToken(jar.get('src')?.value);
   const preset = locale === 'ru' ? 'ru' : 'en';
   const message =
     notice && NOTICES.has(notice)
