@@ -73,12 +73,12 @@ metadata and `continue`s. Change:
 
 Depends on spec 004 T003 (cursor): a status change that falls into an overflowed batch must not be lost.
 
-### D3 — Showing transitions in an issue (decision needed)
+### D3 — Showing transitions in an issue (decided 2026-11-22: option A)
 
 `digests` has `publications[]` and the hook `assertDigestHasPublications` forbids an empty digest
 (spec 001 FR-010). A week with only status changes would publish nothing. Options:
 
-- **A (proposed)**: add `digests.trialUpdates[]` (relationship to `trial-transitions`) and relax the no-empty rule to "at least one publication **or** one trial update". Issue page renders an "Updates to trials you may follow" block.
+- **A (chosen by the owner: relax the no-empty rule)**: add `digests.trialUpdates[]` (relationship to `trial-transitions`) and relax the no-empty rule to "at least one publication **or** one trial update". Issue page renders an "Updates to trials you may follow" block.
 - **B**: re-open the publication by creating a _new_ publication row per transition (title "Update: …"). Simpler schema, but pollutes the feed and the dedupe key.
 - **C**: show updates only on the trial detail page and in the feed badge, not in the issue. Smallest change, weakest for the patient.
 

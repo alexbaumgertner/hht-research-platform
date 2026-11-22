@@ -44,6 +44,7 @@ Format: `[ID] [P?] [Story] Description`. `[P]` = parallelisable. Tests precede i
 - [ ] T024 [US2] Add optional intervention tag to the `summarizeAndRank` schema/prompt in `apps/worker/src/pipeline/ai.ts` (no extra call).
 - [ ] T025 [US2] Treatments view route `apps/web/src/app/[locale]/projects/[slug]/treatments/page.tsx` + cache tags per `docs/public-caching.md`.
 - [ ] T026 [P] [US2] `TrustNotice` on the view; i18n keys in 5 locales; Playwright for disclaimer and stage labels.
+- [ ] T026a [US2] "Now approved" label («Теперь одобрено · <кем>») for an approval of a known drug for a new indication: needs a cited regulator source (authority and date); without one, show the stage label only. Tests: label with source, no label without source, 5 locales.
 
 ## Phase 5: Release 2b — US4, US5, US6 (P2/P3)
 

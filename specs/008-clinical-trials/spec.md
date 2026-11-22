@@ -207,9 +207,9 @@ Start date, expected primary completion and planned enrolment appear on the tria
 ## Open Questions (for the owner)
 
 1. **Regions to prioritise** in site lists: proposed `ru`: RU, UA, BY, KZ, TR + EU; `tr`: TR + EU; `uk`: UA + EU; `de`: DE/AT/CH; `en`: none. Is this right for your patients?
-2. **Eligibility paraphrase (US4):** acceptable to ship AI-generated plain-language points in v1, or structured facts only until a physician has seen the calibration set? Proposed: structured facts in v1, AI points behind a flag turned on after physician feedback.
+2. **Eligibility paraphrase (US4):** **Decided 2026-11-22: structured facts only in v1** (age, sex, healthy volunteers, link to the registry text). AI points stay behind `ELIGIBILITY_POINTS` (off) until a physician has seen the calibration set.
 3. **Which transitions count as "patient-relevant"?** Proposed: any change of `overallStatus` among {not yet recruiting, recruiting, enrolling by invitation, active not recruiting, suspended, terminated, withdrawn, completed}, plus `hasResults` false→true. Anything to add or drop?
-4. **Treatments view — what counts as "new"?** Include only investigational interventions, or also approved drugs studied for a new use (repurposing)? Proposed: both, with the stage label `approved/post-marketing` making the difference visible.
+4. **Treatments view — what counts as "new"?** **Decided 2026-11-22: both.** Investigational interventions and approved drugs studied or newly approved for a new use. An approval for a new indication carries the label «Теперь одобрено · <кем>» ("Now approved · <authority>"); the authority (FDA, EMA, …) and date must come from a cited source. Without a verifiable source the item shows the stage `approved/post-marketing` and no "now approved" label.
 5. **Contacts:** show only the registry link, or also the study's public contact email/phone? Proposed: link only.
 6. **Naming for patients:** "Recruiting now" / «Идёт набор участников» and "Treatments in research" / «Лечение: что исследуют». Confirm the Russian wording.
 7. **Ordering vs 007:** confirm that 008 precedes 007 for the rest of Q4 (reduced 007 afterwards).

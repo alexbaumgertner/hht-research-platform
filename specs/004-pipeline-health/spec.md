@@ -147,4 +147,4 @@ After a domain or project move, the owner has a checklist that proves the alerts
 1. **Backlog policy.** Process one batch per run indefinitely (slow catch-up, bounded cost), or loop within a run up to a cap (e.g. 3 batches)? Default proposed: one batch per run, plus an ERROR-level log when the remaining count > 0 for 3 consecutive runs.
 2. **"No successful run" threshold.** The scheduler is hourly but the weekly project only publishes on Monday. Proposed: alert when the last successful _check_ is older than 26 h (checks stay daily even if issues are weekly). Is a daily check acceptable, or should weekly projects be checked weekly only?
 3. **Public "last checked" wording.** Show it to patients (trust signal) or only to the owner? Proposed: patients see it in small text on the project page.
-4. **Is `hht-health` already repointed** to `hht.rarediseasedigest.org`? The domain migration doc lists it as a manual item; the code cannot tell.
+4. **Is `hht-health` already repointed** to `hht.rarediseasedigest.org`? **Confirmed by the owner 2026-11-22: yes.** T012 still verifies it in the runbook.
