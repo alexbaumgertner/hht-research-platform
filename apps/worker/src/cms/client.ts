@@ -13,6 +13,8 @@ import {
   type Summary,
 } from '@hht/shared';
 
+import type { CursorState } from '../pipeline/cursor.js';
+
 type Json = Record<string, unknown>;
 
 /**
@@ -147,6 +149,7 @@ export class CmsClient {
         rssUrl?: string | null;
         enabled: boolean;
         lastSuccessfulFetchAt: string | null;
+        cursorState: CursorState | null;
       }>;
     }>
   > {
@@ -175,6 +178,7 @@ export class CmsClient {
         rssUrl?: string | null;
         enabled?: boolean;
         lastSuccessfulFetchAt?: string | null;
+        cursorState?: CursorState | null;
       }>;
     }>(`/api/monitored-sources?limit=500&depth=0`);
 
@@ -194,6 +198,7 @@ export class CmsClient {
             rssUrl: s.rssUrl,
             enabled: s.enabled !== false,
             lastSuccessfulFetchAt: s.lastSuccessfulFetchAt ?? null,
+            cursorState: s.cursorState ?? null,
           }));
 
         const due = isProjectDue({
@@ -361,10 +366,11 @@ export class CmsClient {
     });
   }
 
-  async patchSourceWatermark(sourceId: CmsId, at: string) {
+  /** `cursorState` null clears the stored boundary progress (backlog drained). */
+  async patchSourceWatermark(sourceId: CmsId, at: string, cursorState: CursorState | null = null) {
     return this.request(`/api/monitored-sources/${sourceId}`, {
       method: 'PATCH',
-      body: JSON.stringify({ lastSuccessfulFetchAt: at }),
+      body: JSON.stringify({ lastSuccessfulFetchAt: at, cursorState }),
     });
   }
 

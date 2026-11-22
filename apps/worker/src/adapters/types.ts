@@ -25,13 +25,26 @@ export type Candidate = {
   /** ClinicalTrials.gov protocol metadata for patient-facing display. */
   trialMetadata?: TrialMetadata;
   sourceType: 'pubmed' | 'clinicaltrials' | 'rss';
+  /**
+   * Position of this candidate in the source's own query key (PubMed EDAT day, ClinicalTrials.gov
+   * last-update day, RSS item timestamp). Never the display date. Absent for undated items.
+   */
+  cursorKey?: string;
 };
+
+/** Stable per-source identifier of a candidate (used for boundary-day progress tracking). */
+export function candidateId(c: Pick<Candidate, 'externalIds'>): string | undefined {
+  return c.externalIds.pmid ?? c.externalIds.nctId ?? c.externalIds.guid;
+}
 
 export type FetchCandidatesInput = {
   keywords: string[];
   since: Date | null;
   bootstrapLookbackDays: number;
+  /** How many not-yet-processed candidates the caller wants (callers pass batchSize + 1). */
   limit: number;
+  /** Ids already processed on the boundary day; adapters drop them before applying `limit`. */
+  excludeIds?: string[];
   rssUrl?: string;
 };
 
@@ -50,4 +63,11 @@ export function resolveSinceDate(
 
 export function formatYmd(date: Date): string {
   return date.toISOString().slice(0, 10);
+}
+
+/** Oldest cursor key first, undated last. Adapters must not rely on the source's own ordering. */
+export function orderByCursor(items: Candidate[]): Candidate[] {
+  const keyed = items.filter((c) => c.cursorKey);
+  keyed.sort((a, b) => (a.cursorKey! < b.cursorKey! ? -1 : a.cursorKey! > b.cursorKey! ? 1 : 0));
+  return [...keyed, ...items.filter((c) => !c.cursorKey)];
 }

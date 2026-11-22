@@ -1,5 +1,4 @@
 import {
-  clampBatch,
   isStaleRun,
   sourceSince,
   formatDigestStepError,
@@ -12,12 +11,6 @@ describe('shouldPublishDigest', () => {
   it('publishes only when qualifying items exist', () => {
     expect(shouldPublishDigest({ qualifyingCount: 0 })).toBe(false);
     expect(shouldPublishDigest({ qualifyingCount: 2 })).toBe(true);
-  });
-});
-
-describe('clampBatch', () => {
-  it('limits to batch size', () => {
-    expect(clampBatch([1, 2, 3, 4], 2)).toEqual([1, 2]);
   });
 });
 
