@@ -24,7 +24,7 @@ function CopyBlock({ label, text }: { label: string; text: string }) {
 }
 
 export function EmbedSnippets() {
-  const { id } = useDocumentInfo();
+  const { id, lastUpdateTime } = useDocumentInfo();
   const [partners, setPartners] = useState<Partner[]>([]);
 
   useEffect(() => {
@@ -33,7 +33,8 @@ export function EmbedSnippets() {
       .then((res) => (res.ok ? res.json() : { partners: [] }))
       .then((body: { partners: Partner[] }) => setPartners(body.partners))
       .catch(() => setPartners([]));
-  }, [id]);
+    // lastUpdateTime changes after every save, so snippets follow partner edits without a reload.
+  }, [id, lastUpdateTime]);
 
   if (partners.length === 0) return null;
   return (
