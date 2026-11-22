@@ -2,6 +2,8 @@ import type { CollectionConfig } from 'payload';
 
 import { isAuthenticatedOrWorker, isWorkerOrAdmin } from '../access';
 
+const SOURCE_PATTERN = /^(vk|wa|fb|tg|other|site:[a-z0-9][a-z0-9-]{1,31})$/;
+
 export const AnalyticsCounts: CollectionConfig = {
   slug: 'analytics-counts',
   admin: {
@@ -26,15 +28,12 @@ export const AnalyticsCounts: CollectionConfig = {
     { name: 'issueKey', type: 'text', required: true },
     {
       name: 'source',
-      type: 'select',
+      type: 'text',
       required: true,
-      options: [
-        { label: 'VK', value: 'vk' },
-        { label: 'WhatsApp', value: 'wa' },
-        { label: 'Facebook', value: 'fb' },
-        { label: 'Telegram', value: 'tg' },
-        { label: 'Other', value: 'other' },
-      ],
+      validate: (value: unknown) =>
+        typeof value === 'string' && SOURCE_PATTERN.test(value)
+          ? true
+          : 'Source must be vk, wa, fb, tg, other or site:<key>',
     },
     {
       name: 'metric',
@@ -44,6 +43,8 @@ export const AnalyticsCounts: CollectionConfig = {
         { label: 'Page view', value: 'page_view' },
         { label: 'Form submit', value: 'form_submit' },
         { label: 'Confirmation', value: 'confirmation' },
+        { label: 'Widget view', value: 'widget_view' },
+        { label: 'Outbound click', value: 'outbound_click' },
       ],
     },
     { name: 'count', type: 'number', required: true, min: 0, defaultValue: 0 },

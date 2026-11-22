@@ -5,6 +5,7 @@ import { getPayload } from 'payload';
 import config from '@payload-config';
 
 import { TextLink } from '@/components/TextLink';
+import { parseSourceToken } from '@hht/shared';
 import { incrementAnalyticsCount } from '@/lib/analyticsCounts';
 import { routing } from '@/i18n/routing';
 import { sendWelcomeIssue } from '@/lib/subscriberMail';
@@ -83,7 +84,7 @@ export default async function ConfirmSubscriptionPage({ params }: Props) {
   await incrementAnalyticsCount({
     projectId,
     issueKey: 'none',
-    source: row.source,
+    source: parseSourceToken(row.source),
     metric: 'confirmation',
   });
 
