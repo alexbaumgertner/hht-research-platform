@@ -162,5 +162,18 @@
     "deletion": "To ask for deletion, reply to any email from this project or use the unsubscribe link.",
     "sourceCookie": "The chat you arrived from is remembered for this browser session so the subscription can be attributed. It is not an analytics cookie.",
     "rateLimit": "A short-lived hashed record of the network address is kept for a day to limit repeated submissions. It is not attached to the subscription."
+  },
+  "Widget": {
+    "frameTitle": "Latest research digest: {projectName}",
+    "heading": "{projectName}: update of {date}",
+    "summaryHeading": "What's new and why it matters",
+    "moreItems": "{count, plural, one {# more material in this update} other {# more materials in this update}}",
+    "allIssues": "All updates",
+    "firstIssueComing": "The first update is coming soon. You can subscribe to get it by email.",
+    "subscribeHeading": "Get updates by email",
+    "subscribeButton": "Subscribe",
+    "fallbackSentence": "Plain-language news about research, in your inbox.",
+    "fallbackCommunity": "Community",
+    "fallbackSubscribe": "Subscribe by email"
   }
 }

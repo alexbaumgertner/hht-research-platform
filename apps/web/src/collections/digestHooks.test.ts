@@ -2,6 +2,8 @@ import {
   applyIssueTextRules,
   assertDigestHasPublications,
   capCreateDepth,
+  embedRelevantChange,
+  previousEmbedProject,
   invalidateIssueTranslations,
   issueTextFingerprint,
   resolveRelationshipId,
@@ -376,5 +378,37 @@ describe('invalidateIssueTranslations', () => {
       req,
     );
     expect(calls).toHaveLength(0);
+  });
+});
+
+describe('embedRelevantChange', () => {
+  const base = { hiddenFromPublic: false, issueTextRevision: 1, publications: [1, 2] };
+  it('is false when only unrelated fields changed', () => {
+    expect(embedRelevantChange({ ...base, subscriberFanoutAt: 'x' }, base)).toBe(false);
+  });
+  it('is true when hiding, text or publications change', () => {
+    expect(embedRelevantChange({ ...base, hiddenFromPublic: true }, base)).toBe(true);
+    expect(embedRelevantChange({ ...base, issueTextRevision: 2 }, base)).toBe(true);
+    expect(embedRelevantChange({ ...base, publications: [1] }, base)).toBe(true);
+  });
+  it('is true when the date or the project changes, ignoring populated vs id form', () => {
+    expect(embedRelevantChange({ ...base, publishedAt: 'b' }, { ...base, publishedAt: 'a' })).toBe(
+      true,
+    );
+    expect(embedRelevantChange({ ...base, project: 2 }, { ...base, project: 1 })).toBe(true);
+    expect(embedRelevantChange({ ...base, project: { id: 1 } }, { ...base, project: 1 })).toBe(
+      false,
+    );
+  });
+  it('is true without a previous doc', () => {
+    expect(embedRelevantChange(base, null)).toBe(true);
+  });
+});
+
+describe('previousEmbedProject', () => {
+  it('returns the old project only when the digest moved', () => {
+    expect(previousEmbedProject({ project: 2 }, { project: 1 })).toBe(1);
+    expect(previousEmbedProject({ project: { id: 1 } }, { project: 1 })).toBeUndefined();
+    expect(previousEmbedProject({ project: 1 }, null)).toBeUndefined();
   });
 });

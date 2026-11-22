@@ -162,5 +162,18 @@
     "deletion": "To ask for deletion, reply to any email from this project or use the unsubscribe link.",
     "sourceCookie": "The chat you arrived from is remembered for this browser session so the subscription can be attributed. It is not an analytics cookie.",
     "rateLimit": "A short-lived hashed record of the network address is kept for a day to limit repeated submissions. It is not attached to the subscription."
+  },
+  "Widget": {
+    "frameTitle": "Güncel araştırma özeti: {projectName}",
+    "heading": "{projectName}: {date} tarihli güncelleme",
+    "summaryHeading": "Yenilikler ve neden önemli oldukları",
+    "moreItems": "{count, plural, one {Bu güncellemede # içerik daha} other {Bu güncellemede # içerik daha}}",
+    "allIssues": "Tüm güncellemeler",
+    "firstIssueComing": "İlk güncelleme yakında geliyor. E-postayla almak için abone olun.",
+    "subscribeHeading": "Güncellemeleri e-postayla alın",
+    "subscribeButton": "Abone ol",
+    "fallbackSentence": "Araştırma haberleri sade bir dille e-posta kutunuzda.",
+    "fallbackCommunity": "Topluluk",
+    "fallbackSubscribe": "E-postayla abone ol"
   }
 }
