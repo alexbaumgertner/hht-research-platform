@@ -135,3 +135,37 @@ export function isProjectStale(input: ScheduleDueInput): boolean {
 export function shouldSkipPaused(monitoringStatus: MonitoringStatus): boolean {
   return monitoringStatus === 'paused';
 }
+
+/** Spec 004 (OQ2): every project is checked daily; no successful check for 26 h is unhealthy. */
+export const CHECK_STALE_AFTER_MS = 26 * MS_HOUR;
+
+type CheckInput = {
+  monitoringStatus: MonitoringStatus;
+  lastCheckedAt: Date | string | null | undefined;
+  lastSuccessfulRunAt?: Date | string | null;
+  now?: Date;
+};
+
+/** Newest of the last check and the last successful run (a run is also a check). */
+function lastCheck(input: CheckInput): Date | null {
+  const times = [parseLastRun(input.lastCheckedAt), parseLastRun(input.lastSuccessfulRunAt)].filter(
+    (d): d is Date => d !== null,
+  );
+  return times.length ? new Date(Math.max(...times.map((d) => d.getTime()))) : null;
+}
+
+/** Health rule: independent of publish cadence, so a quiet weekly project is not "stale". */
+export function isCheckStale(input: CheckInput): boolean {
+  if (input.monitoringStatus === 'paused') return false;
+  const last = lastCheck(input);
+  if (!last) return true;
+  return (input.now ?? new Date()).getTime() - last.getTime() > CHECK_STALE_AFTER_MS;
+}
+
+/** Whether the daily lightweight source check should run (hourly ticks, so with tolerance). */
+export function isCheckDue(input: CheckInput): boolean {
+  if (input.monitoringStatus === 'paused') return false;
+  const last = lastCheck(input);
+  if (!last) return true;
+  return (input.now ?? new Date()).getTime() - last.getTime() >= MS_DAY - DUE_TOLERANCE_MS;
+}

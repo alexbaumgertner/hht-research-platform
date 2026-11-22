@@ -1,4 +1,7 @@
 import {
+  CHECK_STALE_AFTER_MS,
+  isCheckDue,
+  isCheckStale,
   isProjectDue,
   isProjectStale,
   latestScheduledSlot,
@@ -426,5 +429,75 @@ describe('isProjectStale with an anchor', () => {
         now: new Date('2026-09-28T10:01:00.000Z'),
       }),
     ).toBe(false);
+  });
+});
+
+// Spec 004 US3 / Open Question 2: checks are daily for every project (even weekly ones); health
+// is stale when the last successful check is older than 26 h. Publishing stays on its own slot.
+describe('isCheckStale', () => {
+  const base = { monitoringStatus: 'active' as const };
+  const now = new Date('2026-09-24T12:00:00.000Z');
+
+  it('uses a 26 hour threshold', () => {
+    expect(CHECK_STALE_AFTER_MS).toBe(26 * 60 * 60 * 1000);
+  });
+
+  it('is fresh at 25h59m and stale at 26h01m since the last check', () => {
+    expect(isCheckStale({ ...base, lastCheckedAt: '2026-09-23T10:01:00.000Z', now })).toBe(false);
+    expect(isCheckStale({ ...base, lastCheckedAt: '2026-09-23T09:59:00.000Z', now })).toBe(true);
+  });
+
+  it('a weekly project checked daily stays healthy between its weekly runs', () => {
+    expect(
+      isCheckStale({
+        ...base,
+        lastCheckedAt: '2026-09-24T04:00:30.000Z',
+        lastSuccessfulRunAt: '2026-09-21T04:00:40.000Z',
+        now,
+      }),
+    ).toBe(false);
+  });
+
+  it('a recent successful run counts as a check (pre-migration rows, run without separate check)', () => {
+    expect(
+      isCheckStale({
+        ...base,
+        lastCheckedAt: null,
+        lastSuccessfulRunAt: '2026-09-24T04:00:00.000Z',
+        now,
+      }),
+    ).toBe(false);
+  });
+
+  it('is stale when the project was never checked, never flags paused', () => {
+    expect(isCheckStale({ ...base, lastCheckedAt: null, lastSuccessfulRunAt: null, now })).toBe(
+      true,
+    );
+    expect(
+      isCheckStale({
+        monitoringStatus: 'paused',
+        lastCheckedAt: null,
+        lastSuccessfulRunAt: null,
+        now,
+      }),
+    ).toBe(false);
+  });
+});
+
+describe('isCheckDue', () => {
+  const now = new Date('2026-09-24T12:00:00.000Z');
+
+  it('is due when never checked or a day (minus tick tolerance) has passed', () => {
+    expect(isCheckDue({ monitoringStatus: 'active', lastCheckedAt: null, now })).toBe(true);
+    expect(
+      isCheckDue({ monitoringStatus: 'active', lastCheckedAt: '2026-09-23T12:40:00.000Z', now }),
+    ).toBe(false);
+    expect(
+      isCheckDue({ monitoringStatus: 'active', lastCheckedAt: '2026-09-23T11:45:00.000Z', now }),
+    ).toBe(true);
+  });
+
+  it('never for paused projects', () => {
+    expect(isCheckDue({ monitoringStatus: 'paused', lastCheckedAt: null, now })).toBe(false);
   });
 });
