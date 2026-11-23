@@ -1,6 +1,7 @@
 import {
   DEFAULT_BATCH_SIZE_PER_SOURCE,
   DEFAULT_BOOTSTRAP_LOOKBACK_DAYS,
+  isCheckDue,
   isProjectDue,
   keywordText,
   type Importance,
@@ -131,7 +132,29 @@ export class CmsClient {
     return res.json() as Promise<T>;
   }
 
-  async listDueProjects(): Promise<
+  /** Projects due for a full run (publishing cadence). */
+  async listDueProjects() {
+    return (await this.loadActiveProjects()).filter((p) => p.due);
+  }
+
+  /**
+   * Projects NOT due for a run whose last check is older than a day: they get the lightweight
+   * daily check (spec 004), so a weekly project is still verified every day.
+   */
+  async listCheckDueProjects(now: Date = new Date()) {
+    return (await this.loadActiveProjects()).filter(
+      (p) =>
+        !p.due &&
+        isCheckDue({
+          monitoringStatus: p.monitoringStatus,
+          lastCheckedAt: p.lastCheckedAt,
+          lastSuccessfulRunAt: p.lastSuccessfulRunAt,
+          now,
+        }),
+    );
+  }
+
+  private async loadActiveProjects(): Promise<
     Array<{
       id: CmsId;
       name: string;
@@ -140,6 +163,8 @@ export class CmsClient {
       schedule: Schedule;
       monitoringStatus: MonitoringStatus;
       lastSuccessfulRunAt: string | null;
+      lastCheckedAt: string | null;
+      due: boolean;
       bootstrapLookbackDays: number;
       emailNotificationEnabled: boolean;
       ownerEmail?: string;
@@ -164,6 +189,7 @@ export class CmsClient {
         publishHourUtc?: number | null;
         monitoringStatus: MonitoringStatus;
         lastSuccessfulRunAt?: string | null;
+        lastCheckedAt?: string | null;
         bootstrapLookbackDays?: number;
         emailNotificationEnabled?: boolean;
         owner?: { email?: string } | string | number;
@@ -211,7 +237,7 @@ export class CmsClient {
           },
         });
 
-        if (!due || keywords.length === 0 || !projectSources.some((s) => s.enabled)) {
+        if (keywords.length === 0 || !projectSources.some((s) => s.enabled)) {
           return null;
         }
 
@@ -228,6 +254,8 @@ export class CmsClient {
           schedule: project.schedule,
           monitoringStatus: project.monitoringStatus,
           lastSuccessfulRunAt: project.lastSuccessfulRunAt ?? null,
+          lastCheckedAt: project.lastCheckedAt ?? null,
+          due,
           bootstrapLookbackDays: project.bootstrapLookbackDays ?? DEFAULT_BOOTSTRAP_LOOKBACK_DAYS,
           emailNotificationEnabled: Boolean(project.emailNotificationEnabled),
           ownerEmail,
@@ -359,10 +387,19 @@ export class CmsClient {
     });
   }
 
+  /** A successful run is also a successful check, so both timestamps move together. */
   async patchProjectWatermark(projectId: CmsId, at: string) {
     return this.request(`/api/research-projects/${projectId}`, {
       method: 'PATCH',
-      body: JSON.stringify({ lastSuccessfulRunAt: at }),
+      body: JSON.stringify({ lastSuccessfulRunAt: at, lastCheckedAt: at }),
+    });
+  }
+
+  /** Daily lightweight check passed (spec 004): only the check timestamp moves. */
+  async patchProjectChecked(projectId: CmsId, at: string) {
+    return this.request(`/api/research-projects/${projectId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ lastCheckedAt: at }),
     });
   }
 

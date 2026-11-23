@@ -27,7 +27,7 @@ Format: `[ID] [P?] [Story] Description`. `[P]` = parallelisable.
 ## Phase 4: US3 — quiet week vs broken (P2)
 
 - [x] T008 [US3] Regression check (already shipped): confirm `isProjectStale` tests cover daily, weekly-anchored and grace-period cases in `packages/shared/src/schedule.test.ts`; add only missing cases.
-- [ ] T009 [US3] Only if Open Question 2 changes the policy: adjust `isProjectStale` (keep anchored scheduling) and `apps/web/src/lib/health.ts` accordingly. Otherwise close as "shipped".
+- [x] T009 [US3] Owner chose daily checks with a 26 h threshold (Open Question 2): `lastCheckedAt` on `research-projects` (SQL `apps/web/scripts/sql/004-last-checked-at.sql`, owner applies), worker `checkProject` daily lightweight check for projects not due for a run, `isCheckStale`/`isCheckDue` in `packages/shared/src/schedule.ts`, `/api/health` and `lib/health.ts` read it, project page shows the newer of check and run.
 - [x] T010 [P] [US3] Regression check (already shipped): the project page renders `lastChecked` in all five locales. Only the wording/visibility may change (Open Question 3).
 - [x] T011 [US3] Ensure a test asserts the last-checked text in `ru` and `en`; add if missing.
 

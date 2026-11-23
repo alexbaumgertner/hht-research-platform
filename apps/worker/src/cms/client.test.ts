@@ -82,3 +82,37 @@ describe('CmsClient.listDueProjects', () => {
     expect(projects[0]?.id).toBe(2);
   });
 });
+
+describe('CmsClient.listCheckDueProjects', () => {
+  const originalFetch = global.fetch;
+  afterEach(() => {
+    global.fetch = originalFetch;
+  });
+
+  it('returns projects that are not due for a run but have no check in the last day', async () => {
+    const now = new Date();
+    const weeklyRecent = {
+      ...baseProject,
+      schedule: 'weekly',
+      lastSuccessfulRunAt: new Date(now.getTime() - 2 * 24 * MS_HOUR).toISOString(),
+    };
+    global.fetch = fakePayloadRest([
+      { ...weeklyRecent, id: 2, slug: 'needs-check', lastCheckedAt: null },
+      {
+        ...weeklyRecent,
+        id: 3,
+        slug: 'checked-today',
+        lastCheckedAt: new Date(now.getTime() - 2 * MS_HOUR).toISOString(),
+      },
+      { ...weeklyRecent, id: 4, slug: 'paused', monitoringStatus: 'paused' },
+    ]);
+    const projects = await new CmsClient('https://cms.test', 'key').listCheckDueProjects(now);
+    expect(projects.map((p) => p.slug)).toEqual(['needs-check']);
+  });
+
+  it('does not return projects that are due for a full run (the run records the check)', async () => {
+    global.fetch = fakePayloadRest([{ ...baseProject, lastSuccessfulRunAt: null }]);
+    const projects = await new CmsClient('https://cms.test', 'key').listCheckDueProjects();
+    expect(projects).toEqual([]);
+  });
+});

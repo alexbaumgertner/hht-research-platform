@@ -304,18 +304,21 @@ Two independent signals email the owner:
 | Signal                        | What it catches                                         | Where                                                                                                                         |
 | ----------------------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | Log alert `hht-worker-errors` | Any source/project/digest/translation failure in a run  | Cloud Monitoring alert policy on `severity>=ERROR` for `cloud_run_job/hht-monitor-worker`                                     |
-| Uptime check `hht-health`     | Dead-man switch: no successful run within schedule + 6h | Cloud Monitoring uptime check on `GET https://hht.rarediseasedigest.org/api/health` (returns `503` when a project is overdue) |
+| Uptime check `hht-health`     | Dead-man switch: no successful source check within 26 h | Cloud Monitoring uptime check on `GET https://hht.rarediseasedigest.org/api/health` (returns `503` when a project is overdue) |
 
 The uptime check can lag the real state by up to 6 hours (see `/api/health` below); together with the
-6 hour tolerance that is up to ~12 hours in total.
+6 hour tolerance that is up to ~32 hours after the last good check.
 
 The worker writes structured JSON lines (`severity`, `message`, context fields); in Logs Explorer
 filter with `jsonPayload.message:"[worker]"`.
 
 ### `/api/health`
 
-Public. Returns per-project `lastSuccessfulRunAt`, `latestDigestPublishedAt` and `stale`: `200` when
-every project is on schedule, `503` when one is overdue.
+Public. Returns per-project `lastSuccessfulRunAt`, `lastCheckedAt`, `latestDigestPublishedAt` and `stale`: `200` when
+every project had a successful source check within 26 h, `503` when one did not. Every project is
+checked daily, weekly ones too: when a project is not due for a run, the hourly job runs a
+lightweight check (one minimal query per source, no AI, no publishing) and records `lastCheckedAt`;
+a full run records it as well. Publishing stays on the weekly slot.
 
 Caching exists so the constant uptime pings do not hit Neon and keep its compute awake (it can then
 scale to zero between worker runs):
@@ -326,8 +329,8 @@ scale to zero between worker runs):
 - `503` is sent with `Cache-Control: no-store`, so a problem is never cached.
 
 **Allowed signal delay:** a healthy cached response can be up to 6 hours old (plus up to 5 minutes
-of stale-while-revalidate), so an overdue project may be reported up to 6 hours late on top of the
-existing 6 hour tolerance, i.e. up to ~12 hours in total. This is acceptable for a weekly schedule.
+of stale-while-revalidate), so a project with no check for 26 hours may be reported up to 6 hours
+late, i.e. up to ~32 hours after the last good check. This is acceptable.
 Once a `503` is produced, later pings see it immediately.
 
 Do not add query parameters (e.g. `?nocache=1`) to see live state: any unknown query string bypasses
@@ -382,7 +385,7 @@ points at an old host fails silently or starts redirecting.
 - [ ] Log alert `hht-worker-errors` filters `cloud_run_job/hht-monitor-worker` at `severity>=ERROR`
       and has the same channel (the job and project names are the live ones).
 - [ ] Job env `PUBLIC_SITE_URL` equals Vercel Production `PUBLIC_SITE_URL`.
-- [ ] Remember the delay budget above: the 6 h CDN cache plus the 6 h grace is up to ~12 h before a
+- [ ] Remember the delay budget above: the 26 h check threshold plus the 6 h CDN cache is up to ~32 h before a
       stale pipeline alerts.
 - [ ] Record the date and who checked in the table below.
 

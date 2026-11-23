@@ -34,13 +34,17 @@ export function buildHealthReport(
   projects: ProjectHealthInput[],
   now: Date = new Date(),
 ): HealthReport {
-  const rows = projects.map(({ anchor: _anchor, ...project }) => ({
-    ...project,
-    lastCheckedAt: project.lastCheckedAt ?? null,
+  const rows = projects.map((input) => ({
+    slug: input.slug,
+    schedule: input.schedule,
+    monitoringStatus: input.monitoringStatus,
+    lastSuccessfulRunAt: input.lastSuccessfulRunAt,
+    lastCheckedAt: input.lastCheckedAt ?? null,
+    latestDigestPublishedAt: input.latestDigestPublishedAt,
     stale: isCheckStale({
-      monitoringStatus: project.monitoringStatus,
-      lastCheckedAt: project.lastCheckedAt,
-      lastSuccessfulRunAt: project.lastSuccessfulRunAt,
+      monitoringStatus: input.monitoringStatus,
+      lastCheckedAt: input.lastCheckedAt,
+      lastSuccessfulRunAt: input.lastSuccessfulRunAt,
       now,
     }),
   }));

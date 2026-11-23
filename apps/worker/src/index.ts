@@ -1,6 +1,7 @@
 import { CmsClient } from './cms/client.js';
 import { logError, logInfo } from './log.js';
 import { sweepIssueText } from './pipeline/issueSweep.js';
+import { checkProject } from './pipeline/checkProject.js';
 import { isStaleRun } from './pipeline/publish.js';
 import { runProject } from './pipeline/runProject.js';
 import { subscriptionCms } from './pipeline/subscriptionCms.js';
@@ -51,6 +52,24 @@ async function main(): Promise<void> {
       } catch (err) {
         logError('project failed', err, { projectId: project.id, projectSlug: project.slug });
       }
+    }
+
+    // Weekly (and other quiet) projects are still verified every day: re-list after the runs so
+    // projects that just ran (which also records a check) are skipped.
+    try {
+      const toCheck = await cms.listCheckDueProjects();
+      for (const project of toCheck) {
+        try {
+          await checkProject(cms, project);
+        } catch (err) {
+          logError('project check failed', err, {
+            projectId: project.id,
+            projectSlug: project.slug,
+          });
+        }
+      }
+    } catch (err) {
+      logError('daily check listing failed', err);
     }
   } finally {
     // Separate from runs: a sweep failure never touches run status or watermarks.
