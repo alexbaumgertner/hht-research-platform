@@ -43,6 +43,7 @@ export async function GET() {
         schedule: project.schedule,
         monitoringStatus: project.monitoringStatus,
         lastSuccessfulRunAt: project.lastSuccessfulRunAt ?? null,
+        lastCheckedAt: project.lastCheckedAt ?? null,
         latestDigestPublishedAt: digests.docs[0]?.publishedAt ?? null,
         anchor: {
           publishWeekday: project.publishWeekday ?? null,

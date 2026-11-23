@@ -26,6 +26,7 @@ const loadProject = cachePublicRead('project', async (slug: string) => {
     name: project.name,
     description: project.description ?? null,
     lastSuccessfulRunAt: project.lastSuccessfulRunAt ?? null,
+    lastCheckedAt: project.lastCheckedAt ?? null,
   };
 });
 

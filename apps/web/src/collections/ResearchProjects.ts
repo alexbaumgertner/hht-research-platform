@@ -238,6 +238,18 @@ export const ResearchProjects: CollectionConfig = {
       },
     },
     {
+      name: 'lastCheckedAt',
+      type: 'date',
+      admin: {
+        readOnly: true,
+        description:
+          'Last successful daily source check by the worker (spec 004). Drives /api/health (26 h) and the public "last checked" text; publishing stays on the weekly slot.',
+      },
+      access: {
+        update: isWorkerOrAdminFieldLevel,
+      },
+    },
+    {
       name: 'bootstrapLookbackDays',
       type: 'number',
       defaultValue: 30,

@@ -100,14 +100,14 @@ export const usersReadAccess: Access = ({ req: { user } }): boolean | Where => {
 /**
  * Research-projects update: admin/worker sessions (and native API-key users with
  * those roles) may edit the document. Header-only X-Payload-API-Key may patch
- * lastSuccessfulRunAt only — not name, keywords, owner, etc.
+ * lastSuccessfulRunAt and lastCheckedAt only — not name, keywords, owner, etc.
  */
 export const canUpdateResearchProject: Access = ({ req, data }) => {
   if (userHasWorkerOrAdminRole(req.user)) return true;
   if (!isWorkerOrAdmin({ req })) return false;
 
   const keys = Object.keys((data ?? {}) as Record<string, unknown>);
-  return keys.every((key) => key === 'lastSuccessfulRunAt');
+  return keys.every((key) => key === 'lastSuccessfulRunAt' || key === 'lastCheckedAt');
 };
 
 /**

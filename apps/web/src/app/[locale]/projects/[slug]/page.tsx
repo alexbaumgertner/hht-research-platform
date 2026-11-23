@@ -27,6 +27,7 @@ const fetchProject = cache(async (baseUrl: string, slug: string) => {
     description: string | null;
     slug: string;
     lastSuccessfulRunAt: string | null;
+    lastCheckedAt?: string | null;
   }>;
 });
 
@@ -88,6 +89,12 @@ export default async function ProjectFeedPage({ params, searchParams }: Props) {
     notFound();
   }
 
+  // Newest of the daily source check and the last successful run (spec 004).
+  const lastChecked = [project.lastCheckedAt, project.lastSuccessfulRunAt]
+    .filter((v): v is string => Boolean(v))
+    .sort()
+    .at(-1);
+
   const [{ docs }, latestIssue] = await Promise.all([
     fetchMaterials(baseUrl, slug, locale),
     fetchLatestIssue(baseUrl, slug, locale),
@@ -103,10 +110,10 @@ export default async function ProjectFeedPage({ params, searchParams }: Props) {
           {project.name}
         </Title>
         {project.description ? <Text c="dimmed">{project.description}</Text> : null}
-        {project.lastSuccessfulRunAt ? (
+        {lastChecked ? (
           <Text size="xs" c="dimmed" mt="xs">
             {t('lastChecked', {
-              date: new Date(project.lastSuccessfulRunAt).toLocaleDateString(locale, {
+              date: new Date(lastChecked).toLocaleDateString(locale, {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',

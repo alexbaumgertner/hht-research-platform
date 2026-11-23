@@ -71,6 +71,28 @@ describe('research-projects access.update', () => {
     ).toBe(false);
   });
 
+  it('allows X-Payload-API-Key to patch lastCheckedAt (daily check) with or without the watermark', () => {
+    const req = mockReq({ apiKey: 'test-worker-key' });
+    expect(
+      canUpdateResearchProject({ ...req, data: { lastCheckedAt: '2026-11-23T04:00:00.000Z' } }),
+    ).toBe(true);
+    expect(
+      canUpdateResearchProject({
+        ...req,
+        data: {
+          lastCheckedAt: '2026-11-23T04:00:00.000Z',
+          lastSuccessfulRunAt: '2026-11-23T04:00:00.000Z',
+        },
+      }),
+    ).toBe(true);
+    expect(
+      canUpdateResearchProject({
+        ...req,
+        data: { lastCheckedAt: '2026-11-23T04:00:00.000Z', name: 'hijack' },
+      }),
+    ).toBe(false);
+  });
+
   it('rejects a wrong API key', () => {
     expect(
       canUpdateResearchProject({
